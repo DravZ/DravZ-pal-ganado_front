@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.pageLayout {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.mainWrapper {
+    flex: 1;
+    display: flex;
+    align-items: stretch;
+}
+
+.mobileHeader {
+    padding: 0rem 1rem 0.5rem 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.mobileBrandLogo {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.mobileLogoIcon {
+    width: 40px;
+    height: 40px;
+    background-color: #e5c05d;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e4b27;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
