@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.statusBarContainer {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+
+/* Estado Online */
+.online {
+  background-color: #173d2a; /* Verde oscuro basado en la imagen */
+  color: #ffffff;
+}
+
+/* Estado Offline */
+.offline {
+  background-color: #d97300; /* Naranja/marrón claro basado en la imagen */
+  color: #ffffff;
+}
+
+/* Texto en negrita para el estado */
+.statusTitle {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Subtexto secundario */
+.statusSubtitle {
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* Iconos de Wi-Fi estilo SVG */
+.wifiIcon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+}
