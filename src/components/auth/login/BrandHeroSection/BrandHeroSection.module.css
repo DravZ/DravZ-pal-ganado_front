@@ -1,9 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 .heroContainer {
   background: linear-gradient(165deg, #1e4b27 0%, #12331a 100%);
   color: #ffffff;
-  font-family: 'Inter', sans-serif;
   height: 100%;
   min-height: 100vh;
   padding: 3rem 2.5rem;

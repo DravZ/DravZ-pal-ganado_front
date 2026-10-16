@@ -1,0 +1,159 @@
+.navbarContainer {
+    height: 64px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5ebe3;
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Inter', sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.leftGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.menuButton {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #dce3db;
+    background-color: #f8faf7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.menuButton:hover {
+    background-color: #edf4ee;
+    border-color: #c2dec8;
+    color: #1e4b27;
+}
+
+.brandLogo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1.15rem;
+    cursor: pointer;
+}
+
+.logoBadge {
+    width: 36px;
+    height: 36px;
+    background-color: #e5c05d;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e4b27;
+}
+
+/* Selector de Finca Droplist */
+.farmSelectorButton {
+    background-color: #f8faf7;
+    border: 1px solid #dce3db;
+    border-radius: 10px;
+    padding: 0.4rem 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.farmSelectorButton:hover {
+    background-color: #edf4ee;
+    border-color: #c2dec8;
+}
+
+.farmLabel {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    text-transform: uppercase;
+    text-align: left;
+    line-height: 1;
+}
+
+.farmValue {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.rightGroup {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Botón Notificaciones */
+.notificationButton {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid #dce3db;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.notificationButton:hover {
+    background-color: #f8faf7;
+}
+
+.notificationBadge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: #d97706;
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+}
+
+/* Avatar de Usuario */
+.userAvatar {
+    width: 40px;
+    height: 40px;
+    background-color: #1e4b27;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.userAvatar:hover {
+    transform: scale(1.05);
+}

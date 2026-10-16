@@ -1,0 +1,189 @@
+/* Backdrop oscuro difuminado */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(3px);
+  z-index: 10000;
+  animation: fadeIn 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Contenedor principal del Drawer */
+.drawerContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 320px;
+  max-width: 85vw;
+  height: 100vh;
+  background-color: #f8faf7;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 10001;
+  font-family: 'Inter', sans-serif;
+  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Encabezado del Drawer */
+.drawerHeader {
+  padding: 1.25rem 1.25rem 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5ebe3;
+  background-color: #ffffff;
+}
+
+.headerTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.kicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #2d6a4f;
+  text-transform: uppercase;
+}
+
+.headerTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.closeButton {
+  background-color: #eaf3ed;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1e4b27;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.closeButton:hover {
+  background-color: #d8e8dc;
+  transform: scale(1.05);
+}
+
+/* Cuerpo desplegable con scroll */
+.drawerBody {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  overflow-y: auto;
+}
+
+/* Botón principal de categoría (Acordeón Header) */
+.categoryHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #1e4b27;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.25rem;
+}
+
+.categoryHeader:hover {
+  background-color: #edf4ee;
+}
+
+.categoryHeaderActive {
+  background-color: #e2efe5;
+  border: 1px solid #c2dec8;
+}
+
+.categoryTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Submenú de enlaces dentro de la categoría */
+.submenuList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.35rem 0 0.5rem 0.5rem;
+}
+
+.subItemLink {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #0f172a;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.subItemLink:hover {
+  background-color: #edf4ee;
+  color: #1e4b27;
+}
+
+/* Estado activo resaltado para subítem seleccionado (ej. Tablero de control) */
+.subItemLinkActive {
+  background-color: #1e4b27 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(30, 75, 39, 0.2);
+}
+
+.subItemLabelGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Badge numérico de notificación */
+.badgeCounter {
+  background-color: #d97706;
+  color: #ffffff;
+  font-size: 0.725rem;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

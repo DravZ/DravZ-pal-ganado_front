@@ -58,11 +58,7 @@ export default function About() {
       <section className="about-mission-section">
         <div className="container about-mission-grid">
           <div className="about-mission-image">
-            <img
-              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=85"
-              alt="Campo verde y paisaje rural"
-              loading="lazy"
-            />
+            
           </div>
 
           <div className="about-mission-content">

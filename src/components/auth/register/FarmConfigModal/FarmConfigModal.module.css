@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Overlay posicionado en la raíz de la pantalla (Viewport completo) */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    /* Asegura estar por encima de todo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Tarjeta contenedora con límites adecuados para centrado y scroll interno */
+.modalCard {
+    background-color: #ffffff;
+    border-radius: 20px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    font-family: 'Inter', sans-serif;
+    animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    overflow: hidden;
+    position: relative;
+    z-index: 10000;
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Encabezado fijo del modal */
+.modalHeader {
+    padding: 1.5rem 1.75rem 1.25rem 1.75rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background-color: #ffffff;
+}
+
+.kicker {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #1e4b27;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.modalTitle {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 0.2rem 0;
+}
+
+.modalSubtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.closeButton {
+    background-color: #f1f5f9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.closeButton:hover {
+    background-color: #e2e8f0;
+    transform: scale(1.05);
+}
+
+/* Cuerpo con scroll interno limpio */
+.modalBody {
+    padding: 1.5rem 1.75rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Banner de información */
+.infoBanner {
+    background-color: #eaf3ed;
+    border-radius: 12px;
+    padding: 0.875rem 1.15rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+.homeIconBadge {
+    width: 38px;
+    height: 38px;
+    background-color: #1e4b27;
+    color: #ffffff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bannerTitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1e4b27;
+    margin-bottom: 0.15rem;
+}
+
+.bannerText {
+    font-size: 0.8rem;
+    color: #2d6a4f;
+    margin: 0;
+}
+
+/* Controles de formulario */
+.fieldLabel {
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+    display: block;
+}
+
+.inputControl {
+    height: 50px;
+    border-radius: 10px;
+    border: 1px solid #dce3db;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    color: #0f172a;
+    width: 100%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #ffffff;
+}
+
+.inputControl:focus {
+    outline: none;
+    border-color: #1e4b27;
+    box-shadow: 0 0 0 3px rgba(30, 75, 39, 0.12);
+}
+
+.inputError {
+    border-color: #dc2626 !important;
+}
+
+.errorMessage {
+    color: #dc2626;
+    font-size: 0.775rem;
+    margin-top: 0.3rem;
+    font-weight: 500;
+}
+
+.inputGroupSuffix {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.suffixText {
+    position: absolute;
+    right: 1rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #0f172a;
+    pointer-events: none;
+}
+
+/* Pie fijo del modal */
+.modalFooter {
+    padding: 1.15rem 1.75rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+}
+
+.backBtn {
+    background: none;
+    border: none;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #0f172a;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+    color: #1e4b27;
+}
+
+.submitBtn {
+    height: 50px;
+    background-color: #1e4b27;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.submitBtn:hover {
+    background-color: #15381d;
+}
+
+.submitBtn:active {
+    transform: scale(0.99);
+}

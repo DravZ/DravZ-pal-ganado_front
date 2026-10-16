@@ -1,7 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
 .statusBarContainer {
-  font-family: 'Inter', sans-serif;
   font-size: 13px;
   letter-spacing: 0.2px;
   user-select: none;
