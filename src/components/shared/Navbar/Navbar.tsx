@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <Menu size={20} strokeWidth={2.2} />
                     </button>
 
-                    {/* Logo Pa'l Ganado */}
+                    {/* Logo Pa'l Ganado (Texto oculto en móvil mediante d-none) */}
                     <div className={styles.brandLogo} onClick={handleBrandClick}>
                         <div className={styles.logoBadge}>
                             <ShieldCheck size={20} strokeWidth={2.2} />
@@ -52,14 +52,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {/* Selector de Finca */}
                     <button
                         type="button"
-                        className={`${styles.farmSelectorButton} ms-1 ms-sm-2`}
+                        className={styles.farmSelectorButton}
                         onClick={() => console.log('[Action Log]: Selector de finca cliqueado')}
+                        title={currentFarmName}
                     >
-                        <div>
+                        <div className={styles.farmTextWrapper}>
                             <div className={styles.farmLabel}>FINCA ACTUAL</div>
                             <div className={styles.farmValue}>{currentFarmName}</div>
                         </div>
-                        <ChevronDown size={16} strokeWidth={2.2} className="text-secondary" />
+                        <ChevronDown size={14} strokeWidth={2.2} className="text-secondary flex-shrink-0" />
                     </button>
                 </div>
 
