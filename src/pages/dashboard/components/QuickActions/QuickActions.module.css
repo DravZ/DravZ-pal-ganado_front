@@ -1,0 +1,62 @@
+.sectionKicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.sectionHeaderFlex {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.accessNote {
+  font-size: 0.775rem;
+  color: #64748b;
+}
+
+.actionBtn {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);
+}
+
+.actionBtn:hover {
+  border-color: #c2dec8;
+  background-color: #f8faf7;
+  transform: translateY(-1px);
+}
+
+.actionIconSquare {
+  width: 36px;
+  height: 36px;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

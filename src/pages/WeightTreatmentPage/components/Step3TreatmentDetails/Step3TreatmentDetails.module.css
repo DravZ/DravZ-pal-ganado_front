@@ -1,0 +1,139 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stepContainer {
+  animation: fadeInUp 0.3s ease-out forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Banner Superior Sanitario */
+.bannerSanitary {
+  background-color: #f8faf7;
+  border: 1px solid #e5ebe3;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.bannerInfoGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.syringeIconBox {
+  width: 40px;
+  height: 40px;
+  background-color: #eaf3ed;
+  color: #1e4b27;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bannerKicker {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.bannerTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.queueBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1e4b27;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.formLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.controlInput {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.controlInput:focus {
+  outline: none;
+  border-color: #1e4b27;
+}
+
+/* Alerta de Retiro */
+.withdrawalAlertBox {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.bellIcon {
+  color: #d97706;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alertTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0;
+}
+
+.alertSub {
+  font-size: 0.775rem;
+  color: #b45309;
+  margin: 0.15rem 0 0 0;
+}
+
+/* Adaptación para móviles (<= 576px) */
+@media (max-width: 576px) {
+  .bannerSanitary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .queueBadge {
+    align-self: flex-start;
+  }
+}

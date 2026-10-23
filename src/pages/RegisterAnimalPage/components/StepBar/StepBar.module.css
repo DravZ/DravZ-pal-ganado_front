@@ -1,0 +1,107 @@
+.stepperContainer {
+  background-color: #f8faf7;
+  border-bottom: 1px solid #e5ebe3;
+  padding: 1.25rem 2rem;
+}
+
+.stepList {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 2;
+  position: relative;
+  background-color: #f8faf7;
+  padding: 0 0.5rem;
+}
+
+.circleBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.activeCircle {
+  background-color: #1e4b27;
+  border-color: #1e4b27;
+  color: #ffffff;
+}
+
+.completedCircle {
+  background-color: #1e4b27;
+  border-color: #1e4b27;
+  color: #ffffff;
+}
+
+.stepTextWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.stepLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.stepTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.stepTitleInactive {
+  color: #94a3b8;
+}
+
+/* Línea conectora entre círculos */
+.connectorLine {
+  position: absolute;
+  top: 50%;
+  left: 5%;
+  right: 5%;
+  height: 2px;
+  background-color: #e2e8f0;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.connectorProgress {
+  height: 100%;
+  background-color: #1e4b27;
+  transition: width 0.3s ease;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+  .stepperContainer {
+    padding: 1rem;
+  }
+  .stepTextWrapper {
+    display: none; /* En pantallas pequeñas solo muestra los círculos con la línea */
+  }
+  .stepItem {
+    padding: 0;
+  }
+}

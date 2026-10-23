@@ -1,0 +1,74 @@
+.performanceCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5ebe3;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionKicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.trendBadge {
+  background-color: #d1fae5;
+  color: #065f46;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+}
+
+.weightDisplay {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+  margin: 0.5rem 0 1rem 0;
+}
+
+.unitText {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-left: 0.25rem;
+}
+
+.chartContainer {
+  margin-top: auto;
+  width: 100%;
+}
+
+.svgChart {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chartLine {
+  fill: none;
+  stroke: #1e4b27;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.monthLabel {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #64748b;
+  text-anchor: middle;
+}

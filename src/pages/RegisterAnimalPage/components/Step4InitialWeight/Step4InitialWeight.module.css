@@ -1,0 +1,144 @@
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stepHeaderGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.stepIconBadge {
+  width: 44px;
+  height: 44px;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stepTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.stepSubtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.greenBox {
+  background-color: #eaf3ed;
+  border: 1px solid #c2dec8;
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+.formLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.fieldTag {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.formControl {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.formControlBig {
+  font-size: 1.5rem;
+  font-weight: 700;
+  height: 52px;
+}
+
+/* Resumen del registro */
+.summaryCard {
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.summaryKicker {
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.pendingBadge {
+  background-color: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+}
+
+.summaryLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.summaryValue {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.offlineBanner {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.offlineIcon {
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.offlineTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0;
+}
+
+.offlineSub {
+  font-size: 0.8rem;
+  color: #b45309;
+  margin: 0.15rem 0 0 0;
+}

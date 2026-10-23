@@ -1,0 +1,217 @@
+.cardContainer {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5ebe3;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+}
+
+.tableResponsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.customTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.customTable th {
+  background-color: #f4f6f0;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #2d6a4f;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid #e5ebe3;
+}
+
+.tableRow {
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background-color: #f8faf7;
+}
+
+.tableRow td {
+  padding: 1rem 1.25rem;
+  vertical-align: middle;
+}
+
+/* Identificación e Ícono */
+.identityGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.iconBadge {
+  width: 38px;
+  height: 38px;
+  background-color: #eaf3ed;
+  color: #1e4b27;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tagId {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.subDetails {
+  font-size: 0.775rem;
+  color: #64748b;
+}
+
+/* Sex Badge */
+.genderGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.genderBadge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.genderF {
+  background-color: #fce7f3;
+  color: #be185d;
+}
+
+.genderM {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.genderText {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.weightMain {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Pills de Estado */
+.statusPill {
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.statusActive {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.statusTreatment {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* Pie de Paginación */
+.tableFooter {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #e5ebe3;
+}
+
+.counterText {
+  font-size: 0.825rem;
+  color: #64748b;
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pageBtn {
+  height: 38px;
+  padding: 0 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background-color: #f8faf7;
+  border-color: #c2dec8;
+}
+
+.pageBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageBtnActive {
+  background-color: #1e4b27 !important;
+  color: #ffffff !important;
+  border-color: #1e4b27 !important;
+}
+
+/* Vista Móvil (Tarjetas) */
+.mobileCardsWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileCardItem {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.mobileCardItem:last-child {
+  border-bottom: none;
+}
+
+.mobileRightInfo {
+  text-align: right;
+}
+
+.mobileWeightLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}

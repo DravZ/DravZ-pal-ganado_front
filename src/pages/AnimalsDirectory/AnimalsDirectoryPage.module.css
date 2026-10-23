@@ -1,0 +1,61 @@
+.pageContainer {
+  font-family: 'Inter', sans-serif;
+  color: #0f172a;
+}
+
+.kicker {
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.5px;
+}
+
+.pageSubtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.registerBtn {
+  height: 48px;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 4px 12px rgba(30, 75, 39, 0.15);
+}
+
+.registerBtn:hover {
+  background-color: #15381d;
+}
+
+.registerBtn:active {
+  transform: scale(0.99);
+}
+
+/* Botón flotante cuadrado compacto exclusivo para móvil */
+.mobileSquareBtn {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 12px;
+}

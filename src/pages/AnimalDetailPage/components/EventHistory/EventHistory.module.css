@@ -1,0 +1,118 @@
+.filterCard {
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.selectControl {
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  width: 100%;
+}
+
+.timelineCard {
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.eventItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.eventItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.iconSquare {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconMovement {
+  background-color: #eaf3ed;
+  color: #1e4b27;
+}
+
+.iconHealth {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.iconBirth {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.eventHeaderFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.eventKicker {
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.pillTag {
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+}
+
+.pillMovement {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+.pillHealth {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.pillReproduction {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.eventTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.eventSub {
+  font-size: 0.825rem;
+  color: #64748b;
+  margin: 0.2rem 0 0.4rem 0;
+}
+
+.registeredBy {
+  font-size: 0.775rem;
+  color: #64748b;
+}

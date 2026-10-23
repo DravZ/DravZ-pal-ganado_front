@@ -1,0 +1,63 @@
+.statCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5ebe3;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+  height: 100%;
+}
+
+.statIconBadge {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconBadgeGreen {
+  background-color: #eaf3ed;
+  color: #1e4b27;
+}
+
+.iconBadgeYellow {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.iconBadgeRed {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0f172a;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+.statSubtext {
+  font-size: 0.775rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.statSubtextBold {
+  font-weight: 700;
+  color: #0f172a;
+}

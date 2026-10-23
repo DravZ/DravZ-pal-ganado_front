@@ -1,0 +1,140 @@
+.alertsCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5ebe3;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.sectionKicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1e4b27;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+/* Item de alerta principal */
+.alertItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 1rem;
+}
+
+.alertItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Grupo que envuelve la etiqueta y el texto */
+.alertContentGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Estilos de las etiquetas (Pills) */
+.alertPill {
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  display: inline-block;
+  white-space: nowrap;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.pillRed {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.pillYellow {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.alertTextWrapper {
+  min-width: 0;
+  flex: 1;
+}
+
+.alertTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.alertSubtitle {
+  font-size: 0.775rem;
+  color: #64748b;
+  margin: 0.15rem 0 0 0;
+}
+
+.alertTime {
+  font-size: 0.775rem;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* Adaptación responsiva para móviles (<= 640px) */
+@media (max-width: 640px) {
+  .alertsCard {
+    padding: 1.25rem 1rem;
+  }
+
+  .alertItem {
+    align-items: flex-end; /* Alinea el tiempo con el texto inferior */
+    padding: 0.85rem 0;
+  }
+
+  /* Cambia la etiqueta arriba del título */
+  .alertContentGroup {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .alertPill {
+    align-self: flex-start;
+  }
+
+  .alertTime {
+    margin-bottom: 0.15rem; /* Ajuste visual para alinear con la subtítulo */
+  }
+}

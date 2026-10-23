@@ -1,0 +1,200 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tabContent {
+  animation: fadeInUp 0.35s ease-out forwards;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+}
+
+.kicker {
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #1e4b27;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.editBtn:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.dataTable td {
+  padding: 0.85rem 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  width: 50%;
+}
+
+.dataTable tr:last-child td {
+  border-bottom: none;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.fieldVal {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.badgePill {
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* Estructura Árbol Genealógico */
+.treeBox {
+  background-color: #f8faf7;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.centerAnimalNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.nodeAvatar {
+  width: 48px;
+  height: 48px;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px #d1fae5;
+}
+
+.parentCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.parentCard:hover {
+  border-color: #1e4b27;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.genderCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.maleCircle {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.femaleCircle {
+  background-color: #fce7f3;
+  color: #be185d;
+}
+
+.grandparentsRow {
+  display: flex;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.grandparentCell {
+  flex: 1;
+  font-size: 0.75rem;
+}
+
+.grandparentCell:first-child {
+  border-right: 1px solid #e2e8f0;
+  padding-right: 0.5rem;
+}
+
+.grandparentCell:last-child {
+  padding-left: 0.5rem;
+}
+
+.offspringCard {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.offspringCard:hover {
+  border-color: #1e4b27;
+  transform: translateY(-1px);
+}
