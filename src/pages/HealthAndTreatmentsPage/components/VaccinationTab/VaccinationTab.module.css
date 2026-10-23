@@ -1,0 +1,189 @@
+/* VaccinationTab.module.css */
+.cardBox {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.dbLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.monthSelect {
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+}
+
+.animalPill {
+  background-color: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.dayHeader {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  padding: 0.5rem 0;
+}
+
+.calendarCell {
+  padding: 0.85rem 0.25rem;
+  border-radius: 12px;
+  background-color: #f8faf7;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cellSelected {
+  background-color: #1e4b27;
+  color: #ffffff;
+}
+
+.cellHasDot {
+  background-color: #fef3c7;
+  color: #78350f;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  background-color: #d97706;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+/* VaccinationTab.module.css */
+
+.scheduledCard {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* BLOQUE DE FECHA PROTEGIDO CONTRA DEFORMACIÓN */
+.dateBlock {
+  width: 48px;
+  min-width: 48px;
+  height: 52px;
+  min-height: 52px;
+  background-color: #eaf3ed;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #1e4b27;
+  flex-shrink: 0; /* Impide que se reduzca o aplaste el contenido */
+  padding: 0.25rem 0;
+  box-sizing: border-box;
+}
+
+.dateDay {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.dateMonth {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.vaccineInfo {
+  flex: 1;
+  min-width: 0; /* Permite que el texto se trunque si es muy largo sin romper el layout */
+}
+
+.vaccineTitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.vaccineSubtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.registerBtn {
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.registerBtn:hover {
+  background-color: #f8faf7;
+  border-color: #c2dec8;
+}
+
+/* RESPONSIVO PARA PANTALLAS ESTRECHAS (≤ 400px) */
+@media (max-width: 400px) {
+  .scheduledCard {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .registerBtn {
+    width: 100%;
+    margin-top: 0.25rem;
+    text-align: center;
+  }
+}

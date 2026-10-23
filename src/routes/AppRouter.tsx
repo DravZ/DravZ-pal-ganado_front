@@ -16,6 +16,7 @@ import AnimalDetailPage from "../pages/AnimalDetailPage/AnimalDetailPage";
 import WeightTreatmentPage from "../pages/WeightTreatmentPage/WeightTreatmentPage";
 import ReproductionPage from "../pages/ReproductionPage/ReproductionPage";
 import MovementsAndSalesPage from "../pages/MovementsAndSalesPage/MovementsAndSalesPage";
+import HealthAndTreatmentsPage from "../pages/HealthAndTreatmentsPage/HealthAndTreatmentsPage";
 
 export default function AppRouter() {
   return (
@@ -34,6 +35,10 @@ export default function AppRouter() {
             <Route path="/hato/pesajes" element={<WeightTreatmentPage />} />
             <Route path="/hato/reproduccion" element={<ReproductionPage />} />
             <Route path="/hato/traslados" element={<MovementsAndSalesPage />} />
+
+            <>
+              <Route path="/salud/eventos" element={<HealthAndTreatmentsPage />} />
+            </>
           </Route>
         </Route>
         <Route path="/login" element={<Login />} />

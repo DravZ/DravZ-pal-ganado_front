@@ -1,0 +1,124 @@
+/* MedicationsTab.module.css */
+.filterRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.searchBox {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  font-size: 0.9rem;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.routeSelect {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  font-size: 0.9rem;
+  color: #0f172a;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.countInfo {
+  font-size: 0.85rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.medCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 1.25rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  height: 100%;
+}
+
+.medIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background-color: #eaf3ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moreBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.categoryLabel {
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.medName {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0.15rem 0;
+}
+
+.presentationText {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.cardDivider {
+  border: 0;
+  border-top: 1px solid #f1f5f9;
+  margin: 1rem 0;
+}
+
+.viaLabel { font-size: 0.8rem; color: #64748b; }
+.viaValue { font-size: 0.85rem; font-weight: 700; color: #0f172a; }
+
+.withdrawalBox {
+  background-color: #fefce8;
+  border-radius: 10px;
+  padding: 0.6rem;
+  text-align: center;
+}
+
+.wLabel {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #a16207;
+  display: block;
+}
+
+.wDays {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #854d0e;
+}
