@@ -74,3 +74,30 @@ export default defineConfig([
 
 ```
 "# DravZ-pal-ganado_front" 
+
+## Prueba de la PWA
+
+Vite genera `manifest.webmanifest` y `sw.js` al compilar. El worker precarga el HTML
+y los recursos compilados de la aplicacion; las rutas de React Router reciben el
+mismo `index.html`, por lo que no hace falta abrir cada pagina antes de probarlas.
+
+### Probar desde un celular
+
+1. Conecta la computadora y el celular a la misma red Wi-Fi.
+2. Inicia Vite con `npm run dev -- --host 0.0.0.0` y abre en el celular
+   `http://<IP-de-la-computadora>:5173`.
+3. Para instalarla desde el celular, usa un origen HTTPS (por ejemplo, un tunel
+   HTTPS de desarrollo). Los navegadores no permiten instalar service workers
+   desde una IP local servida por HTTP. `localhost` es la excepcion, pero solo
+   aplica en el dispositivo donde corre el servidor.
+4. En Chrome/Android, usa **Instalar aplicacion** o **Agregar a pantalla principal**.
+
+El service worker de desarrollo permite comprobar el registro y la navegacion SPA,
+pero Vite sirve modulos de desarrollo y no representa la precarga offline final.
+Para verificar que todas las paginas compiladas abren sin red, genera y sirve el
+build con `npx vite build` y `npm run preview -- --host 0.0.0.0`, usando tambien
+HTTPS desde el celular. `npx vite build` omite la verificacion de TypeScript:
+actualmente `npm run build` se detiene por errores TypeScript preexistentes.
+Instala/abre la aplicacion una vez con conexion y luego desactiva la red: la
+interfaz y sus rutas estaticas estaran disponibles; los datos que dependan de una
+API seguiran necesitando conectividad.
