@@ -1,0 +1,312 @@
+/* MovementForm.module.css */
+
+.formCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden; /* Previene desbordamiento en contenedores principales */
+}
+
+.dbLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.sectionTitleNoMargin {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.sectionHeaderFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.input, .select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inputError {
+  border-color: #dc2626 !important;
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.swapIconContainer {
+  background-color: #f1f5f9;
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #f1f5f9;
+  margin: 1.75rem 0;
+}
+
+.addAnimalBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background-color: #ffffff;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.addAnimalBtn:hover {
+  background-color: #f8faf7;
+  border-color: #c2dec8;
+}
+
+/* CONTENEDOR DE CADA ANIMAL */
+.animalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid #f1f5f9;
+  background-color: #ffffff;
+  gap: 1rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.avatarIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background-color: #eaf3ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.animalTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.animalSubtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.actionControlsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+.weightLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.weightInputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.weightInput {
+  width: 90px;
+  padding: 0.5rem 1.8rem 0.5rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  font-weight: 700;
+  text-align: right;
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.unit {
+  position: absolute;
+  right: 8px;
+  font-size: 0.85rem;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.removeBtnExplicit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.removeBtnExplicit:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+}
+
+.summaryFooter {
+  background-color: #f8faf7;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.summaryCount {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.summaryTotal {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.errorBanner {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
+/* ==========================================
+   CORRECCIÓN RESPONSIVE MÓVIL (≤ 576px)
+   ========================================== */
+@media (max-width: 576px) {
+  .formCard {
+    padding: 1rem;
+  }
+
+  .addAnimalBtn {
+    width: 100%; /* El botón ocupa todo el ancho superior */
+  }
+
+  .animalRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .actionControlsRow {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    border-top: 1px dashed #f1f5f9;
+    padding-top: 0.75rem;
+  }
+
+  .weightInputGroup {
+    flex: 1;
+    max-width: 120px;
+  }
+
+  .weightInput {
+    width: 100%;
+  }
+
+  .summaryFooter {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .saveBtn {
+    width: 100%;
+  }
+}

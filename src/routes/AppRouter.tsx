@@ -14,6 +14,8 @@ import AnimalsDirectoryPage from "../pages/AnimalsDirectory/AnimalsDirectoryPage
 import RegisterAnimalPage from "../pages/RegisterAnimalPage/RegisterAnimalPage";
 import AnimalDetailPage from "../pages/AnimalDetailPage/AnimalDetailPage";
 import WeightTreatmentPage from "../pages/WeightTreatmentPage/WeightTreatmentPage";
+import ReproductionPage from "../pages/ReproductionPage/ReproductionPage";
+import MovementsAndSalesPage from "../pages/MovementsAndSalesPage/MovementsAndSalesPage";
 
 export default function AppRouter() {
   return (
@@ -30,6 +32,8 @@ export default function AppRouter() {
             <Route path="/hato/nuevo" element={<RegisterAnimalPage />} />
             <Route path="/hato/animales/:id" element={<AnimalDetailPage />} />
             <Route path="/hato/pesajes" element={<WeightTreatmentPage />} />
+            <Route path="/hato/reproduccion" element={<ReproductionPage />} />
+            <Route path="/hato/traslados" element={<MovementsAndSalesPage />} />
           </Route>
         </Route>
         <Route path="/login" element={<Login />} />

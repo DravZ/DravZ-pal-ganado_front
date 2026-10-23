@@ -1,0 +1,42 @@
+/* TabSelector.module.css */
+.tabContainer {
+  display: flex;
+  background-color: #eaefe9;
+  border-radius: 14px;
+  padding: 5px;
+  gap: 6px;
+}
+
+.tabBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  color: #0f172a;
+}
+
+.tabBtn.active {
+  background-color: #ffffff;
+  color: #1e4b27;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 576px) {
+  .tabBtn {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.5rem;
+  }
+}

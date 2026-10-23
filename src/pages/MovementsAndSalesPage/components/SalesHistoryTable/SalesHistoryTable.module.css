@@ -1,0 +1,168 @@
+.tableCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Evita que los elementos sobresalgan del borde curvo */
+}
+
+.dbLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.cardHeaderFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.filterSelect {
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  font-size: 0.85rem;
+  color: #0f172a;
+  outline: none;
+  background-color: #ffffff;
+}
+
+/* CONTENEDOR CON SCROLL HORIZONTAL APORTADO */
+.tableResponsiveContainer {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+  margin-bottom: 1rem;
+}
+
+.tableCustom {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 580px; /* Asegura un ancho legible sin apretar el texto */
+}
+
+.tableCustom thead th {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #f8faf7;
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tableCustom tbody td {
+  padding: 0.85rem;
+  vertical-align: middle;
+  font-size: 0.875rem;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.775rem;
+  font-weight: 700;
+}
+
+.badgePaid {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badgePending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* PIE Y PAGINACIÓN RESPONSIVA */
+.paginationFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.paginationInfo {
+  font-size: 0.825rem;
+  color: #64748b;
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.pageBtn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.825rem;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageActive {
+  background-color: #1e4b27;
+  color: #ffffff;
+  border-color: #1e4b27;
+}
+
+/* AJUSTES PARA PANTALLAS MÓVILES (≤ 576px) */
+@media (max-width: 576px) {
+  .tableCard {
+    padding: 1rem;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .paginationFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .paginationControls {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .pageBtn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.775rem;
+  }
+}

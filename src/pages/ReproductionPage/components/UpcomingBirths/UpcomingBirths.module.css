@@ -1,0 +1,143 @@
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cardUpcoming {
+  animation: fadeIn 0.45s ease-out forwards;
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+  height: 100%;
+}
+
+.kicker {
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.viewAllBtn {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1e4b27;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s ease;
+}
+
+.viewAllBtn:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+.birthList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.birthCard {
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: transform 0.15s ease;
+}
+
+.birthCard:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.birthCard:hover {
+  transform: translateX(2px);
+}
+
+.iconAvatar {
+  width: 42px;
+  height: 42px;
+  background-color: #eaf3ed;
+  color: #1e4b27;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.animalNameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.animalTag {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.gestaBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.subDetailText {
+  font-size: 0.775rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.daysCount {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #d97706;
+}
+
+.dateSub {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.1rem;
+}
+
+/* Barra de avance del embarazo */
+.pregnancyProgressBar {
+  width: 100%;
+  height: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  margin-top: 0.4rem;
+  overflow: hidden;
+}
+
+.pregnancyProgressFill {
+  height: 100%;
+  background-color: #1e4b27;
+  border-radius: 2px;
+}

@@ -1,0 +1,174 @@
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cardCalendar {
+  animation: fadeIn 0.4s ease-out forwards;
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.kicker {
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.monthNavBtn {
+  background: none;
+  border: none;
+  color: #0f172a;
+  padding: 0.25rem;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.monthNavBtn:hover {
+  background-color: #f1f5f9;
+}
+
+.monthTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Rejilla de días */
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.dayHeader {
+  text-align: center;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  padding-bottom: 0.35rem;
+}
+
+.dayCell {
+  background-color: #f8faf7;
+  border-radius: 10px;
+  min-height: 54px;
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+}
+
+.dayNumber {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Event Badges en el Calendario */
+.eventBadge {
+  width: 100%;
+  padding: 0.2rem 0.35rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  margin-top: 0.2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.badgeOrange {
+  background-color: #d97706; /* En 7 días */
+}
+
+.badgeDarkGreen {
+  background-color: #1e4b27; /* Confirmado */
+}
+
+.badgeBlue {
+  background-color: #2563eb; /* Proyectado */
+}
+
+/* Leyenda inferior */
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.775rem;
+  color: #475569;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dotOrange { background-color: #d97706; }
+.dotGreen { background-color: #1e4b27; }
+.dotBlue { background-color: #2563eb; }
+
+.btnSecondaryOutline {
+  height: 40px;
+  background-color: #ffffff;
+  border: 1px solid #dce3db;
+  border-radius: 10px;
+  padding: 0 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSecondaryOutline:hover {
+  background-color: #f8faf7;
+  border-color: #c2dec8;
+}
+
+@media (max-width: 576px) {
+  .calendarGrid {
+    gap: 0.25rem;
+  }
+  .dayCell {
+    min-height: 46px;
+    padding: 0.25rem;
+  }
+  .eventBadge {
+    font-size: 0.625rem;
+    padding: 0.15rem 0.1rem;
+  }
+}
