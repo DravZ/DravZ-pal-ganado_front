@@ -1,0 +1,160 @@
+/* SaleForm.module.css */
+.formCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 1.75rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.sectionHeader {
+  margin-bottom: 1.25rem;
+}
+
+.sectionHeaderFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.dbLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.label, .miniLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.miniLabel {
+  font-size: 0.675rem;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.input, .select {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  font-size: 0.9rem;
+  outline: none;
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+.inputWithPrefix, .inputWithSuffix {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dce3db;
+  border-radius: 10px;
+  padding: 0 0.75rem;
+  background-color: #ffffff;
+}
+
+.prefix, .suffix {
+  font-weight: 700;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.inputBare {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 0.65rem 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.addLineBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lineRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background-color: #f8faf7;
+  border-radius: 12px;
+  border: 1px solid #e5ebe3;
+  flex-wrap: wrap;
+}
+
+.subtotalText {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+}
+
+.offlineBanner {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.offlineIcon { color: #d97706; flex-shrink: 0; }
+.offlineTitle { font-weight: 700; font-size: 0.85rem; color: #92400e; }
+.offlineSubtitle { font-size: 0.775rem; color: #b45309; }
+
+.totalsBox {
+  font-size: 0.875rem;
+  color: #475569;
+  margin-bottom: 1rem;
+}
+
+.saveBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}

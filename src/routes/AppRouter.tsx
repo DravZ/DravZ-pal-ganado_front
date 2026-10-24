@@ -46,6 +46,9 @@ export default function AppRouter() {
               <Route path="/alimentacion/diaria" element={<FeedingAndProductionPage />} />
               <Route path="/alimentacion/inventario" element={<InventoryAndPurchasesPage />} />
             </>
+            <>
+              <Route path="/finanzas/ventas" element={<MovementsAndSalesPage />} /> 
+            </>
           </Route>
         </Route>
         <Route path="/login" element={<Login />} />
