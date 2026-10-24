@@ -1,0 +1,243 @@
+/* RegisterVaccinationPage.module.css */
+
+.pageContainer {
+  padding: 1.5rem 2rem;
+  max-width: 900px; /* Ancho cómodo para formularios de registro */
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: #1e4b27;
+}
+
+.sectionSubtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.formCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.select {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px 16px;
+  cursor: pointer;
+}
+
+.input:focus, .select:focus {
+  border-color: #1e4b27;
+  box-shadow: 0 0 0 3px rgba(30, 75, 39, 0.12);
+}
+
+.inputError {
+  border-color: #dc2626 !important;
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* GRUPO DOSIS (INPUT + SELECT) */
+.doseGroup {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.doseInput {
+  flex: 1;
+  min-width: 0; /* Permite que el input se reduzca si el espacio se estrecha */
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.doseSelect {
+  composes: select;
+  width: 95px; /* Reducido de 130px a 95px para pantallas estrechas */
+  min-width: 85px;
+  padding-left: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0; /* Evita que el select pierda forma */
+  box-sizing: border-box;
+}
+
+/* BANNER MODO OFFLINE */
+.offlineBanner {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+.offlineIcon {
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.offlineTitle {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #92400e;
+}
+
+.offlineSubtitle {
+  font-size: 0.8rem;
+  color: #b45309;
+}
+
+/* FILA DE BOTONES DE ACCIÓN */
+.actionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cancelBtn {
+  padding: 0.85rem 1.75rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background-color: #f8faf7;
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveBtn:hover {
+  background-color: #15381d;
+}
+
+/* AJUSTES RESPONSIVOS */
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+
+  .formCard {
+    padding: 1.25rem;
+  }
+
+  .actionsRow {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .cancelBtn, .saveBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
