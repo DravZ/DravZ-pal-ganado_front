@@ -1,7 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home from "../pages/Home";
-import About from "../pages/About";
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
 import SuperLayout from "../layouts/SuperLayout/SuperLayout";
@@ -10,13 +8,14 @@ import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage/ForgotPasswordP
 import RegisterPage from "../pages/auth/RegisterPage/RegisterPage";
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import Dashboard from "../pages/dashboard/DashboardPage";
-import AnimalsDirectoryPage from "../pages/AnimalsDirectory/AnimalsDirectoryPage";
-import RegisterAnimalPage from "../pages/RegisterAnimalPage/RegisterAnimalPage";
-import AnimalDetailPage from "../pages/AnimalDetailPage/AnimalDetailPage";
-import WeightTreatmentPage from "../pages/WeightTreatmentPage/WeightTreatmentPage";
-import ReproductionPage from "../pages/ReproductionPage/ReproductionPage";
-import MovementsAndSalesPage from "../pages/MovementsAndSalesPage/MovementsAndSalesPage";
-import HealthAndTreatmentsPage from "../pages/HealthAndTreatmentsPage/HealthAndTreatmentsPage";
+import AnimalsDirectoryPage from "../pages/HatoModule/AnimalsDirectory/AnimalsDirectoryPage";
+import RegisterAnimalPage from "../pages/HatoModule/RegisterAnimalPage/RegisterAnimalPage";
+import AnimalDetailPage from "../pages/HatoModule/AnimalDetailPage/AnimalDetailPage";
+import WeightTreatmentPage from "../pages/HatoModule/WeightTreatmentPage/WeightTreatmentPage";
+import ReproductionPage from "../pages/HatoModule/ReproductionPage/ReproductionPage";
+import HealthAndTreatmentsPage from "../pages/HealthModule/HealthAndTreatmentsPage/HealthAndTreatmentsPage";
+import MovementsAndSalesPage from "../pages/HatoModule/MovementsAndSalesPage/MovementsAndSalesPage";
+import HealthEventAndTreatmentPage from "../pages/HealthModule/HealthEventAndTreatmentPage/HealthEventAndTreatmentPage";
 
 export default function AppRouter() {
   return (
@@ -35,9 +34,9 @@ export default function AppRouter() {
             <Route path="/hato/pesajes" element={<WeightTreatmentPage />} />
             <Route path="/hato/reproduccion" element={<ReproductionPage />} />
             <Route path="/hato/traslados" element={<MovementsAndSalesPage />} />
-
             <>
               <Route path="/salud/eventos" element={<HealthAndTreatmentsPage />} />
+              <Route path="/salud/tratamientos" element={<HealthEventAndTreatmentPage />} />
             </>
           </Route>
         </Route>

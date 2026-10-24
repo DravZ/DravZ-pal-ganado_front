@@ -6,7 +6,7 @@ import type {
   Animal,
   CreateMovementDTO,
   SyncQueueEntry
-} from '../../../../types/database.types';
+} from '../../../../../types/database.types';
 
 interface AnimalSelectionItem {
   animal: Animal & { identifier_tag: string };

@@ -16,3 +16,23 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
 }
+
+/* index.css */
+
+/* Regla Global para todos los selects nativos de la aplicación */
+select,
+.form-select {
+  /* 1. Resetear la apariencia por defecto de los navegadores (Chrome, Safari, Firefox, Edge) */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+
+  /* 2. Padding a la derecha para que el texto NUNCA pise la flecha */
+  padding-right: 2.5rem !important;
+
+  /* 3. Reemplazar la flecha nativa por el SVG personalizado y colocarlo a 1rem de la derecha */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 1rem center !important;
+  background-size: 16px 16px !important;
+}

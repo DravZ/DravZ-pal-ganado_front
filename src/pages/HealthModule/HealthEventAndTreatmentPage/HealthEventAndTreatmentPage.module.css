@@ -1,0 +1,211 @@
+/* HealthEventAndTreatmentPage.module.css */
+.pageContainer {
+  padding: 1.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: #1e4b27;
+}
+
+.sectionSubtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.formCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stepBadge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #1e4b27;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stepTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.stepSubtitle {
+  font-size: 0.825rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.input, .select, .textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #1e4b27;
+  box-shadow: 0 0 0 3px rgba(30, 75, 39, 0.12);
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #f1f5f9;
+  margin: 2rem 0;
+}
+
+.withdrawalBanner {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.bellIcon {
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.withdrawalTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #991b1b;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.withdrawalText {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #7f1d1d;
+}
+
+.stickyColumn {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 0.85rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.cancelBtn:hover {
+  background-color: #f8faf7;
+}
+
+.saveBtn {
+  flex: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveBtn:hover {
+  background-color: #15381d;
+}
+
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+  .formCard {
+    padding: 1.25rem;
+  }
+  .stickyColumn {
+    position: static;
+  }
+}
+

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './SalesHistoryTable.module.css';
-import type { Sale } from '../../../../types/database.types';
+import type { Sale } from '../../../../../types/database.types';
 
 type SaleHistoryUI = Sale & {
   customer_name: string;

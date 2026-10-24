@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './MedicationsTab.module.css';
 import { Search, Syringe, MoreHorizontal } from 'lucide-react';
-import type { Medication } from '../../../../types/database.types';
+import type { Medication } from '../../../../../types/database.types';
 
 type MedicationWithUI = Medication & {
   category_name: string;

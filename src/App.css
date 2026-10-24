@@ -1,0 +1,37 @@
+.select {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem; /* 2.5rem a la derecha para que el texto no toque la flecha */
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+
+  /* Resetear flecha nativa */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  /* Flecha SVG personalizada con posición fija a la derecha */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center; /* Mantiene la flecha a 1rem (16px) del borde derecho */
+  background-size: 16px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.select:focus {
+  border-color: #1e4b27;
+  box-shadow: 0 0 0 3px rgba(30, 75, 39, 0.12);
+}
+
+/* Para versiones compactas (ej. tablas o tarjetas) */
+.selectCompact {
+  composes: select;
+  padding: 0.55rem 2.25rem 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  background-position: right 0.75rem center;
+}

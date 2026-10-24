@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './EventsAndTreatmentsTab.module.css';
 import { Syringe, Bell, Activity, Search, Beef } from 'lucide-react';
-import type { HealthEvent, Treatment, Animal } from '../../../../types/database.types';
+import type { HealthEvent, Treatment, Animal } from '../../../../../types/database.types';
 
 // Tipos adaptados a partir del esquema DBML usando los types globales
 type HealthEventWithUI = HealthEvent & {

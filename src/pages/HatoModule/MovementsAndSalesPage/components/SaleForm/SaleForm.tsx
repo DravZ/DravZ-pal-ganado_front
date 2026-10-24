@@ -6,7 +6,7 @@ import type {
   Customer,
   CreateSaleDTO,
   SyncQueueEntry
-} from '../../../../types/database.types';
+} from '../../../../../types/database.types';
 
 interface UIItemLine {
   id: string;
