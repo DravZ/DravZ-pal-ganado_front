@@ -18,6 +18,7 @@ import MovementsAndSalesPage from "../pages/HatoModule/MovementsAndSalesPage/Mov
 import HealthEventAndTreatmentPage from "../pages/HealthModule/HealthEventAndTreatmentPage/HealthEventAndTreatmentPage";
 import RegisterVaccinationPage from "../pages/HealthModule/RegisterVaccinationPage/RegisterVaccinationPage";
 import FeedingAndProductionPage from "../pages/FoodSuppliesModule/FeedingAndProductionPage/FeedingAndProductionPage";
+import InventoryAndPurchasesPage from "../pages/FoodSuppliesModule/InventoryAndPurchasesPage/InventoryAndPurchasesPage";
 
 export default function AppRouter() {
   return (
@@ -43,6 +44,7 @@ export default function AppRouter() {
             </>
             <>
               <Route path="/alimentacion/diaria" element={<FeedingAndProductionPage />} />
+              <Route path="/alimentacion/inventario" element={<InventoryAndPurchasesPage />} />
             </>
           </Route>
         </Route>
