@@ -1,0 +1,80 @@
+/* PaddocksTable.module.css */
+.cardBox {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 1rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.tableResponsiveContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.customTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.customTable thead th {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  background-color: #f8faf7;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.customTable tbody td {
+  padding: 0.85rem;
+  vertical-align: middle;
+  font-size: 0.875rem;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.subText {
+  font-size: 0.775rem;
+  color: #64748b;
+}
+
+.progressBarBg {
+  width: 80px;
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background-color: #1e4b27;
+  border-radius: 3px;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.775rem;
+  font-weight: 700;
+}
+
+.badgeInUse { background-color: #d1fae5; color: #065f46; }
+.badgeResting { background-color: #fef3c7; color: #92400e; }
+
+.detailBtn {
+  background: transparent;
+  border: none;
+  color: #1e4b27;
+  font-weight: 700;
+  font-size: 0.825rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  cursor: pointer;
+}

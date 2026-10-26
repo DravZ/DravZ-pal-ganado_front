@@ -1,0 +1,198 @@
+/* PaddockCard.module.css */
+.card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* BLOQUE DE ESTADO (VERDE) */
+.badgeBlock {
+  width: 95px;
+  padding: 0.85rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.bgInUse {
+  background-color: #1e4b27;
+}
+
+.bgResting {
+  background-color: #2d5a37;
+}
+
+.badgePill {
+  display: inline-block;
+  padding: 0.2rem 0.45rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.badgeInUse {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badgeResting {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.hectaresValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.hectaresUnit {
+  font-size: 0.7rem;
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+/* BLOQUE DE INFORMACIÓN (DERECHA) */
+.rightContentBlock {
+  padding: 0.85rem 1rem;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.codeText {
+  font-size: 0.675rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.paddockName {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.forageText {
+  font-size: 0.775rem;
+  color: #64748b;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* CAPACIDAD */
+.capacitySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.capacityHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+}
+
+.capacityLabel {
+  font-size: 0.725rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.capacityValue {
+  font-size: 0.775rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.progressBarBg {
+  width: 100%;
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  background-color: #1e4b27;
+  border-radius: 4px;
+}
+
+/* PIE DE TARJETA */
+.footerFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding-top: 0.25rem;
+}
+
+.occupancySubtext {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.detailBtn {
+  background: transparent;
+  border: none;
+  color: #1e4b27;
+  font-weight: 700;
+  font-size: 0.775rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* EN PANTALLAS MUY ESTRECHAS (< 380px) PASA A MODO APILADO */
+@media (max-width: 380px) {
+  .card {
+    flex-direction: column;
+  }
+  
+  .badgeBlock {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+  }
+  
+  .badgePill {
+    margin-bottom: 0;
+  }
+  
+  .hectaresValue {
+    font-size: 1.2rem;
+    display: inline;
+  }
+  
+  .hectaresUnit {
+    display: inline;
+    margin-left: 0.2rem;
+  }
+}
