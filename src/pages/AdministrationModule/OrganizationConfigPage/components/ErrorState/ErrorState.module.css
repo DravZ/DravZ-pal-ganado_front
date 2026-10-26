@@ -1,0 +1,47 @@
+.errorCard {
+  background-color: #fef2f2;
+  border-radius: 20px;
+  border: 1px solid #fecaca;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.errorIcon {
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.errorTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #991b1b;
+  margin: 0;
+}
+
+.errorSubtitle {
+  font-size: 0.875rem;
+  color: #b91c1c;
+  margin-bottom: 1.5rem;
+  margin-left: 2.5rem;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  background-color: #ffffff;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retryBtn:hover {
+  background-color: #fff5f5;
+}

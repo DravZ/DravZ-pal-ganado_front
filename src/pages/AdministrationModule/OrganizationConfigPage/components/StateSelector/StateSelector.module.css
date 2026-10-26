@@ -1,0 +1,39 @@
+.stateSelectorCard {
+  background-color: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5ebe3;
+  padding: 0.65rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stateLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.stateButtonsGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.stateBtn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stateBtn.activeStateBtn {
+  background-color: #1e4b27;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}

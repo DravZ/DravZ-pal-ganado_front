@@ -1,0 +1,57 @@
+.actionCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  padding: 1.35rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionCard:hover {
+  border-color: #1e4b27;
+  transform: translateY(-2px);
+}
+
+.actionHeaderFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.actionIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-color: #eaf3ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrowIcon {
+  color: #0f172a;
+}
+
+.actionTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.actionTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.actionDescription {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}

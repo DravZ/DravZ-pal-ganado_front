@@ -1,0 +1,37 @@
+.loadingCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinnerIcon {
+  color: #1e4b27;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e4b27;
+  margin-bottom: 0.25rem;
+}
+
+.loadingSubtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}

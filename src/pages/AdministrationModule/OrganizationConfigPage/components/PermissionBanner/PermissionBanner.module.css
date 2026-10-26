@@ -1,0 +1,42 @@
+.permissionBanner {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 20px;
+  padding: 1.35rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.permissionIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-color: #fef3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.permissionTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #b45309;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.permissionTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #92400e;
+  margin-bottom: 0.25rem;
+}
+
+.permissionDescription {
+  font-size: 0.825rem;
+  color: #b45309;
+  margin: 0;
+  line-height: 1.4;
+}

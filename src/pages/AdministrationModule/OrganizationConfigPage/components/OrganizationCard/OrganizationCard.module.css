@@ -1,0 +1,78 @@
+.orgMainCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.orgInfoFlex {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.orgIconBox {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background-color: #1e4b27;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardHeaderTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.orgName {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.orgLegalText {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.secondaryBtn {
+  padding: 0.65rem 1.25rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background-color: #f8faf7;
+}
+
+@media (max-width: 576px) {
+  .orgMainCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .secondaryBtn {
+    width: 100%;
+  }
+}

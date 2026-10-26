@@ -1,0 +1,36 @@
+.pageContainer {
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.sectionSubtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+}

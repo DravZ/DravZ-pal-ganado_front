@@ -21,6 +21,7 @@ import FeedingAndProductionPage from "../pages/FoodSuppliesModule/FeedingAndProd
 import InventoryAndPurchasesPage from "../pages/FoodSuppliesModule/InventoryAndPurchasesPage/InventoryAndPurchasesPage";
 import ExpensesAndCostAllocationsPage from "../pages/FinancesModule/ExpensesAndCostAllocationsPage/ExpensesAndCostAllocationsPage";
 import PaddocksPage from "../pages/AdministrationModule/PaddocksPage/PaddocksPage";
+import OrganizationConfigPage from "../pages/AdministrationModule/OrganizationConfigPage/OrganizationConfigPage";
 
 export default function AppRouter() {
   return (
@@ -53,6 +54,7 @@ export default function AppRouter() {
             </>
             <>
               <Route path="/admin/estructura" element={<PaddocksPage />} />
+              <Route path="/admin/configuracion" element={<OrganizationConfigPage />} />
             </>
           </Route>
         </Route>
