@@ -1,0 +1,166 @@
+/* CreateExpenseModal.module.css */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1.5rem 1rem; /* Margen de seguridad vertical */
+  overflow-y: auto;
+}
+
+.modalCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100vh - 3rem); /* Previene que el modal toque los bordes pantalla */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin: auto;
+}
+
+.header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-shrink: 0; /* Mantiene la cabecera fija */
+}
+
+.dbLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.825rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.closeBtn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.body {
+  padding: 1.5rem;
+  overflow-y: auto; /* Permite el scroll del contenido del formulario */
+  flex: 1;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.input, .select, .textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  font-size: 0.9rem;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.inputWithPrefix {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dce3db;
+  border-radius: 10px;
+  padding: 0 0.75rem;
+  background-color: #ffffff;
+}
+
+.prefix {
+  font-weight: 700;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.inputBare {
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: 0.65rem 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.offlineBanner {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.offlineIcon { color: #d97706; flex-shrink: 0; }
+.offlineTitle { font-weight: 700; font-size: 0.85rem; color: #92400e; }
+.offlineSubtitle { font-size: 0.775rem; color: #b45309; }
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+}

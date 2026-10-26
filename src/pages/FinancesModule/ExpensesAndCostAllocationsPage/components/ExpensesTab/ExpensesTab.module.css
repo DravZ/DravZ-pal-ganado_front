@@ -1,0 +1,109 @@
+/* ExpensesTab.module.css */
+.cardBox {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.cardHeaderFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dbLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.searchBox {
+  position: relative;
+  width: 260px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.55rem 0.85rem 0.55rem 2.3rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.tableResponsiveContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.customTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.customTable thead th {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  background-color: #f8faf7;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.customTable tbody td {
+  padding: 0.85rem;
+  vertical-align: middle;
+  font-size: 0.875rem;
+  color: #0f172a;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.subText {
+  font-size: 0.775rem;
+  color: #64748b;
+}
+
+.categoryBadge {
+  background-color: #f1f5f9;
+  color: #334155;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.775rem;
+  font-weight: 700;
+}
+
+.badgeAssigned { background-color: #d1fae5; color: #065f46; }
+.badgePending { background-color: #fef3c7; color: #92400e; }
