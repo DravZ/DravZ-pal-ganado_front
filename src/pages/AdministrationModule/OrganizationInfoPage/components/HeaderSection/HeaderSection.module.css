@@ -1,0 +1,84 @@
+.headerWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: #1e4b27;
+}
+
+.headerFlex {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sectionSubtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.editBtn:hover {
+  background-color: #15381d;
+}
+
+@media (max-width: 576px) {
+  .headerFlex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .editBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
