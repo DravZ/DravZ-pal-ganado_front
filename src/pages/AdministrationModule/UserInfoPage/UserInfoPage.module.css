@@ -1,0 +1,27 @@
+.pageContainer {
+  padding: 1.5rem 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.mainCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+  .mainCard {
+    padding: 1.25rem;
+    border-radius: 16px;
+  }
+}

@@ -1,0 +1,37 @@
+.gridContainer {
+  padding-bottom: 0.5rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f8faf7;
+}
+
+.label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.value {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: right;
+}
+
+@media (max-width: 576px) {
+  .detailItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .value {
+    text-align: left;
+  }
+}

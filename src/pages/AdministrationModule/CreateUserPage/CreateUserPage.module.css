@@ -1,0 +1,269 @@
+/* CreateUserPage.module.css */
+.pageContainer {
+  padding: 1.5rem 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: #1e4b27;
+}
+
+.headerFlex {
+  margin-bottom: 1.5rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* BANNER DE ERROR DE SERVIDOR */
+.errorBanner {
+  background-color: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.errorIcon {
+  color: #e11d48;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.errorTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #9f1239;
+  margin-bottom: 0.2rem;
+}
+
+.errorDescription {
+  font-size: 0.85rem;
+  color: #be123c;
+  margin: 0;
+}
+
+/* TARJETA DEL FORMULARIO */
+.formCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  padding: 2rem;
+}
+
+.formSection {
+  margin-bottom: 0.5rem;
+}
+
+.sectionTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.groupTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.input:focus {
+  border-color: #1e4b27;
+}
+
+.readOnlyInput {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #475569;
+  cursor: not-allowed;
+  font-weight: 700;
+}
+
+.selectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.selectInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.fieldHelpText {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  display: block;
+  margin-top: 0.4rem;
+  line-height: 1.3;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #f1f5f9;
+  margin: 2rem 0;
+}
+
+/* BOTONES DE ACCIÓN */
+.formActionsFlex {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cancelBtn {
+  padding: 0.75rem 1.5rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background-color: #f8faf7;
+}
+
+.submitBtn {
+  padding: 0.75rem 1.75rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitBtn:hover {
+  background-color: #15381d;
+}
+
+/* FOOTER SIMULADOR DE ERROR */
+.simulationFooter {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.simulateErrorBtn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.simulateErrorBtn:hover {
+  color: #dc2626;
+}
+
+/* ADAPTACIÓN MÓVIL (MOBILE-FIRST) */
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+  .formCard {
+    padding: 1.25rem;
+  }
+  .formActionsFlex {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+    text-align: center;
+  }
+}
