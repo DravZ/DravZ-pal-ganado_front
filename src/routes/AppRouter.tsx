@@ -27,6 +27,7 @@ import EditOrganizationInfoPage from "../pages/AdministrationModule/EditOrganiza
 import UsersManagementPage from "../pages/AdministrationModule/UsersManagementPage/UsersManagementPage";
 import CreateUserPage from "../pages/AdministrationModule/CreateUserPage/CreateUserPage";
 import UserInfoPage from "../pages/AdministrationModule/UserInfoPage/UserInfoPage";
+import EditUserPage from "../pages/AdministrationModule/EditUserPage/EditUserPage";
 
 export default function AppRouter() {
   return (
@@ -65,6 +66,7 @@ export default function AppRouter() {
               <Route path="/admin/usuarios" element={<UsersManagementPage />} />
               <Route path="/usuarios/nuevo" element={<CreateUserPage />} />
               <Route path="/usuarios/:id" element={<UserInfoPage />} />
+              <Route path="/usuarios/editar/:id" element={<EditUserPage />} />
             </>
           </Route>
         </Route>
