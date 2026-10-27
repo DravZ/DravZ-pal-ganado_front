@@ -1,0 +1,66 @@
+/* FarmsErrorState.module.css */
+.card {
+    background-color: #fef2f2;
+    border-radius: 20px;
+    border: 1px solid #fecaca;
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.contentFlex {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 240px;
+}
+
+.icon {
+    color: #dc2626;
+    flex-shrink: 0;
+}
+
+.title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #991b1b;
+    margin: 0 0 0.2rem 0;
+}
+
+.subtitle {
+    font-size: 0.85rem;
+    color: #b91c1c;
+    margin: 0;
+}
+
+.retryBtn {
+    padding: 0.75rem 1.25rem;
+    background-color: #ffffff;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+@media (max-width: 576px) {
+    .card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .contentFlex {
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .retryBtn {
+        width: 100%;
+    }
+}
