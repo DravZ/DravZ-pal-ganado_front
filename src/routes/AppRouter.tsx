@@ -23,6 +23,7 @@ import ExpensesAndCostAllocationsPage from "../pages/FinancesModule/ExpensesAndC
 import PaddocksPage from "../pages/AdministrationModule/PaddocksPage/PaddocksPage";
 import OrganizationConfigPage from "../pages/AdministrationModule/OrganizationConfigPage/OrganizationConfigPage";
 import OrganizationInfoPage from "../pages/AdministrationModule/OrganizationInfoPage/OrganizationInfoPage";
+import EditOrganizationInfoPage from "../pages/AdministrationModule/EditOrganizationInfoPage/EditOrganizationInfoPage";
 
 export default function AppRouter() {
   return (
@@ -57,6 +58,7 @@ export default function AppRouter() {
               <Route path="/admin/estructura" element={<PaddocksPage />} />
               <Route path="/admin/configuracion" element={<OrganizationConfigPage />} />
               <Route path="/organizacion/informacion" element={<OrganizationInfoPage />} />
+              <Route path="/organizacion/editar" element={<EditOrganizationInfoPage />} />
             </>
           </Route>
         </Route>
