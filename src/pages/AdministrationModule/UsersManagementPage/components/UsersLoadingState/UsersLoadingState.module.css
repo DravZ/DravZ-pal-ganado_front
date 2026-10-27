@@ -1,0 +1,36 @@
+/* UsersLoadingState.module.css */
+.card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e5ebe3;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.spinner {
+    color: #1e4b27;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e4b27;
+    margin-bottom: 0.25rem;
+}
+
+.subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}

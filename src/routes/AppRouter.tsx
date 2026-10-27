@@ -24,6 +24,7 @@ import PaddocksPage from "../pages/AdministrationModule/PaddocksPage/PaddocksPag
 import OrganizationConfigPage from "../pages/AdministrationModule/OrganizationConfigPage/OrganizationConfigPage";
 import OrganizationInfoPage from "../pages/AdministrationModule/OrganizationInfoPage/OrganizationInfoPage";
 import EditOrganizationInfoPage from "../pages/AdministrationModule/EditOrganizationInfoPage/EditOrganizationInfoPage";
+import UsersManagementPage from "../pages/AdministrationModule/UsersManagementPage/UsersManagementPage";
 
 export default function AppRouter() {
   return (
@@ -59,6 +60,7 @@ export default function AppRouter() {
               <Route path="/admin/configuracion" element={<OrganizationConfigPage />} />
               <Route path="/organizacion/informacion" element={<OrganizationInfoPage />} />
               <Route path="/organizacion/editar" element={<EditOrganizationInfoPage />} />
+              <Route path="/admin/usuarios" element={<UsersManagementPage />} />
             </>
           </Route>
         </Route>
