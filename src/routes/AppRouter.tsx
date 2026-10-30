@@ -32,6 +32,7 @@ import FarmsManagementPage from "../pages/AdministrationModule/FarmsManagementPa
 import FarmInfoPage from "../pages/AdministrationModule/FarmInfoPage/FarmInfoPage";
 import CreateFarmPage from "../pages/AdministrationModule/CreateFarmPage/CreateFarmPage";
 import EditFarmPage from "../pages/AdministrationModule/EditFarmPage/EditFarmPage";
+import AlertsPage from "../pages/AdministrationModule/AlertsPage/AlertsPage";
 
 export default function AppRouter() {
   return (
@@ -75,6 +76,8 @@ export default function AppRouter() {
               <Route path="/fincas/:id" element={<FarmInfoPage />} />
               <Route path="/fincas/nueva" element={<CreateFarmPage />} />
               <Route path="/fincas/editar/:id" element={<EditFarmPage />} />
+              <Route path="/admin/alertas" element={<AlertsPage />} />
+
             </>
           </Route>
         </Route>

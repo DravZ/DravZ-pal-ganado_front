@@ -1,0 +1,18 @@
+.pageContainer {
+  padding: 1.5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.alertsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+}
