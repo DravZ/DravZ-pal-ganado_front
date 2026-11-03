@@ -1,0 +1,108 @@
+/* SyncOfflineBanner.module.css */
+.bannerCard {
+  background-color: #eaf3ed;
+  border: 1px solid #cbe0d0;
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.leftInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.iconCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background-color: #1e4b27;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bannerTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.15rem 0;
+}
+
+.bannerDescription {
+  font-size: 0.875rem;
+  color: #475569;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.metricsGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 0.65rem 1rem;
+  border-radius: 14px;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.metricBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.metricLabel {
+  font-size: 0.725rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.metricValue {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.valFailed {
+  color: #dc2626;
+}
+
+.divider {
+  width: 1px;
+  height: 28px;
+  background-color: #cbd5e1;
+  flex-shrink: 0;
+}
+
+/* RESPONSIVE MÓVIL */
+@media (max-width: 768px) {
+  .bannerCard {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .metricsGroup {
+    width: 100%;
+    justify-content: space-around;
+    gap: 0.5rem;
+  }
+
+  .metricBox {
+    min-width: auto;
+  }
+}

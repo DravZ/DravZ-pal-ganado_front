@@ -1,0 +1,281 @@
+.tableWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filtersBarFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.statusTabs {
+  display: flex;
+  align-items: center;
+  background-color: #f1f5f9;
+  padding: 0.35rem;
+  border-radius: 14px;
+  gap: 0.25rem;
+}
+
+.tabBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.tabBtn.activeTab {
+  background-color: #1e4b27;
+  color: #ffffff;
+}
+
+.badgeCount {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+}
+
+.entitySelect {
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+}
+
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.customTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.customTable thead th {
+  font-size: 0.725rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  background-color: #f8faf7;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.customTable tbody td {
+  padding: 0.9rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.875rem;
+}
+
+.entityName {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.entityId {
+  font-size: 0.775rem;
+  color: #94a3b8;
+}
+
+.opBadge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+}
+
+.op_CREATE { background-color: #e2e8f0; color: #334155; }
+.op_UPDATE { background-color: #fef3c7; color: #92400e; }
+
+.payloadPreview {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.viewJsonBtn {
+  background: transparent;
+  border: none;
+  color: #1e4b27;
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.2rem;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+}
+
+.status_PENDING { background-color: #fef3c7; color: #92400e; }
+.status_FAILED { background-color: #fecdd3; color: #9f1239; }
+.status_SYNCED { background-color: #d1fae5; color: #065f46; }
+
+.errorText {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.dashText {
+  color: #94a3b8;
+}
+
+.menuBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+}
+
+/* Pie de Tabla */
+.tableFooterFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.counterSubtext {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.paginationFlex {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pageArrowBtn, .pageNumBtn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.pageNumBtn.activePage {
+  background-color: #1e4b27;
+  color: #ffffff;
+  border-color: #1e4b27;
+}
+
+.persistenceNote {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 1rem;
+}
+
+/* SyncTable.module.css */
+.tableWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.filtersBarFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.statusTabs {
+  display: flex;
+  align-items: center;
+  background-color: #f1f5f9;
+  padding: 0.35rem;
+  border-radius: 14px;
+  gap: 0.25rem;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none; /* Oculta scrollbar en Firefox */
+  -webkit-overflow-scrolling: touch;
+}
+
+.statusTabs::-webkit-scrollbar {
+  display: none; /* Oculta scrollbar en Chrome/Safari */
+}
+
+.tabBtn {
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap; /* Impide que los nombres de los tabs se fragmenten */
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.tabBtn.activeTab {
+  background-color: #1e4b27;
+  color: #ffffff;
+}
+
+.badgeCount {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .filtersBarFlex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .statusTabs {
+    width: 100%;
+  }
+}
