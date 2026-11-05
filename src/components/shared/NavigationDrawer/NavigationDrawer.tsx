@@ -14,15 +14,7 @@ import {
     Plus,
     ArrowLeftRight,
     Bell,
-    CheckCircle,
-    LayoutDashboard,
-    Building,
-    Users,
-    Warehouse,
     RefreshCw,
-    ShoppingBag,
-    Activity,
-    Receipt,
     type LucideIcon,
 } from 'lucide-react';
 import styles from './NavigationDrawer.module.css';
@@ -43,7 +35,7 @@ interface NavigationCategory {
     subItems: SubMenuItem[];
 }
 
-// Estructura de módulos basada en las capturas
+// Estructura de módulos
 const NAVIGATION_MENU: NavigationCategory[] = [
     {
         id: 'hato',
@@ -65,7 +57,6 @@ const NAVIGATION_MENU: NavigationCategory[] = [
             { id: 'diagnostico', label: 'Eventos de salud y diagnóstic...', icon: Syringe, path: '/salud/eventos' },
             { id: 'tratamiento', label: 'Aplicar tratamiento / receta', icon: Plus, path: '/salud/tratamientos' },
             { id: 'vacunacion', label: 'Jornada de vacunación', icon: Syringe, path: '/salud/vacunacion' },
-            { id: 'dias_retiro', label: 'Registro de días de retiro', icon: Bell, path: '/salud/retiro' },
         ],
     },
     {
@@ -75,7 +66,6 @@ const NAVIGATION_MENU: NavigationCategory[] = [
         subItems: [
             { id: 'diaria', label: 'Alimentación diaria', icon: Package, path: '/alimentacion/diaria' },
             { id: 'inventario', label: 'Inventario y bodega', icon: Package, path: '/alimentacion/inventario' },
-            { id: 'compras', label: 'Compras e insumos', icon: ArrowLeftRight, path: '/alimentacion/compras' },
         ],
     },
     {
@@ -83,8 +73,6 @@ const NAVIGATION_MENU: NavigationCategory[] = [
         title: '4. FINANZAS Y VENTAS',
         icon: Scale,
         subItems: [
-            { id: 'ventas', label: 'Ventas de ganado', icon: Scale, path: '/finanzas/ventas' },
-            { id: 'produccion', label: 'Registro de producción', icon: Scale, path: '/finanzas/produccion' },
             { id: 'gastos', label: 'Gastos del rancho', icon: ArrowLeftRight, path: '/finanzas/gastos' },
         ],
     },
@@ -115,7 +103,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
     onClose,
     activePath = '/dashboard',
 }) => {
-    // Estado para la categoría actualmente expandida (Accordion style)
+    // Estado para la categoría actualmente expandida (Acordeón)
     const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>('hato');
     const navigate = useNavigate();
 
@@ -141,13 +129,13 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                 {/* Header */}
                 <div className={styles.drawerHeader}>
                     <div className={styles.headerTitleWrapper}>
-                        <Menu size={20} className="text-success" />
+                        <Menu size={20} color="#1e4b27" />
                         <div>
                             <div className={styles.kicker}>NAVEGACIÓN</div>
                             <div className={styles.headerTitle}>Todos los módulos</div>
                         </div>
                     </div>
-                    <button type="button" className={styles.closeButton} onClick={onClose}>
+                    <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Cerrar menú">
                         <X size={20} strokeWidth={2.2} />
                     </button>
                 </div>
@@ -163,8 +151,9 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                                 {/* Botón Encabezado de Categoría */}
                                 <button
                                     type="button"
-                                    className={`${styles.categoryHeader} ${isExpanded ? styles.categoryHeaderActive : ''
-                                        }`}
+                                    className={`${styles.categoryHeader} ${
+                                        isExpanded ? styles.categoryHeaderActive : ''
+                                    }`}
                                     onClick={() => toggleCategory(category.id)}
                                 >
                                     <div className={styles.categoryTitleGroup}>
@@ -189,8 +178,9 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                                                 <button
                                                     key={subItem.id}
                                                     type="button"
-                                                    className={`${styles.subItemLink} ${isActive ? styles.subItemLinkActive : ''
-                                                        }`}
+                                                    className={`${styles.subItemLink} ${
+                                                        isActive ? styles.subItemLinkActive : ''
+                                                    }`}
                                                     onClick={() => handleNavigate(subItem.path, subItem.label)}
                                                 >
                                                     <div className={styles.subItemLabelGroup}>
@@ -214,3 +204,5 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
         document.body
     );
 };
+
+export default NavigationDrawer;

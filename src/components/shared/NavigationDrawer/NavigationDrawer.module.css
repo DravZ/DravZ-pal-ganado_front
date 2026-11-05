@@ -58,7 +58,7 @@
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.8px;
-  color: #2d6a4f;
+  color: #1e4b27;
   text-transform: uppercase;
 }
 
@@ -160,7 +160,7 @@
   color: #1e4b27;
 }
 
-/* Estado activo resaltado para subítem seleccionado (ej. Tablero de control) */
+/* Estado activo resaltado para subítem seleccionado */
 .subItemLinkActive {
   background-color: #1e4b27 !important;
   color: #ffffff !important;

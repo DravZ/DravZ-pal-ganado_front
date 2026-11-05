@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  min-width: 0; /* Permite truncar texto dentro de contenedores flex */
+  min-width: 0;
   flex: 1;
 }
 
@@ -67,7 +67,13 @@
   flex-shrink: 0;
 }
 
-/* Selector de Finca Droplist Ajustado */
+/* Contenedor relativo para posicionar los menús desplegables */
+.dropdownWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Selector de Finca Button */
 .farmSelectorButton {
   background-color: #f8faf7;
   border: 1px solid #dce3db;
@@ -79,13 +85,17 @@
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 0;
-  max-width: 180px; /* Limita ancho para no empujar notificaciones */
-  flex-shrink: 1;
+  max-width: 200px;
 }
 
 .farmSelectorButton:hover {
   background-color: #edf4ee;
   border-color: #c2dec8;
+}
+
+.rotateIcon {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
 }
 
 .farmTextWrapper {
@@ -113,15 +123,69 @@
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Corta con "..." si sobrepasa el espacio */
+  text-overflow: ellipsis;
 }
 
+/* Menú Desplegable de Fincas */
+.farmDropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 220px;
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+  padding: 0.5rem;
+  z-index: 1005;
+  animation: dropdownFadeIn 0.15s ease forwards;
+}
+
+.dropdownHeaderLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  padding: 0.4rem 0.6rem;
+}
+
+.farmOptionItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #0f172a;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  text-align: left;
+}
+
+.farmOptionItem:hover {
+  background-color: #f8faf7;
+  color: #1e4b27;
+}
+
+.farmOptionSelected {
+  background-color: #edf4ee;
+  color: #1e4b27;
+}
+
+.checkIcon {
+  color: #1e4b27;
+}
+
+/* Grupo Derecho */
 .rightGroup {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.75rem;
   flex-shrink: 0;
-  margin-left: 0.5rem;
 }
 
 /* Botón Notificaciones */
@@ -163,6 +227,16 @@
 }
 
 /* Avatar de Usuario */
+.avatarButton {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
 .userAvatar {
   width: 38px;
   height: 38px;
@@ -174,16 +248,119 @@
   justify-content: center;
   font-weight: 700;
   font-size: 0.85rem;
-  cursor: pointer;
   transition: transform 0.2s ease;
-  flex-shrink: 0;
 }
 
-.userAvatar:hover {
+.avatarButton:hover .userAvatar {
   transform: scale(1.05);
 }
 
-/* Ajustes finos exclusivamente para pantallas muy pequeñas (Mobile) */
+/* Menú Desplegable de Perfil */
+.profileDropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background-color: #ffffff;
+  border: 1px solid #e5ebe3;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  padding: 0.75rem;
+  z-index: 1005;
+  animation: dropdownFadeIn 0.15s ease forwards;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.userMenuHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.5rem 0.5rem 0.5rem;
+}
+
+.userMenuAvatar {
+  width: 42px;
+  height: 42px;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.userMenuDetails {
+  min-width: 0;
+  flex: 1;
+}
+
+.userMenuName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userMenuEmail {
+  font-size: 0.75rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdownDivider {
+  height: 1px;
+  background-color: #e5ebe3;
+  margin: 0.5rem 0;
+}
+
+.menuOptionItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.menuOptionItem:hover {
+  background-color: #f8faf7;
+  color: #1e4b27;
+}
+
+.logoutOption {
+  color: #dc2626;
+}
+
+.logoutOption:hover {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
 @media (max-width: 576px) {
   .navbarContainer {
     padding: 0 0.75rem;
@@ -208,5 +385,10 @@
 
   .rightGroup {
     gap: 0.4rem;
+  }
+
+  .profileDropdownMenu {
+    width: 240px;
+    right: -0.5rem;
   }
 }
