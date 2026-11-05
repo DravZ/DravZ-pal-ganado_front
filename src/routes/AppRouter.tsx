@@ -36,10 +36,12 @@ import AlertsPage from "../pages/AdministrationModule/AlertsPage/AlertsPage";
 import SyncQueuePage from "../pages/AdministrationModule/SyncQueuePage/SyncQueuePage";
 import ProfilePage from "../pages/ProfileModule/ProfilePage/ProfilePage";
 import EditProfilePage from "../pages/ProfileModule/EditProfilePage/EditProfilePage";
+import { NotificationProvider } from "../context/NotificationContext";
 
 export default function AppRouter() {
   return (
-    <BrowserRouter>
+    <NotificationProvider>
+      <BrowserRouter>
       <Routes>
         <Route element={<SuperLayout />}>
           <Route path="/" element={<LoginPage />} />
@@ -92,5 +94,6 @@ export default function AppRouter() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
+    </NotificationProvider>
   );
 }

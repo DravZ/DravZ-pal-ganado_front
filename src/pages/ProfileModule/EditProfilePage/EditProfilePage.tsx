@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, Check } from 'lucide-react';
 import styles from './EditProfilePage.module.css';
 import type { User } from '../../../types/database.types';
+import useNotification from '../../../hooks/useNotification';
 
 interface EditProfileFormData {
   first_name: string;
@@ -12,6 +13,7 @@ interface EditProfileFormData {
 }
 
 export const EditProfilePage: React.FC = () => {
+  const { showNotification } = useNotification();
   const navigate = useNavigate();
 
   // Estado con datos precargados del usuario
@@ -45,8 +47,14 @@ export const EditProfilePage: React.FC = () => {
   // Manejador de envío del formulario
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    showNotification({
+      type: 'alert',
+      title: 'Finca registrada',
+      message: 'Los datos de la finca se han guardado correctamente en la base de datos.'
+    });
 
     if (simulateErrorToggle) {
+      
       // Muestra la pantalla dedicada de error al actualizar conservando los datos
       setShowErrorView(true);
       return;
