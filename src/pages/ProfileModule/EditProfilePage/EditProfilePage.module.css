@@ -1,0 +1,370 @@
+/* EditProfilePage.module.css */
+.pageContainer {
+  padding: 1.5rem 2rem;
+  max-width: 1050px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  transition: color 0.2s ease;
+}
+
+.backBtn:hover {
+  color: #1e4b27;
+}
+
+.headerFlex {
+  margin-bottom: 1.5rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* TARJETA DEL FORMULARIO */
+.formCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  padding: 1.75rem;
+}
+
+.cardHeaderFlex {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.avatarBox {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background-color: #1e4b27;
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.15rem 0;
+}
+
+.cardDescription {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #dce3db;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  border-color: #1e4b27;
+}
+
+/* BOTONES DE ACCIÓN DEL FORMULARIO */
+.formActionsFlex {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  margin-top: 2rem;
+}
+
+.cancelBtn {
+  padding: 0.75rem 1.5rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+  background-color: #f8faf7;
+}
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitBtn:hover {
+  background-color: #15381d;
+}
+
+/* FOOTER SIMULADOR DE ERROR */
+.simulationFooter {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.simulateErrorBtn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.simulateErrorBtn:hover {
+  color: #dc2626;
+}
+
+/* TARJETA DATOS NO EDITABLES */
+.uneditableCard {
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  padding: 1.75rem;
+}
+
+.uneditableTag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.uneditableTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+}
+
+.uneditableDescription {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.uneditableGroup {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.uneditableGroup:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.uneditableLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.uneditableValue {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* VISTA DE ERROR DEDICADA */
+.errorViewCard {
+  background-color: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #e5ebe3;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  padding: 3.5rem 2rem;
+  max-width: 580px;
+  margin: 2rem auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.errorIconCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background-color: #fff1f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.errorIcon {
+  color: #e11d48;
+}
+
+.errorTag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+}
+
+.errorTitle {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.errorDescription {
+  font-size: 0.9rem;
+  color: #64748b;
+  max-width: 440px;
+  margin-bottom: 2rem;
+  line-height: 1.45;
+}
+
+.errorActionsFlex {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.retryBtn {
+  padding: 0.85rem 1.75rem;
+  background-color: #1e4b27;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryBtn:hover {
+  background-color: #15381d;
+}
+
+.backToEditBtn {
+  padding: 0.85rem 1.5rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backToEditBtn:hover {
+  background-color: #f8faf7;
+}
+
+/* ADAPTACIÓN MÓVIL (MOBILE-FIRST) */
+@media (max-width: 576px) {
+  .pageContainer {
+    padding: 1rem;
+  }
+  .formCard, .uneditableCard {
+    padding: 1.25rem;
+  }
+  .formActionsFlex {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .errorViewCard {
+    padding: 2rem 1.25rem;
+    margin: 1rem auto;
+  }
+  .errorActionsFlex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .retryBtn,
+  .backToEditBtn {
+    width: 100%;
+  }
+}
