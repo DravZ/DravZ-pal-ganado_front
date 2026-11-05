@@ -34,6 +34,7 @@ import CreateFarmPage from "../pages/AdministrationModule/CreateFarmPage/CreateF
 import EditFarmPage from "../pages/AdministrationModule/EditFarmPage/EditFarmPage";
 import AlertsPage from "../pages/AdministrationModule/AlertsPage/AlertsPage";
 import SyncQueuePage from "../pages/AdministrationModule/SyncQueuePage/SyncQueuePage";
+import ProfilePage from "../pages/AdministrationModule/ProfilePage/ProfilePage";
 
 export default function AppRouter() {
   return (
@@ -79,6 +80,7 @@ export default function AppRouter() {
               <Route path="/fincas/editar/:id" element={<EditFarmPage />} />
               <Route path="/admin/alertas" element={<AlertsPage />} />
               <Route path="/admin/sincronizacion" element={<SyncQueuePage />} />
+              <Route path="/perfil" element={<ProfilePage />} />
             </>
           </Route>
         </Route>

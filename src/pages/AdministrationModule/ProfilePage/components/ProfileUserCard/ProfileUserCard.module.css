@@ -1,0 +1,94 @@
+.userCardWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.leftProfileFlex {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.avatarBox {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background-color: #1e4b27;
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.tagLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.userName {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.userEmail {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.badgeWrapper {
+  display: flex;
+}
+
+.roleBadge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.85rem;
+  border-radius: 14px;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.secondaryEditBtn {
+  padding: 0.75rem 1.5rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.secondaryEditBtn:hover {
+  background-color: #f8faf7;
+}
+
+@media (max-width: 768px) {
+  .userCardWrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .secondaryEditBtn {
+    width: 100%;
+    text-align: center;
+  }
+}

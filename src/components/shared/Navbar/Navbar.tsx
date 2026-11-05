@@ -230,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                                 <button
                                     type="button"
                                     className={styles.menuOptionItem}
-                                    onClick={() => handleNavigateMenu('/profile')}
+                                    onClick={() => handleNavigateMenu('/perfil')}
                                 >
                                     <UserIcon size={16} />
                                     <span>Mi perfil</span>
