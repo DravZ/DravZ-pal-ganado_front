@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './FarmInfoDetailsGrid.module.css';
+import styles from '../../../shared/InfoDetailsGrid.module.css';
 import type { Farm } from '../../../../../types/database.types';
 
 interface FarmInfoDetailsGridProps {

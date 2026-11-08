@@ -150,6 +150,8 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
                 className={styles.input}
                 value={currentStock}
                 onChange={(e) => setCurrentStock(e.target.value)}
+                min="0"
+                step="0.001"
               />
             </div>
 
@@ -160,6 +162,8 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
                 className={styles.input}
                 value={minimumStock}
                 onChange={(e) => setMinimumStock(e.target.value)}
+                min="0"
+                step="0.001"
               />
             </div>
 
@@ -170,6 +174,8 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
                 className={styles.input}
                 value={reorderPoint}
                 onChange={(e) => setReorderPoint(e.target.value)}
+                min="0"
+                step="0.001"
               />
             </div>
 
@@ -182,6 +188,8 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
                   className={styles.inputPrefixed}
                   value={averageCost}
                   onChange={(e) => setAverageCost(e.target.value)}
+                  min="0"
+                  step="0.0001"
                 />
               </div>
             </div>

@@ -9,8 +9,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Pal Ganado',
-        short_name: 'Pal Ganado',
+        name: 'Pa\'la Vaca',
+        short_name: 'Pa\'la Vaca',
         description: 'Sistema integral de gestión ganadera',
         lang: 'es-MX',
         theme_color: '#24452F',

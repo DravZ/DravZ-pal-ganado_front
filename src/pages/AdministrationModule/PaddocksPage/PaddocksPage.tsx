@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './PaddocksPage.module.css';
-import { Plus, Box, Beef, Syringe, ChevronRight, LayoutGrid, List } from 'lucide-react';
+import { Plus, Box, Beef, Syringe } from 'lucide-react';
 import type { Paddock } from '../../../types/database.types';
 import PaddockCard from './components/PaddockCard/PaddockCard';
 import PaddocksTable from './components/PaddocksTable/PaddocksTable';

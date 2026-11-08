@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import styles from './UserInfoPage.module.css';
+import styles from '../shared/InfoPage.module.css';
 import type { User } from '../../../types/database.types';
 
 // Subcomponentes Modularizados

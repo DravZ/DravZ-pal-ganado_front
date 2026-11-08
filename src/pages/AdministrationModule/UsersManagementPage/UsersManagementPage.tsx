@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './UsersManagementPage.module.css';
+import styles from '../shared/ManagementPage.module.css';
 import type { User } from '../../../types/database.types';
 
 // Componentes Modularizados

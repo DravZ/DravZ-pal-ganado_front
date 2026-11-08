@@ -14,7 +14,7 @@ export default function Navbar() {
           <span className="brand-icon">
             <Beef size={23} />
           </span>
-          <span>Pal Ganado</span>
+          <span>Pa'la Vaca</span>
         </Link>
 
         <button

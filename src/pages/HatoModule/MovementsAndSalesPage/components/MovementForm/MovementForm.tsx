@@ -180,6 +180,7 @@ export const MovementForm: React.FC = () => {
             className={styles.select}
             value={originLotId}
             onChange={(e) => setOriginLotId(e.target.value)}
+            required
           >
             {MOCK_LOTS.map((lot) => (
               <option key={lot.id} value={lot.id}>
@@ -201,6 +202,7 @@ export const MovementForm: React.FC = () => {
             className={`${styles.select} ${errors.destinationLotId ? styles.inputError : ''}`}
             value={destinationLotId}
             onChange={(e) => setDestinationLotId(e.target.value)}
+            required
           >
             {MOCK_LOTS.map((lot) => (
               <option key={lot.id} value={lot.id}>
@@ -222,6 +224,7 @@ export const MovementForm: React.FC = () => {
             className={styles.input}
             value={movementDate}
             onChange={(e) => setMovementDate(e.target.value)}
+            required
           />
         </div>
 
@@ -294,6 +297,9 @@ export const MovementForm: React.FC = () => {
                     className={styles.weightInput}
                     value={weight}
                     onChange={(e) => handleWeightChange(animal.id, parseFloat(e.target.value) || 0)}
+                    min="0"
+                    step="0.1"
+                    required
                   />
                   <span className={styles.unit}>kg</span>
                 </div>

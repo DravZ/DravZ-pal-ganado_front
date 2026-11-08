@@ -52,7 +52,7 @@ export default function Home() {
             </h1>
 
             <p className="hero-description">
-              Pal Ganado te ayudará a organizar la información de tu unidad
+              Pa'la Vaca te ayudará a organizar la información de tu unidad
               ganadera y mantener el control de las actividades de tu rancho
               desde un solo lugar.
             </p>
@@ -118,7 +118,7 @@ export default function Home() {
       <section className="cta-section">
         <div className="container cta-content">
           <div>
-            <span className="eyebrow">Pal Ganado</span>
+            <span className="eyebrow">Pa'la Vaca</span>
             <h2>Tu trabajo en el campo merece mejores herramientas.</h2>
             <p>
               Ingresa a la plataforma y descubre una forma más organizada de

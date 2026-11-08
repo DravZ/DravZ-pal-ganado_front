@@ -2,34 +2,23 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Home, Check } from 'lucide-react';
 import styles from './FarmConfigModal.module.css';
-
-export interface FarmFormData {
-  name: string;
-  code: string;
-  state: string;
-  municipality: string;
-  locality: string;
-  hectares: number | string;
-  address: string;
-}
+import type { FarmFormValues } from '../../../../types/database.types';
 
 interface FarmConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmitFarm: (farmData: FarmFormData) => void;
+  onSubmitFarm: (farmData: FarmFormValues) => void;
 }
 
-type FarmFormErrors = Partial<Record<keyof FarmFormData, string>>;
+type FarmFormErrors = Partial<Record<keyof FarmFormValues, string>>;
 
 export const FarmConfigModal: React.FC<FarmConfigModalProps> = ({
   isOpen,
   onClose,
   onSubmitFarm,
 }) => {
-  if (!isOpen) return null;
-
   // Estado local para los campos de la finca
-  const [farmData, setFarmData] = useState<FarmFormData>({
+  const [farmData, setFarmData] = useState<FarmFormValues>({
     name: 'Finca La Esperanza',
     code: 'FIN-001',
     state: 'Antioquia',
@@ -41,10 +30,12 @@ export const FarmConfigModal: React.FC<FarmConfigModalProps> = ({
 
   const [errors, setErrors] = useState<FarmFormErrors>({});
 
+  if (!isOpen) return null;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFarmData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof FarmFormData]) {
+    if (errors[name as keyof FarmFormValues]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
@@ -117,6 +108,7 @@ export const FarmConfigModal: React.FC<FarmConfigModalProps> = ({
                   placeholder="Ej. Finca La Esperanza"
                   value={farmData.name}
                   onChange={handleChange}
+                  required
                 />
                 {errors.name && <div className={styles.errorMessage}>{errors.name}</div>}
               </div>
@@ -133,6 +125,7 @@ export const FarmConfigModal: React.FC<FarmConfigModalProps> = ({
                   placeholder="FIN-001"
                   value={farmData.code}
                   onChange={handleChange}
+                  required
                 />
                 {errors.code && <div className={styles.errorMessage}>{errors.code}</div>}
               </div>
@@ -149,6 +142,7 @@ export const FarmConfigModal: React.FC<FarmConfigModalProps> = ({
                   placeholder="Antioquia"
                   value={farmData.state}
                   onChange={handleChange}
+                  required
                 />
                 {errors.state && <div className={styles.errorMessage}>{errors.state}</div>}
               </div>
@@ -165,6 +159,7 @@ export const FarmConfigModal: React.FC<FarmConfigModalProps> = ({
                   placeholder="Puerto Berrío"
                   value={farmData.municipality}
                   onChange={handleChange}
+                  required
                 />
                 {errors.municipality && <div className={styles.errorMessage}>{errors.municipality}</div>}
               </div>
@@ -198,6 +193,7 @@ export const FarmConfigModal: React.FC<FarmConfigModalProps> = ({
                     placeholder="0"
                     value={farmData.hectares}
                     onChange={handleChange}
+                    required
                   />
                   <span className={styles.suffixText}>ha</span>
                 </div>

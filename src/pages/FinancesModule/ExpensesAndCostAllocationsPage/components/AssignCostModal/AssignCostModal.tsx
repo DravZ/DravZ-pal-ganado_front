@@ -120,6 +120,9 @@ export const AssignCostModal: React.FC<AssignCostModalProps> = ({
                   className={styles.inputBare}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
+                  min="0.01"
+                  step="0.01"
+                  required
                 />
               </div>
             </div>
@@ -131,6 +134,7 @@ export const AssignCostModal: React.FC<AssignCostModalProps> = ({
                 className={styles.input}
                 value={allocationDate}
                 onChange={(e) => setAllocationDate(e.target.value)}
+                required
               />
             </div>
           </div>

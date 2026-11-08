@@ -10,7 +10,7 @@ export default function Footer() {
             <span className="brand-icon">
               <Beef size={23} />
             </span>
-            <span>Pal Ganado</span>
+            <span>Pa'la Vaca</span>
           </Link>
 
           <p>
@@ -36,7 +36,7 @@ export default function Footer() {
 
       <div className="container footer-bottom">
         <p>
-          © {new Date().getFullYear()} Pal Ganado. Todos los derechos
+          © {new Date().getFullYear()} Pa'la Vaca. Todos los derechos
           reservados.
         </p>
         <span>

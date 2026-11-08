@@ -78,7 +78,11 @@ export const SaleForm: React.FC = () => {
     setLines(lines.filter((l) => l.id !== id));
   };
 
-  const handleUpdateLine = (id: string, field: keyof UIItemLine, value: any) => {
+  const handleUpdateLine = <K extends keyof UIItemLine>(
+    id: string,
+    field: K,
+    value: UIItemLine[K]
+  ) => {
     setLines(lines.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
   };
 
@@ -141,6 +145,7 @@ export const SaleForm: React.FC = () => {
             className={styles.select}
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
+            required
           >
             {MOCK_CUSTOMERS.map((c) => (
               <option key={c.id} value={c.id}>
@@ -157,6 +162,7 @@ export const SaleForm: React.FC = () => {
             className={styles.input}
             value={saleDate}
             onChange={(e) => setSaleDate(e.target.value)}
+            required
           />
         </div>
 
@@ -223,6 +229,9 @@ export const SaleForm: React.FC = () => {
                   className={styles.inputCompact}
                   value={line.quantity}
                   onChange={(e) => handleUpdateLine(line.id, 'quantity', parseInt(e.target.value) || 1)}
+                  min="1"
+                  step="1"
+                  required
                 />
               </div>
 
@@ -235,6 +244,9 @@ export const SaleForm: React.FC = () => {
                     className={styles.inputCompact}
                     value={line.weight}
                     onChange={(e) => handleUpdateLine(line.id, 'weight', parseFloat(e.target.value) || 0)}
+                    min="0.001"
+                    step="0.01"
+                    required
                   />
                   <span className={styles.unitText}>kg</span>
                 </div>
@@ -250,6 +262,9 @@ export const SaleForm: React.FC = () => {
                     className={`${styles.inputCompact} ps-4`}
                     value={line.unit_price}
                     onChange={(e) => handleUpdateLine(line.id, 'unit_price', parseFloat(e.target.value) || 0)}
+                    min="0.01"
+                    step="0.01"
+                    required
                   />
                 </div>
               </div>

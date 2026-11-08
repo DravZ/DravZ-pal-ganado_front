@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Pencil } from 'lucide-react';
-import styles from './FarmInfoHeader.module.css';
+import styles from '../../../shared/InfoHeader.module.css';
 
 interface FarmInfoHeaderProps {
   farmName: string;

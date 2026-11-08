@@ -154,6 +154,7 @@ export const RegisterVaccinationPage: React.FC = () => {
               placeholder="Ej. Clostridial 8 vías"
               value={vaccineName}
               onChange={(e) => setVaccineName(e.target.value)}
+              required
             />
             {errors.vaccineName && (
               <span className={styles.errorText}>{errors.vaccineName}</span>
@@ -192,6 +193,7 @@ export const RegisterVaccinationPage: React.FC = () => {
               className={styles.input}
               value={applicationDate}
               onChange={(e) => setApplicationDate(e.target.value)}
+              required
             />
           </div>
 
@@ -203,6 +205,7 @@ export const RegisterVaccinationPage: React.FC = () => {
               className={styles.input}
               value={nextDueDate}
               onChange={(e) => setNextDueDate(e.target.value)}
+              min={applicationDate}
             />
           </div>
 
@@ -212,10 +215,12 @@ export const RegisterVaccinationPage: React.FC = () => {
             <div className={styles.doseGroup}>
               <input
                 type="number"
-                step="0.1"
                 className={styles.doseInput}
                 value={dose}
                 onChange={(e) => setDose(e.target.value)}
+                min="0.001"
+                step="0.001"
+                required
               />
               <select
                 className={styles.doseSelect}

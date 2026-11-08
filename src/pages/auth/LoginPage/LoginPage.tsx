@@ -25,7 +25,7 @@ export const LoginPage: React.FC = () => {
                                             <circle cx="12" cy="12" r="4" />
                                         </svg>
                                     </div>
-                                    <span>Pa'l Ganado</span>
+                                    <span>Pa'la Vaca</span>
                                 </div>
                             </div>
 

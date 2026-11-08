@@ -24,7 +24,7 @@ export const RegisterPage: React.FC = () => {
                                     <div className={styles.mobileLogoIcon}>
                                         <ShieldCheck size={22} strokeWidth={2.2} />
                                     </div>
-                                    <span>Pa'l Ganado</span>
+                                    <span>Pa'la Vaca</span>
                                 </div>
                             </div>
 

@@ -45,7 +45,7 @@ export default function About() {
             Una gestión ganadera más <span>organizada.</span>
           </h1>
           <p>
-            Pal Ganado nace con el propósito de facilitar la administración de
+            Pa'la Vaca nace con el propósito de facilitar la administración de
             la información ganadera mediante una plataforma clara, práctica y
             preparada para crecer.
           </p>
@@ -71,7 +71,7 @@ export default function About() {
               mantenerla actualizada puede ser complicado.
             </p>
             <p>
-              Pal Ganado busca centralizar esa información en una experiencia
+              Pa'la Vaca busca centralizar esa información en una experiencia
               sencilla, con una estructura que permita incorporar nuevas
               herramientas conforme el sistema evolucione.
             </p>
@@ -123,7 +123,7 @@ export default function About() {
         <div className="container about-cta-inner">
           <div>
             <h2>Construyamos una mejor forma de gestionar tu rancho.</h2>
-            <p>Accede a Pal Ganado para continuar.</p>
+            <p>Accede a Pa'la Vaca para continuar.</p>
           </div>
           <Link to="/login" className="button button-primary">
             Iniciar sesión <ArrowRight size={18} />

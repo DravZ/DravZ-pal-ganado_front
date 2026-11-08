@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { X, Check, CloudOff } from 'lucide-react';
 import styles from './RegisterReproductiveEventModal.module.css';
+import type {
+  ReproductiveEvent,
+  ReproductiveEventFormValues,
+} from '../../../../../types/database.types';
 
 interface ModalProps {
   isOpen: boolean;
@@ -13,15 +17,15 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ReproductiveEventFormValues>({
     femaleAnimalId: 'BR-1042',
     eventType: 'Celo',
     maleAnimalId: 'BR-0721',
     serviceType: 'Inseminación artificial',
     eventDate: '2025-06-16',
     expectedDate: '2026-03-25',
-    realDate: '',
-    resultStatus: 'Pendiente',
+    actualDate: '',
+    result: 'Pendiente',
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -57,15 +61,16 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
 
     if (!validateForm()) return;
 
-    const payload = {
+    const payload: ReproductiveEvent = {
+      id: crypto.randomUUID(),
       female_animal_id: formData.femaleAnimalId,
       event_type: formData.eventType,
-      male_animal_id: formData.maleAnimalId || null,
-      service_type: formData.serviceType || null,
+      male_animal_id: formData.maleAnimalId || undefined,
+      service_type: formData.serviceType || undefined,
       event_date: formData.eventDate,
-      expected_date: formData.expectedDate || null,
-      real_date: formData.realDate || null,
-      result_status: formData.resultStatus,
+      expected_date: formData.expectedDate || undefined,
+      actual_date: formData.actualDate || undefined,
+      result: formData.result,
     };
 
     console.log('[Action Log]: Formulario enviado al backend ->', payload);
@@ -190,6 +195,7 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                   }`}
                   value={formData.eventDate}
                   onChange={(e) => handleChange('eventDate', e.target.value)}
+                  required
                 />
                 {errors.eventDate && (
                   <div className={styles.errorText}>{errors.eventDate}</div>
@@ -204,6 +210,7 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                   className={styles.formControl}
                   value={formData.expectedDate}
                   onChange={(e) => handleChange('expectedDate', e.target.value)}
+                  min={formData.eventDate}
                 />
               </div>
 
@@ -213,8 +220,9 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                 <input
                   type="date"
                   className={styles.formControl}
-                  value={formData.realDate}
-                  onChange={(e) => handleChange('realDate', e.target.value)}
+                  value={formData.actualDate}
+                  onChange={(e) => handleChange('actualDate', e.target.value)}
+                  min={formData.eventDate}
                 />
               </div>
 
@@ -223,11 +231,11 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                 <label className={styles.formLabel}>Resultado</label>
                 <select
                   className={styles.formControl}
-                  value={formData.resultStatus}
-                  onChange={(e) => handleChange('resultStatus', e.target.value)}
+                  value={formData.result}
+                  onChange={(e) => handleChange('result', e.target.value)}
                 >
                   <option value="Pendiente">Pendiente</option>
-                  <option value="Confirmada">Confirmada</option>
+                  <option value="Confirmado">Confirmado</option>
                   <option value="Fallida">Fallida</option>
                 </select>
               </div>

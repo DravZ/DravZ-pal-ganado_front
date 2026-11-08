@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ForgotPasswordForm.module.css';
 import { KeyRound } from 'lucide-react';
+import type { PasswordRecoveryRequest } from '../../../../types/database.types';
 
 type FormState = 'form' | 'loading' | 'success';
 
@@ -30,8 +31,9 @@ export const ForgotPasswordForm: React.FC = () => {
         e.preventDefault();
         if (!validateEmail()) return;
 
+        const request: PasswordRecoveryRequest = { email };
         const payload = {
-            email,
+            ...request,
             timestamp: new Date().toISOString(),
             action: 'REQUEST_PASSWORD_RESET',
         };

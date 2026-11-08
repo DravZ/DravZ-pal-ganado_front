@@ -6,6 +6,8 @@
   padding: 5px;
   gap: 6px;
   max-width: 500px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tabBtn {
@@ -14,7 +16,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.7rem 1rem;
+  padding: 0.7rem 0.75rem;
   border: none;
   background: transparent;
   border-radius: 10px;
@@ -24,10 +26,25 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-width: 0; /* Permite que flexbox ajuste el contenido correctamente */
+}
+
+.tabBtn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tabBtn.active {
   background-color: #ffffff;
   color: #1e4b27;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ADAPTACIÓN MÓVIL */
+@media (max-width: 576px) {
+  .tabBtn {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.8rem;
+    gap: 0.35rem;
+  }
 }

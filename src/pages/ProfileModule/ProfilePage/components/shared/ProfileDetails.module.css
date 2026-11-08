@@ -1,4 +1,4 @@
-/* ProfilePersonalDetails.module.css / ProfileAccountDetails.module.css */
+/* Shared by the personal and account detail panels. */
 .sectionContainer {
   display: flex;
   flex-direction: column;

@@ -1,18 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './EditUserPage.module.css';
-import type { User } from '../../../types/database.types';
+import type { CreateUserFormValues, User } from '../../../types/database.types';
 
-interface EditUserFormData {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  role: string;
-  status: string;
-  farm_id: string;
-}
+type EditUserFormData = CreateUserFormValues;
 
 export const EditUserPage: React.FC = () => {
   const navigate = useNavigate();

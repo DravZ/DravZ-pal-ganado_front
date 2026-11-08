@@ -13,7 +13,7 @@ export const BrandHeroSection: React.FC = () => {
                             <circle cx="12" cy="12" r="4" />
                         </svg>
                     </div>
-                    <span className={styles.brandTitle}>Pa'l Ganado</span>
+                    <span className={styles.brandTitle}>Pa'la Vaca</span>
                 </div>
 
                 {/* Hero Copy */}

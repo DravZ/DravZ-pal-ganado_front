@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './RegisterPurchaseModal.module.css';
+import styles from '../CreateProductModal/CreateProductModal.module.css';
 import { X, Plus, RefreshCw, WifiOff } from 'lucide-react';
 import type { Purchase, PurchaseLine, SyncQueueEntry } from '../../../../../types/database.types';
 
@@ -139,6 +139,7 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
                 className={styles.input}
                 value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)}
+                required
               />
             </div>
 
@@ -198,6 +199,9 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
                       onChange={(e) =>
                         handleLineChange(idx, 'quantity', parseFloat(e.target.value) || 0)
                       }
+                      min="0.001"
+                      step="0.001"
+                      required
                     />
                   </div>
 
@@ -216,6 +220,9 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
                             parseFloat(e.target.value) || 0
                           )
                         }
+                        min="0.01"
+                        step="0.01"
+                        required
                       />
                     </div>
                   </div>

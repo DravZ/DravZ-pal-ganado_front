@@ -142,6 +142,7 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
                 className={styles.input}
                 value={feedingDate}
                 onChange={(e) => setFeedingDate(e.target.value)}
+                required
               />
             </div>
 
@@ -153,6 +154,8 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
                 className={styles.input}
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
+                min="0.001"
+                required
               />
             </div>
 
@@ -178,6 +181,7 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
                   className={styles.inputPrefixed}
                   value={totalCost}
                   onChange={(e) => setTotalCost(e.target.value)}
+                  min="0"
                 />
               </div>
             </div>

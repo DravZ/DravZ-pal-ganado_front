@@ -1,35 +1,12 @@
-.headerWrapper {
-  margin-bottom: 1.5rem;
-}
-
-.backBtn {
-  background: transparent;
-  border: none;
-  color: #475569;
-  font-weight: 600;
-  font-size: 0.875rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 1.25rem;
-  transition: color 0.2s ease;
-}
-
-.backBtn:hover {
-  color: #1e4b27;
-}
-
 .headerFlex {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  margin-bottom: 1.5rem;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
-.sectionSubtitle {
+.subtitle {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -39,7 +16,7 @@
   margin-bottom: 0.25rem;
 }
 
-.sectionTitle {
+.title {
   font-size: 2rem;
   font-weight: 800;
   color: #0f172a;
@@ -47,17 +24,17 @@
   letter-spacing: -0.02em;
 }
 
-.sectionDescription {
+.description {
   font-size: 0.95rem;
   color: #64748b;
   margin: 0;
 }
 
-.editBtn {
+.createBtn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   background-color: #1e4b27;
   color: #ffffff;
   border: none;
@@ -68,17 +45,13 @@
   transition: background-color 0.2s ease;
 }
 
-.editBtn:hover {
+.createBtn:hover {
   background-color: #15381d;
 }
 
 @media (max-width: 576px) {
-  .headerFlex {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .editBtn {
-    width: 100%;
-    justify-content: center;
+  .createBtn {
+    padding: 0.75rem;
+    border-radius: 12px;
   }
 }

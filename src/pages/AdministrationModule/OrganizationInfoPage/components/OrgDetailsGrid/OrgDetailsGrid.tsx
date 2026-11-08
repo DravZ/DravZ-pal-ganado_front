@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './OrgDetailsGrid.module.css';
+import styles from '../../../shared/InfoDetailsGrid.module.css';
 import type { Organization } from '../../../../../types/database.types';
 
 interface OrgDetailsGridProps {

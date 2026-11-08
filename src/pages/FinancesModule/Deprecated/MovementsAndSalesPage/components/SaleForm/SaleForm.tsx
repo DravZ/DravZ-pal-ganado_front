@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './SaleForm.module.css';
 import { Plus, X, Check, WifiOff } from 'lucide-react';
-import type { Sale, SaleLine, SyncQueueEntry } from '../../../../../types/database.types';
+import type { Sale, SaleLine, SyncQueueEntry } from '../../../../../../types/database.types';
 
 interface SaleLineUI {
   id: string;
@@ -128,6 +128,7 @@ export const SaleForm: React.FC = () => {
             className={styles.select}
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
+            required
           >
             <option value="c-1">Frigorífico Central · NIT 900.882.114</option>
             <option value="c-2">Cooperativa del Valle · NIT 800.123.456</option>
@@ -141,6 +142,7 @@ export const SaleForm: React.FC = () => {
             className={styles.input}
             value={saleDate}
             onChange={(e) => setSaleDate(e.target.value)}
+            required
           />
         </div>
 
@@ -198,6 +200,9 @@ export const SaleForm: React.FC = () => {
                   onChange={(e) =>
                     handleLineChange(l.id, 'quantity', parseFloat(e.target.value) || 0)
                   }
+                  min="0.001"
+                  step="0.001"
+                  required
                 />
               </div>
 
@@ -211,6 +216,9 @@ export const SaleForm: React.FC = () => {
                     onChange={(e) =>
                       handleLineChange(l.id, 'weight', parseFloat(e.target.value) || 0)
                     }
+                    min="0.001"
+                    step="0.01"
+                    required
                   />
                   <span className={styles.suffix}>kg</span>
                 </div>
@@ -231,6 +239,9 @@ export const SaleForm: React.FC = () => {
                         parseFloat(e.target.value) || 0
                       )
                     }
+                    min="0.01"
+                    step="0.01"
+                    required
                   />
                 </div>
               </div>

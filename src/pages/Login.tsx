@@ -1,10 +1,18 @@
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Beef, LockKeyhole } from "lucide-react";
+import type { LoginCredentials } from "../types/database.types";
 
 export default function Login() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const values = new FormData(event.currentTarget);
+    const credentials: LoginCredentials = {
+      email: String(values.get("email") ?? ""),
+      password: String(values.get("password") ?? ""),
+    };
+    if (!credentials.email || !credentials.password) return;
 
     // La autenticación se implementará después.
   }
@@ -21,7 +29,7 @@ export default function Login() {
           <span className="brand-icon">
             <Beef size={24} />
           </span>
-          <span>Pal Ganado</span>
+          <span>Pa'la Vaca</span>
         </Link>
 
         <div className="login-heading">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
-import styles from './FarmsHeader.module.css';
+import styles from '../../../shared/ManagementHeader.module.css';
 
 interface FarmsHeaderProps {
   onCreateFarm: () => void;

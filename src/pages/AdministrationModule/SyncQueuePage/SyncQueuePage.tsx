@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import styles from './SyncQueuePage.module.css';
+import styles from '../shared/ManagementPage.module.css';
 import type { SyncQueueEntry } from '../../../types/database.types';
 
 // Componentes Modularizados

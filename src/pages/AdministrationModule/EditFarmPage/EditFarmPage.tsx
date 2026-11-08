@@ -4,15 +4,9 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './EditFarmPage.module.css';
 import type { Farm } from '../../../types/database.types';
 
-interface EditFarmFormData {
-  name: string;
-  code: string;
-  state: string;
-  municipality: string;
-  locality: string;
+type EditFarmFormData = Pick<Farm, 'name' | 'code' | 'state' | 'municipality' | 'locality' | 'address'> & {
   hectares: string;
-  address: string;
-}
+};
 
 export const EditFarmPage: React.FC = () => {
   const navigate = useNavigate();
@@ -216,6 +210,7 @@ export const EditFarmPage: React.FC = () => {
                   id="hectares"
                   name="hectares"
                   type="number"
+                  min="0"
                   step="0.01"
                   className={styles.input}
                   value={formData.hectares}

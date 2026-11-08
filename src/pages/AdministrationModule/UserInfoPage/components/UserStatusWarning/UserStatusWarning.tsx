@@ -1,6 +1,6 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
-import styles from './UserStatusWarning.module.css';
+import styles from '../../../shared/StatusWarning.module.css';
 
 export const UserStatusWarning: React.FC = () => (
   <div className={styles.warningBox}>

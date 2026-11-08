@@ -1,10 +1,13 @@
-/* ProductionRecordsTab.module.css */
+/* ProductionRecordsTab.module.css (Corregido) */
+
 .bannerGreen {
   background-color: #1e4b27;
   border-radius: 20px;
   padding: 1.75rem 2rem;
   color: #ffffff;
   box-shadow: 0 4px 20px rgba(30, 75, 39, 0.15);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bannerLabel {
@@ -53,20 +56,26 @@
   background-color: #f8faf7;
 }
 
+/* TARJETA DE CONTENIDO */
 .cardBox {
   background-color: #ffffff;
   border-radius: 20px;
   padding: 1.5rem;
   border: 1px solid #e5ebe3;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden; /* Evita cualquier fuga externa */
 }
 
+/* ENCABEZADO CON SOPORTE RESPONSIVE */
 .cardHeaderFlex {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.25rem;
+  width: 100%;
 }
 
 .dbLabel {
@@ -85,7 +94,8 @@
 }
 
 .filterSelect {
-  width: 170px;
+  width: 160px;
+  max-width: 100%;
   padding: 0.55rem 1rem;
   border-radius: 10px;
   border: 1px solid #dce3db;
@@ -93,17 +103,22 @@
   font-weight: 600;
   color: #0f172a;
   outline: none;
+  background-color: #ffffff;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
+/* SCROLL HORIZONTAL DE LA TABLA */
 .tableResponsiveContainer {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .customTable {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 650px; /* Asegura que las columnas de dinero no se aplasten en pantallas pequeñas */
 }
 
 .customTable thead th {
@@ -115,6 +130,7 @@
   padding: 0.75rem 0.85rem;
   border-bottom: 1px solid #f1f5f9;
   text-align: left;
+  white-space: nowrap;
 }
 
 .customTable tbody td {
@@ -123,6 +139,7 @@
   font-size: 0.875rem;
   color: #0f172a;
   border-bottom: 1px solid #f1f5f9;
+  white-space: nowrap;
 }
 
 .typeBadge {
@@ -135,3 +152,29 @@
 
 .badgeMilk { background-color: #f1f5f9; color: #334155; }
 .badgeMeat { background-color: #d1fae5; color: #065f46; }
+
+/* ADAPTACIÓN PARA MÓVILES (MOBILE-FIRST) */
+@media (max-width: 576px) {
+  .bannerGreen {
+    padding: 1.25rem;
+  }
+
+  .bannerBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cardBox {
+    padding: 1rem;
+  }
+
+  .cardHeaderFlex {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+}

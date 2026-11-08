@@ -93,6 +93,7 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 className={styles.input}
                 value={expenseDate}
                 onChange={(e) => setExpenseDate(e.target.value)}
+                required
               />
             </div>
 
@@ -119,6 +120,9 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                   className={styles.inputBare}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
+                  min="0.01"
+                  step="0.01"
+                  required
                 />
               </div>
             </div>

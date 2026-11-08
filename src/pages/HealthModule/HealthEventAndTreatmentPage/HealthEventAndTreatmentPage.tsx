@@ -81,8 +81,6 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
   const [frequency, setFrequency] = useState<string>('Cada 24 horas');
   const [doseValue, setDoseValue] = useState<string>('20');
 
-  const selectedMed = MOCK_MEDICATIONS.find((m) => m.id === medicationId) || MOCK_MEDICATIONS[0];
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -183,6 +181,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
                     className={styles.select}
                     value={animalId}
                     onChange={(e) => setAnimalId(e.target.value)}
+                    required
                   >
                     {MOCK_ANIMALS.map((a) => (
                       <option key={a.id} value={a.id}>
@@ -212,6 +211,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
                     className={styles.input}
                     value={eventDate}
                     onChange={(e) => setEventDate(e.target.value)}
+                    required
                   />
                 </div>
 
@@ -267,6 +267,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
                     className={styles.select}
                     value={medicationId}
                     onChange={(e) => setMedicationId(e.target.value)}
+                    required
                   >
                     {MOCK_MEDICATIONS.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -297,6 +298,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
                     className={styles.input}
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
+                    required
                   />
                 </div>
 
@@ -307,6 +309,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
                     className={styles.input}
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate}
                   />
                 </div>
 

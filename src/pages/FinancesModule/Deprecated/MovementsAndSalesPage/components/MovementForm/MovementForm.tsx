@@ -6,7 +6,7 @@ import type {
   Animal,
   CreateMovementDTO,
   SyncQueueEntry
-} from '../../../../../types/database.types';
+} from '../../../../../../types/database.types';
 
 interface AnimalSelectionItem {
   animal: Animal & { identifier_tag: string };
@@ -162,6 +162,7 @@ export const MovementForm: React.FC = () => {
             className={styles.select}
             value={originLotId}
             onChange={(e) => setOriginLotId(e.target.value)}
+            required
           >
             {MOCK_LOTS.map((lot) => (
               <option key={lot.id} value={lot.id}>
@@ -183,6 +184,7 @@ export const MovementForm: React.FC = () => {
             className={styles.select}
             value={destinationLotId}
             onChange={(e) => setDestinationLotId(e.target.value)}
+            required
           >
             {MOCK_LOTS.map((lot) => (
               <option key={lot.id} value={lot.id}>
@@ -201,6 +203,7 @@ export const MovementForm: React.FC = () => {
             className={styles.input}
             value={movementDate}
             onChange={(e) => setMovementDate(e.target.value)}
+            required
           />
         </div>
 
@@ -267,6 +270,9 @@ export const MovementForm: React.FC = () => {
                   onChange={(e) =>
                     handleWeightChange(animal.id, parseFloat(e.target.value) || 0)
                   }
+                  min="0"
+                  step="0.1"
+                  required
                 />
                 <span className={styles.unitText}>kg</span>
               </div>

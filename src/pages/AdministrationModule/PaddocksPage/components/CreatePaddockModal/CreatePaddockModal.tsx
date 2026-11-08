@@ -104,6 +104,8 @@ export const CreatePaddockModal: React.FC<CreatePaddockModalProps> = ({
                   className={styles.inputBare}
                   value={hectares}
                   onChange={(e) => setHectares(e.target.value)}
+                  min="0"
+                  step="0.01"
                 />
                 <span className={styles.suffix}>ha</span>
               </div>
@@ -117,6 +119,8 @@ export const CreatePaddockModal: React.FC<CreatePaddockModalProps> = ({
                   className={styles.inputBare}
                   value={capacity}
                   onChange={(e) => setCapacity(e.target.value)}
+                  min="0"
+                  step="1"
                 />
                 <span className={styles.suffix}>animales</span>
               </div>

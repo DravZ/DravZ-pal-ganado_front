@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './LoginForm.module.css';
+import type { LoginCredentials } from '../../../../types/database.types';
 
 interface FormErrors {
     email?: string;
@@ -38,8 +39,9 @@ export const LoginForm: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (validateForm()) {
+            const credentials: LoginCredentials = { email, password };
             console.log('[Action Log]: Submit Login', {
-                email,
+                email: credentials.email,
                 password: '***',
                 rememberMe,
             });
@@ -132,7 +134,7 @@ export const LoginForm: React.FC = () => {
 
                 {/* Main Action Button */}
                 <button type="submit" className={styles.primaryButton}>
-                    <span>Ingresar a Pa'l Ganado</span>
+                    <span>Ingresar a Pa'la Vaca</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <polyline points="9 18 15 12 9 6" />
                     </svg>

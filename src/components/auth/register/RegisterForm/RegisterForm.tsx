@@ -1,23 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
-import { FarmConfigModal, type FarmFormData } from '../FarmConfigModal/FarmConfigModal';
+import { FarmConfigModal } from '../FarmConfigModal/FarmConfigModal';
 import styles from './RegisterForm.module.css';
+import type {
+  FarmFormValues,
+  RegistrationFormValues,
+} from '../../../../types/database.types';
 
-// Tipado del estado del formulario
-interface RegisterFormData {
-  userName: string;
-  userPhone: string;
-  userEmail: string;
-  userPass: string;
-  orgName: string;
-  orgLegalName: string;
-  orgTaxId: string;
-  orgPhone: string;
-  orgEmail: string;
-}
-
-type FormErrors = Partial<Record<keyof RegisterFormData, string>>;
+type FormErrors = Partial<Record<keyof RegistrationFormValues, string>>;
 
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +17,7 @@ export const RegisterForm: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // Estado del formulario principal
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [formData, setFormData] = useState<RegistrationFormValues>({
     userName: '',
     userPhone: '',
     userEmail: '',
@@ -44,7 +35,7 @@ export const RegisterForm: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof RegisterFormData]) {
+    if (errors[name as keyof RegistrationFormValues]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
@@ -96,7 +87,7 @@ export const RegisterForm: React.FC = () => {
   };
 
   // 2. Paso 2: Finalización desde el modal, imprime todo el payload unificado y redirige a '/'
-  const handleFinalSubmit = (farmData: FarmFormData) => {
+  const handleFinalSubmit = (farmData: FarmFormValues) => {
     const completePayload = {
       users: {
         name: formData.userName,
@@ -173,6 +164,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="Ej. Rafael Mendes"
               value={formData.userName}
               onChange={handleChange}
+              required
             />
             {errors.userName && <div className={styles.errorMessage}>{errors.userName}</div>}
           </div>
@@ -189,6 +181,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="+57 300 000 0000"
               value={formData.userPhone}
               onChange={handleChange}
+              required
             />
             {errors.userPhone && <div className={styles.errorMessage}>{errors.userPhone}</div>}
           </div>
@@ -205,6 +198,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="nombre@correo.com"
               value={formData.userEmail}
               onChange={handleChange}
+              required
             />
             {errors.userEmail && <div className={styles.errorMessage}>{errors.userEmail}</div>}
           </div>
@@ -221,6 +215,8 @@ export const RegisterForm: React.FC = () => {
               placeholder="Mínimo 8 caracteres"
               value={formData.userPass}
               onChange={handleChange}
+              minLength={8}
+              required
             />
             {errors.userPass && <div className={styles.errorMessage}>{errors.userPass}</div>}
           </div>
@@ -250,6 +246,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="Ej. Ganadería La Esperanza"
               value={formData.orgName}
               onChange={handleChange}
+              required
             />
             {errors.orgName && <div className={styles.errorMessage}>{errors.orgName}</div>}
           </div>
@@ -266,6 +263,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="Nombre legal registrado"
               value={formData.orgLegalName}
               onChange={handleChange}
+              required
             />
             {errors.orgLegalName && <div className={styles.errorMessage}>{errors.orgLegalName}</div>}
           </div>
@@ -282,6 +280,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="900.000.000-1"
               value={formData.orgTaxId}
               onChange={handleChange}
+              required
             />
             {errors.orgTaxId && <div className={styles.errorMessage}>{errors.orgTaxId}</div>}
           </div>
@@ -298,6 +297,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="+57 601 000 0000"
               value={formData.orgPhone}
               onChange={handleChange}
+              required
             />
             {errors.orgPhone && <div className={styles.errorMessage}>{errors.orgPhone}</div>}
           </div>

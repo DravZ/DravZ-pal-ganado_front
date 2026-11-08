@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './UserInfoDetailsGrid.module.css';
+import styles from '../../../shared/InfoDetailsGrid.module.css';
 import type { UserDetailUI } from '../../UserInfoPage';
 
 interface UserInfoDetailsGridProps {

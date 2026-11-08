@@ -2,22 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './CreateFarmPage.module.css';
-
-interface FarmFormData {
-  name: string;
-  code: string;
-  state: string;
-  municipality: string;
-  locality: string;
-  hectares: string;
-  address: string;
-}
+import type { Farm, FarmFormValues } from '../../../types/database.types';
 
 export const CreateFarmPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Estados del formulario inicializados
-  const [formData, setFormData] = useState<FarmFormData>({
+  const [formData, setFormData] = useState<FarmFormValues>({
     name: '',
     code: 'FIN-001',
     state: '',
@@ -55,13 +46,13 @@ export const CreateFarmPage: React.FC = () => {
       setIsSubmitting(false);
 
       // Payload mapeado para la tabla farms y sync_queue
-      const farmPayload = {
+      const farmPayload: Omit<Farm, 'id'> = {
         name: formData.name,
         code: formData.code,
         state: formData.state || undefined,
         municipality: formData.municipality || undefined,
         locality: formData.locality || undefined,
-        hectares: formData.hectares ? parseFloat(formData.hectares) : undefined,
+        hectares: formData.hectares ? Number(formData.hectares) : undefined,
         address: formData.address || undefined,
         status: 'active',
         organization_id: 'org-123',
@@ -127,6 +118,7 @@ export const CreateFarmPage: React.FC = () => {
                 className={styles.input}
                 value={formData.name}
                 onChange={handleChange}
+                maxLength={150}
                 placeholder="Ej. Finca La Esperanza"
                 required
               />
@@ -214,6 +206,7 @@ export const CreateFarmPage: React.FC = () => {
                   id="hectares"
                   name="hectares"
                   type="number"
+                  min="0"
                   step="0.01"
                   className={styles.input}
                   value={formData.hectares}

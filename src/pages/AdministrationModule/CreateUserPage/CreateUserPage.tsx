@@ -2,22 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './CreateUserPage.module.css';
-
-interface UserFormData {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  role: string;
-  status: string;
-  farm_id: string;
-}
+import type { CreateUserFormValues, User } from '../../../types/database.types';
 
 export const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Estados del formulario inicializados
-  const [formData, setFormData] = useState<UserFormData>({
+  const [formData, setFormData] = useState<CreateUserFormValues>({
     first_name: '',
     last_name: '',
     email: '',
@@ -57,7 +48,7 @@ export const CreateUserPage: React.FC = () => {
       setIsSubmitting(false);
 
       // Payload mapeado para la tabla users y sync_queue
-      const userPayload = {
+      const userPayload: Partial<User> & { role: string; farm_id: string } = {
         name: `${formData.first_name} ${formData.last_name}`.trim(),
         email: formData.email,
         phone: formData.phone,

@@ -134,7 +134,7 @@ export interface AnimalEvent {
   paddock_id?: string; // uuid [ref: > paddocks.id]
   user_id?: string; // uuid [ref: > users.id]
   description?: string; // text
-  metadata?: Record<string, any>; // json
+  metadata?: Record<string, unknown>; // json
   created_at: string; // timestamp
 }
 
@@ -446,7 +446,7 @@ export interface Alert {
 export type SyncOperationType = 'CREATE' | 'UPDATE' | 'DELETE';
 export type SyncStatusType = 'PENDING' | 'PROCESSING' | 'FAILED' | 'SYNCED';
 
-export interface SyncQueueEntry<T = Record<string, any>> {
+export interface SyncQueueEntry<T = Record<string, unknown>> {
   id: string; // uuid [pk]
   entity_name: string; // varchar(50) [not null]
   entity_id: string; // uuid [not null]
@@ -462,6 +462,56 @@ export interface SyncQueueEntry<T = Record<string, any>> {
 // ==========================================
 // UTILIDADES Y DTOs COMPUESTOS (PAYLOADS DE UI)
 // ==========================================
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export type PasswordRecoveryRequest = Pick<User, 'email'>;
+
+export interface RegistrationFormValues {
+  userName: string;
+  userPhone: string;
+  userEmail: string;
+  userPass: string;
+  orgName: string;
+  orgLegalName: string;
+  orgTaxId: string;
+  orgPhone: string;
+  orgEmail: string;
+}
+
+export interface FarmFormValues {
+  name: string;
+  code: string;
+  state: string;
+  municipality: string;
+  locality: string;
+  hectares: number | string;
+  address: string;
+}
+
+export interface CreateUserFormValues {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  farm_id: string;
+}
+
+export interface ReproductiveEventFormValues {
+  femaleAnimalId: string;
+  eventType: string;
+  maleAnimalId: string;
+  serviceType: string;
+  eventDate: string;
+  expectedDate: string;
+  actualDate: string;
+  result: string;
+}
 
 /**
  * Payload completo para la creación de Movimientos con sus animales

@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './ProfilePersonalDetails.module.css';
+import styles from '../shared/ProfileDetails.module.css';
 import type { ProfileUIUser } from '../../ProfilePage';
 
 interface ProfilePersonalDetailsProps {

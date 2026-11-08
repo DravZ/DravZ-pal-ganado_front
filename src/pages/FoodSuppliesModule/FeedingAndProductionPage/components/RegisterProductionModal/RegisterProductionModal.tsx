@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './RegisterProductionModal.module.css';
+import styles from '../RegisterFeedingModal/RegisterFeedingModal.module.css';
 import { X, CheckCircle, WifiOff, Users, User } from 'lucide-react';
 import type { ProductionRecord, SyncQueueEntry } from '../../../../../types/database.types';
 
@@ -145,6 +145,7 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
                                 className={styles.input}
                                 value={productionDate}
                                 onChange={(e) => setProductionDate(e.target.value)}
+                                required
                             />
                         </div>
 
@@ -156,6 +157,8 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
                                 className={styles.input}
                                 value={quantity}
                                 onChange={(e) => setQuantity(e.target.value)}
+                                min="0.001"
+                                required
                             />
                         </div>
 
@@ -180,6 +183,7 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
                                     className={styles.inputPrefixed}
                                     value={unitPrice}
                                     onChange={(e) => setUnitPrice(e.target.value)}
+                                    min="0"
                                 />
                             </div>
                         </div>

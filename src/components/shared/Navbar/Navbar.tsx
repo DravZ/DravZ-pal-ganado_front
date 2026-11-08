@@ -136,12 +136,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <Menu size={20} strokeWidth={2.2} />
                     </button>
 
-                    {/* Logo Pa'l Ganado */}
+                    {/* Logo Pa'la Vaca */}
                     <div className={styles.brandLogo} onClick={handleBrandClick}>
                         <div className={styles.logoBadge}>
                             <ShieldCheck size={20} strokeWidth={2.2} />
                         </div>
-                        <span className="d-none d-sm-inline">Pa'l Ganado</span>
+                        <span className="d-none d-sm-inline">Pa'la Vaca</span>
                     </div>
 
                     {/* Selector de Finca Dropdown */}
