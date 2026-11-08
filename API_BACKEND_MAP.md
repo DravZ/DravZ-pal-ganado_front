@@ -2,9 +2,11 @@
 
 ## Estado actual
 
-El frontend no tiene un cliente HTTP ni llamadas `fetch`/Axios implementadas. Las pantallas usan datos de prueba, estado local y registros en consola; por ello, las rutas de API de este documento son una propuesta de contrato, no endpoints ya disponibles. Los paths visibles para usuarios son rutas de React Router y están declarados en `src/routes/AppRouter.tsx`.
+El frontend aún no tiene un cliente HTTP general y la mayoría de las pantallas usan datos de prueba y estado local; el registro inicial sí está conectado a `POST /api/v1/registrations`. El backend también expone autenticación por sesión, `/api/v1/me` y recursos de dominio, pero algunas rutas del mapa siguen pendientes de completar o conectar. Los paths visibles para usuarios son rutas de React Router y están declarados en `src/routes/AppRouter.tsx`.
 
 Se recomienda prefijar la API con `/api/v1`, usar JSON (`Content-Type: application/json`), UUID para identificadores y fechas ISO 8601. Los `POST` deben omitir `id`, `created_at` y otros campos generados por el servidor, salvo que el contrato de negocio indique lo contrario.
+
+En desarrollo, Vite reenvía `/api` a `http://localhost:8080`; se puede cambiar el destino con `VITE_BACKEND_PROXY_TARGET`. Para despliegues, `VITE_API_BASE_URL` define la URL base de la API y debe apuntar a un backend accesible desde el navegador. El registro obtiene primero el token CSRF y lo envía junto con la cookie de sesión.
 
 ## Mapa de pantallas a recursos
 
@@ -12,7 +14,7 @@ Se recomienda prefijar la API con `/api/v1`, usar JSON (`Content-Type: applicati
 |---|---|---|
 | `/`, `/login` | Inicio de sesión | `POST /api/v1/auth/session` |
 | `/forgot-password` | Recuperar contraseña | `POST /api/v1/auth/password-resets` |
-| `/register` | Alta inicial | `POST /api/v1/registrations` |
+| `/register` | Alta inicial | Implementado: `POST /api/v1/registrations` |
 | `/dashboard` | Resumen | `GET /api/v1/dashboard?farm_id={id}` |
 | `/hato/animales` | Directorio de animales | `GET /api/v1/animals?farm_id={id}` |
 | `/hato/nuevo` | Alta de animal | `POST /api/v1/animals` |
@@ -48,9 +50,12 @@ Se recomienda prefijar la API con `/api/v1`, usar JSON (`Content-Type: applicati
 
 | Método | Endpoint | Uso |
 |---|---|---|
-| `POST` | `/api/v1/auth/session` | Recibe `{ "email", "password" }`; devuelve sesión y usuario. |
-| `POST` | `/api/v1/auth/password-resets` | Recibe `{ "email" }`; responde de forma segura sin revelar si existe la cuenta. |
-| `POST` | `/api/v1/registrations` | Alta atómica de organización, usuario administrador y primera finca. |
+| `POST` | `/api/v1/auth/session` | Implementado: recibe `{ "email", "password" }`, crea sesión HTTP y devuelve el usuario. |
+| `DELETE` | `/api/v1/auth/session` | Implementado: cierra la sesión actual. |
+| `GET` | `/api/v1/auth/csrf` | Implementado: emite la cookie `XSRF-TOKEN` y devuelve el token; enviar su valor en `X-XSRF-TOKEN` al hacer solicitudes que modifican datos. |
+| `POST` | `/api/v1/auth/password-resets` | Implementado como respuesta genérica; el envío real de instrucciones requiere integrar un proveedor de correo y flujo de restablecimiento. |
+| `POST` | `/api/v1/registrations` | Implementado: crea de forma atómica la organización, la primera finca (si se envía) y el usuario administrador. |
+| `GET` | `/api/v1/me` | Implementado: devuelve el usuario de la sesión autenticada. |
 | `GET` | `/api/v1/dashboard?farm_id={id}` | Agregados para tarjetas y gráficas del inicio. |
 | `GET` | `/api/v1/lots?farm_id={id}` | Lotes para formularios, traslados y alimentación. |
 | `GET` | `/api/v1/customers?organization_id={id}` | Catálogo de clientes para ventas. |

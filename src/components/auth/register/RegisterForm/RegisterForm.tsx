@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { FarmConfigModal } from '../FarmConfigModal/FarmConfigModal';
 import styles from './RegisterForm.module.css';
+import useNotification from '../../../../hooks/useNotification';
+import { registerAccount } from '../../../../services/authService';
 import type {
   FarmFormValues,
   RegistrationFormValues,
@@ -12,9 +14,11 @@ type FormErrors = Partial<Record<keyof RegistrationFormValues, string>>;
 
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   // Estado del modal de configuración de finca
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Estado del formulario principal
   const [formData, setFormData] = useState<RegistrationFormValues>({
@@ -44,14 +48,23 @@ export const RegisterForm: React.FC = () => {
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[\d\s().-]{7,30}$/;
 
     // 1. Datos de usuario
-    if (!formData.userName.trim()) newErrors.userName = 'El nombre es obligatorio.';
-    if (!formData.userPhone.trim()) newErrors.userPhone = 'El teléfono es obligatorio.';
+    if (!formData.userName.trim()) {
+      newErrors.userName = 'El nombre es obligatorio.';
+    } else if (formData.userName.trim().length > 150) {
+      newErrors.userName = 'El nombre no puede superar 150 caracteres.';
+    }
+    if (!formData.userPhone.trim()) {
+      newErrors.userPhone = 'El teléfono es obligatorio.';
+    } else if (!phoneRegex.test(formData.userPhone.trim())) {
+      newErrors.userPhone = 'Introduce un teléfono válido (7 a 30 caracteres).';
+    }
 
     if (!formData.userEmail.trim()) {
       newErrors.userEmail = 'El correo electrónico es obligatorio.';
-    } else if (!emailRegex.test(formData.userEmail)) {
+    } else if (formData.userEmail.trim().length > 150 || !emailRegex.test(formData.userEmail.trim())) {
       newErrors.userEmail = 'Formato de correo no válido.';
     }
 
@@ -59,17 +72,35 @@ export const RegisterForm: React.FC = () => {
       newErrors.userPass = 'La contraseña es obligatoria.';
     } else if (formData.userPass.length < 8) {
       newErrors.userPass = 'La contraseña debe tener mínimo 8 caracteres.';
+    } else if (formData.userPass.length > 100) {
+      newErrors.userPass = 'La contraseña no puede superar 100 caracteres.';
     }
 
     // 2. Datos de organización
-    if (!formData.orgName.trim()) newErrors.orgName = 'El nombre comercial es obligatorio.';
-    if (!formData.orgLegalName.trim()) newErrors.orgLegalName = 'La razón social es obligatoria.';
-    if (!formData.orgTaxId.trim()) newErrors.orgTaxId = 'El NIT / RUT es obligatorio.';
-    if (!formData.orgPhone.trim()) newErrors.orgPhone = 'El teléfono de la organización es obligatorio.';
+    if (!formData.orgName.trim()) {
+      newErrors.orgName = 'El nombre comercial es obligatorio.';
+    } else if (formData.orgName.trim().length > 150) {
+      newErrors.orgName = 'El nombre comercial no puede superar 150 caracteres.';
+    }
+    if (!formData.orgLegalName.trim()) {
+      newErrors.orgLegalName = 'La razón social es obligatoria.';
+    } else if (formData.orgLegalName.trim().length > 200) {
+      newErrors.orgLegalName = 'La razón social no puede superar 200 caracteres.';
+    }
+    if (!formData.orgTaxId.trim()) {
+      newErrors.orgTaxId = 'El NIT / RUT es obligatorio.';
+    } else if (formData.orgTaxId.trim().length > 30) {
+      newErrors.orgTaxId = 'El NIT / RUT no puede superar 30 caracteres.';
+    }
+    if (!formData.orgPhone.trim()) {
+      newErrors.orgPhone = 'El teléfono de la organización es obligatorio.';
+    } else if (!phoneRegex.test(formData.orgPhone.trim())) {
+      newErrors.orgPhone = 'Introduce un teléfono válido (7 a 30 caracteres).';
+    }
 
     if (!formData.orgEmail.trim()) {
       newErrors.orgEmail = 'El correo de la organización es obligatorio.';
-    } else if (!emailRegex.test(formData.orgEmail)) {
+    } else if (formData.orgEmail.trim().length > 150 || !emailRegex.test(formData.orgEmail.trim())) {
       newErrors.orgEmail = 'Formato de correo no válido.';
     }
 
@@ -87,37 +118,39 @@ export const RegisterForm: React.FC = () => {
   };
 
   // 2. Paso 2: Finalización desde el modal, imprime todo el payload unificado y redirige a '/'
-  const handleFinalSubmit = (farmData: FarmFormValues) => {
-    const completePayload = {
-      users: {
-        name: formData.userName,
-        phone: formData.userPhone,
-        email: formData.userEmail,
-        password: '***',
-      },
-      organizations: {
-        name: formData.orgName,
-        legal_name: formData.orgLegalName,
-        tax_id: formData.orgTaxId,
-        phone: formData.orgPhone,
-        email: formData.orgEmail,
-      },
-      farms: {
-        name: farmData.name,
-        code: farmData.code,
-        state: farmData.state,
-        municipality: farmData.municipality,
-        locality: farmData.locality,
-        hectares: Number(farmData.hectares),
-        address: farmData.address,
-      },
-      created_at: new Date().toISOString(),
-    };
+  const handleFinalSubmit = async (farmData: FarmFormValues) => {
+    if (!navigator.onLine) {
+      showNotification({
+        type: 'error',
+        title: 'Sin conexión',
+        message: 'Conéctate a internet para crear tu cuenta e inténtalo de nuevo.',
+      });
+      return;
+    }
 
-    console.log('[Action Log]: Registro completo finalizado. Payload JSON Unificado:', JSON.stringify(completePayload, null, 2));
-
-    setIsModalOpen(false);
-    navigate('/');
+    setIsSubmitting(true);
+    try {
+      await registerAccount(formData, farmData);
+      setIsModalOpen(false);
+      showNotification({
+        type: 'success',
+        title: 'Registro completado',
+        message: 'Tu cuenta se creó correctamente. Ya puedes iniciar sesión.',
+      });
+      navigate('/');
+    } catch (error) {
+      showNotification({
+        type: 'error',
+        title: 'No se pudo completar el registro',
+        message: error instanceof Error
+          ? error instanceof TypeError
+            ? 'No fue posible conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.'
+            : error.message
+          : 'Ocurrió un error inesperado. Inténtalo de nuevo.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -164,6 +197,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="Ej. Rafael Mendes"
               value={formData.userName}
               onChange={handleChange}
+              maxLength={150}
               required
             />
             {errors.userName && <div className={styles.errorMessage}>{errors.userName}</div>}
@@ -176,11 +210,12 @@ export const RegisterForm: React.FC = () => {
             <input
               id="userPhone"
               name="userPhone"
-              type="text"
+              type="tel"
               className={`${styles.inputControl} ${errors.userPhone ? styles.inputError : ''}`}
               placeholder="+57 300 000 0000"
               value={formData.userPhone}
               onChange={handleChange}
+              maxLength={30}
               required
             />
             {errors.userPhone && <div className={styles.errorMessage}>{errors.userPhone}</div>}
@@ -198,6 +233,8 @@ export const RegisterForm: React.FC = () => {
               placeholder="nombre@correo.com"
               value={formData.userEmail}
               onChange={handleChange}
+              maxLength={150}
+              autoComplete="email"
               required
             />
             {errors.userEmail && <div className={styles.errorMessage}>{errors.userEmail}</div>}
@@ -216,6 +253,8 @@ export const RegisterForm: React.FC = () => {
               value={formData.userPass}
               onChange={handleChange}
               minLength={8}
+              maxLength={100}
+              autoComplete="new-password"
               required
             />
             {errors.userPass && <div className={styles.errorMessage}>{errors.userPass}</div>}
@@ -246,6 +285,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="Ej. Ganadería La Esperanza"
               value={formData.orgName}
               onChange={handleChange}
+              maxLength={150}
               required
             />
             {errors.orgName && <div className={styles.errorMessage}>{errors.orgName}</div>}
@@ -263,6 +303,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="Nombre legal registrado"
               value={formData.orgLegalName}
               onChange={handleChange}
+              maxLength={200}
               required
             />
             {errors.orgLegalName && <div className={styles.errorMessage}>{errors.orgLegalName}</div>}
@@ -280,6 +321,7 @@ export const RegisterForm: React.FC = () => {
               placeholder="900.000.000-1"
               value={formData.orgTaxId}
               onChange={handleChange}
+              maxLength={30}
               required
             />
             {errors.orgTaxId && <div className={styles.errorMessage}>{errors.orgTaxId}</div>}
@@ -292,11 +334,12 @@ export const RegisterForm: React.FC = () => {
             <input
               id="orgPhone"
               name="orgPhone"
-              type="text"
+              type="tel"
               className={`${styles.inputControl} ${errors.orgPhone ? styles.inputError : ''}`}
               placeholder="+57 601 000 0000"
               value={formData.orgPhone}
               onChange={handleChange}
+              maxLength={30}
               required
             />
             {errors.orgPhone && <div className={styles.errorMessage}>{errors.orgPhone}</div>}
@@ -314,13 +357,16 @@ export const RegisterForm: React.FC = () => {
               placeholder="administracion@empresa.com"
               value={formData.orgEmail}
               onChange={handleChange}
+              maxLength={150}
+              autoComplete="organization"
+              required
             />
             {errors.orgEmail && <div className={styles.errorMessage}>{errors.orgEmail}</div>}
           </div>
         </div>
 
         {/* Botón Submit que abre el Modal */}
-        <button type="submit" className={styles.submitBtn}>
+        <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
           <span>Continuar: configurar finca</span>
           <ChevronRight size={18} strokeWidth={2.5} />
         </button>
@@ -333,8 +379,11 @@ export const RegisterForm: React.FC = () => {
       {/* Modal Modular de Configuración de Finca */}
       <FarmConfigModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          if (!isSubmitting) setIsModalOpen(false);
+        }}
         onSubmitFarm={handleFinalSubmit}
+        isSubmitting={isSubmitting}
       />
     </div>
   );

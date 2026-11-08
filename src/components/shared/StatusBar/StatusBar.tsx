@@ -1,18 +1,26 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import styles from './StatusBar.module.css';
 
-interface StatusBarProps {
-    /**
-     * Determina si el sistema está en línea o en modo offline.
-     * true = EN LÍNEA
-     * false = MODO OFFLINE ACTIVADO
-     */
-    isOnline?: boolean;
-}
+export const StatusBar = () => {
+    const [isOnline, setIsOnline] = useState(() => navigator.onLine);
 
-export const StatusBar: React.FC<StatusBarProps> = ({ isOnline = true }) => {
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
     return (
         <div
+            role="status"
+            aria-live="polite"
             className={`d-flex align-items-center justify-content-center py-1 px-3 ${styles.statusBarContainer
                 } ${isOnline ? styles.online : styles.offline}`}
         >
@@ -53,14 +61,14 @@ export const StatusBar: React.FC<StatusBarProps> = ({ isOnline = true }) => {
                     <div>
                         <span className={styles.statusTitle}>EN LÍNEA</span>{' '}
                         <span className={styles.statusSubtitle}>
-                            Sincronizando datos con servidor...
+                            Conexión de red detectada
                         </span>
                     </div>
                 ) : (
                     <div>
                         <span className={styles.statusTitle}>MODO OFFLINE ACTIVADO</span>{' '}
                         <span className={styles.statusSubtitle}>
-                            Cambios guardados localmente en cola de sincronización
+                            Sin conexión de red
                         </span>
                     </div>
                 )}
