@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styles from './CreateProductModal.module.css';
 import { X, WifiOff } from 'lucide-react';
-import type { Product, SyncQueueEntry } from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { queueHatoWrite } from '../../../../../services/hatoDataService';
+import useNotification from '../../../../../hooks/useNotification';
 
 interface CreateProductModalProps {
   isOpen: boolean;
@@ -14,54 +16,60 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
   onClose,
   onSuccess
 }) => {
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
   const [name, setName] = useState('');
-  const [sku, setSku] = useState('CAT-001');
+  const [sku, setSku] = useState('');
   const [category, setCategory] = useState('Sanidad');
-  const [productType, setProductType] = useState('Ej. Medicamento');
+  const [productType, setProductType] = useState('');
   const [unit, setUnit] = useState('unidad');
   const [currentStock, setCurrentStock] = useState('0');
   const [minimumStock, setMinimumStock] = useState('0');
   const [reorderPoint, setReorderPoint] = useState('0');
   const [averageCost, setAverageCost] = useState('0');
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const productId = crypto.randomUUID();
-
-    const productPayload: Product = {
-      id: productId,
-      organization_id: 'org-1',
-      name,
-      sku,
-      category,
-      product_type: productType,
-      unit,
-      current_stock: parseFloat(currentStock) || 0,
-      minimum_stock: parseFloat(minimumStock) || 0,
-      reorder_point: parseFloat(reorderPoint) || 0,
-      average_cost: parseFloat(averageCost) || 0,
-      status: 'active'
-    };
-
-    const syncEntry: SyncQueueEntry<Product> = {
-      id: crypto.randomUUID(),
-      entity_name: 'products',
-      entity_id: productId,
-      operation_type: 'CREATE',
-      payload: productPayload,
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: new Date().toISOString()
-    };
-
-    console.log('[Action Log]: Crear Producto:', productPayload);
-    console.log('[Sync Queue]:', syncEntry);
-
-    if (onSuccess) onSuccess();
-    onClose();
+    if (!scope) {
+      setSubmitError('No hay una finca autorizada seleccionada.');
+      return;
+    }
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(scope, 'products', 'CREATE', {
+        organization_id: scope.organizationId,
+        name: name.trim(),
+        sku: sku.trim() || undefined,
+        category,
+        product_type: productType.trim() || undefined,
+        unit,
+        current_stock: Number(currentStock),
+        minimum_stock: Number(minimumStock),
+        reorder_point: Number(reorderPoint),
+        average_cost: Number(averageCost),
+        status: 'active',
+      });
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Producto pendiente de sincronización' : 'Producto registrado',
+        message: result.lastError ?? (result.pending
+          ? 'El producto quedó guardado localmente y se sincronizará al recuperar la conexión.'
+          : 'El producto se guardó correctamente.'),
+      });
+      onSuccess?.();
+      onClose();
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo registrar el producto.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo guardar', message });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -200,17 +208,19 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
             <div>
               <div className={styles.offlineTitle}>Disponible sin conexión</div>
               <div className={styles.offlineSubtitle}>
-                Si no hay señal, se guardará en sync_queue.
+                Si no hay señal, se guardará en la cola local de sincronización.
               </div>
             </div>
           </div>
+
+          {submitError && <p role="alert" className="text-danger">{submitError}</p>}
 
           <div className={styles.footer}>
             <button type="button" className={styles.cancelBtn} onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className={styles.saveBtn}>
-              Guardar producto
+            <button type="submit" className={styles.saveBtn} disabled={isSaving}>
+              {isSaving ? 'Guardando…' : 'Guardar producto'}
             </button>
           </div>
         </form>

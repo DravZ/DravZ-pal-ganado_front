@@ -20,7 +20,12 @@ export type HatoResource =
   | 'paddocks'
   | 'customers'
   | 'medications'
-  | 'animal_identifiers';
+  | 'animal_identifiers'
+  | 'feeding_records'
+  | 'production_records'
+  | 'products'
+  | 'purchase_records'
+  | 'suppliers';
 
 export interface HatoScope {
   userId: string;
@@ -57,6 +62,11 @@ const endpointByResource: Record<HatoResource, string> = {
   customers: '/customers',
   medications: '/medications',
   animal_identifiers: '/animal-identifiers',
+  feeding_records: '/feeding-records',
+  production_records: '/production-records',
+  products: '/products',
+  purchase_records: '/purchase-records',
+  suppliers: '/suppliers',
 };
 
 const supportedOperations: Record<HatoResource, WriteOperation[]> = {
@@ -73,9 +83,20 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   customers: [],
   medications: [],
   animal_identifiers: [],
+  feeding_records: ['CREATE'],
+  production_records: ['CREATE'],
+  products: ['CREATE', 'UPDATE', 'DELETE'],
+  purchase_records: ['CREATE', 'UPDATE', 'DELETE'],
+  suppliers: [],
 };
 
 const onlineOnlyResources = new Set(['users', 'organizations', 'farms', 'roles', 'permissions']);
+const organizationScopedResources = new Set<string>([
+  'customers',
+  'medications',
+  'products',
+  'suppliers',
+]);
 const animalScopedResources = new Set<HatoResource>([
   'weight_records',
   'reproductive_records',
@@ -99,7 +120,7 @@ function recordFarmId(record: CachedRecord): string | null {
 }
 
 function recordMatchesFarm(record: CachedRecord, farmId: string): boolean {
-  if (record.resourceType === 'customers' || record.resourceType === 'medications') return true;
+  if (organizationScopedResources.has(record.resourceType)) return true;
   if (record.resourceType === 'animals') return record.farmId === farmId;
   const directFarm = recordFarmId(record);
   if (directFarm) return directFarm === farmId;
@@ -166,11 +187,24 @@ export function useHatoCollection<T extends Record<string, unknown>>(
     ) return;
     if (resource === 'customers' && !url.searchParams.has('organization_id')) {
       url.searchParams.set('organization_id', scope.organizationId);
+    } else if (
+      organizationScopedResources.has(resource)
+      && !url.searchParams.has('organization_id')
+    ) {
+      url.searchParams.set('organization_id', scope.organizationId);
     } else if (resource === 'animals' && !url.searchParams.has('farm_id')) {
       url.searchParams.set('organization_id', scope.organizationId);
       url.searchParams.set('farm_id', scope.farmId);
     } else if (
-      ['lots', 'paddocks', 'movements', 'sales_records'].includes(resource)
+      [
+        'lots',
+        'paddocks',
+        'movements',
+        'sales_records',
+        'feeding_records',
+        'production_records',
+        'purchase_records',
+      ].includes(resource)
       && !url.searchParams.has('farm_id')
     ) {
       url.searchParams.set('farm_id', scope.farmId);
@@ -293,7 +327,9 @@ async function mergeRemoteRecords(
     const animalId = typeof payload.animal_id === 'string' ? payload.animal_id : null;
     const farmId = typeof payload.farm_id === 'string'
       ? payload.farm_id
-      : animalId ? await activeAnimalFarm(scope.userId, animalId) : scope.farmId;
+      : animalId
+        ? await activeAnimalFarm(scope.userId, animalId)
+        : organizationScopedResources.has(resource) ? null : scope.farmId;
     if (farmId && farmId !== scope.farmId) {
       throw new Error('El servidor devolvió información de otra finca.');
     }
@@ -536,7 +572,9 @@ async function applyServerResult(
         await offlineDatabase.records.put({
           userId: operation.userId,
           organizationId: operation.organizationId,
-          farmId: typeof response.farm_id === 'string' ? response.farm_id : operation.farmId,
+          farmId: organizationScopedResources.has(resource)
+            ? null
+            : typeof response.farm_id === 'string' ? response.farm_id : operation.farmId,
           resourceType: resource,
           recordId: remoteRecordId,
           version: typeof response.version === 'number' ? response.version : null,

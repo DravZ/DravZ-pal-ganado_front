@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styles from '../CreateProductModal/CreateProductModal.module.css';
 import { X, Plus, RefreshCw, WifiOff } from 'lucide-react';
-import type { Purchase, PurchaseLine, SyncQueueEntry } from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
+import useNotification from '../../../../../hooks/useNotification';
 
 interface RegisterPurchaseModalProps {
   isOpen: boolean;
@@ -20,18 +22,26 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
   onClose,
   onSuccess
 }) => {
-  const [supplierId, setSupplierId] = useState('sup1');
-  const [purchaseDate, setPurchaseDate] = useState('2025-06-16');
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records: suppliers } = useHatoCollection<Record<string, unknown>>('suppliers', '/suppliers', scope);
+  const { records: products } = useHatoCollection<Record<string, unknown>>('products', '/products', scope);
+  const [supplierId, setSupplierId] = useState('');
+  const [purchaseDate, setPurchaseDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [lines, setLines] = useState<PurchaseLineForm[]>([
-    { product_id: 'p1', quantity: 10, unit_price: 74200 },
-    { product_id: 'p4', quantity: 20, unit_price: 12500 }
+    { product_id: '', quantity: 1, unit_price: 0 },
   ]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleAddLine = () => {
-    setLines([...lines, { product_id: 'p1', quantity: 1, unit_price: 0 }]);
+    setLines([...lines, { product_id: '', quantity: 1, unit_price: 0 }]);
   };
 
   const handleRemoveLine = (index: number) => {
@@ -55,51 +65,56 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
   const calculatedTax = calculatedSubtotal * 0.19;
   const calculatedTotal = calculatedSubtotal + calculatedTax;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const purchaseId = crypto.randomUUID();
-
-    const purchasePayload: Purchase = {
-      id: purchaseId,
-      farm_id: 'farm-1',
-      supplier_id: supplierId,
-      purchase_date: new Date(purchaseDate).toISOString(),
-      invoice_number: invoiceNumber,
-      subtotal: calculatedSubtotal,
-      tax: calculatedTax,
-      total: calculatedTotal,
-      payment_status: 'Pagada'
-    };
-
-    const purchaseLinesPayload: PurchaseLine[] = lines.map((line) => ({
-      id: crypto.randomUUID(),
-      purchase_id: purchaseId,
-      product_id: line.product_id,
-      quantity: line.quantity,
-      unit_price: line.unit_price,
-      subtotal: line.quantity * line.unit_price
-    }));
-
-    const syncEntry: SyncQueueEntry<{
-      purchase: Purchase;
-      lines: PurchaseLine[];
-    }> = {
-      id: crypto.randomUUID(),
-      entity_name: 'purchases',
-      entity_id: purchaseId,
-      operation_type: 'CREATE',
-      payload: { purchase: purchasePayload, lines: purchaseLinesPayload },
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: new Date().toISOString()
-    };
-
-    console.log('[Action Log]: Registrar Compra:', purchasePayload, purchaseLinesPayload);
-    console.log('[Sync Queue]:', syncEntry);
-
-    if (onSuccess) onSuccess();
-    onClose();
+    if (!scope) {
+      setSubmitError('No hay una finca autorizada seleccionada.');
+      return;
+    }
+    if (!supplierId) {
+      setSubmitError('Selecciona un proveedor.');
+      return;
+    }
+    if (lines.length === 0 || lines.some((line) => !line.product_id || line.quantity <= 0 || line.unit_price <= 0)) {
+      setSubmitError('Agrega al menos un producto con cantidad y precio válidos.');
+      return;
+    }
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(scope, 'purchase_records', 'CREATE', {
+        organization_id: scope.organizationId,
+        farm_id: scope.farmId,
+        supplier_id: supplierId,
+        purchase_date: purchaseDate,
+        invoice_number: invoiceNumber.trim() || undefined,
+        subtotal: calculatedSubtotal,
+        tax: calculatedTax,
+        total: calculatedTotal,
+        payment_status: 'Pagada',
+        lines: lines.map((line) => ({
+          product_id: line.product_id,
+          quantity: line.quantity,
+          unit_price: line.unit_price,
+          subtotal: line.quantity * line.unit_price,
+        })),
+      });
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Compra pendiente de sincronización' : 'Compra registrada',
+        message: result.lastError ?? (result.pending
+          ? 'La compra quedó guardada localmente y se sincronizará al recuperar la conexión.'
+          : 'La compra se guardó correctamente.'),
+      });
+      onSuccess?.();
+      onClose();
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo registrar la compra.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo guardar', message });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -127,8 +142,10 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
                 value={supplierId}
                 onChange={(e) => setSupplierId(e.target.value)}
               >
-                <option value="sup1">Agroinsumos del Llano · NIT 900.442.118</option>
-                <option value="sup2">Veterinaria San Martín · NIT 800.112.994</option>
+                <option value="">Selecciona un proveedor</option>
+                {suppliers.map((supplier) => (
+                  <option key={String(supplier.id)} value={String(supplier.id)}>{String(supplier.name ?? supplier.id)}</option>
+                ))}
               </select>
             </div>
 
@@ -183,10 +200,10 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
                         handleLineChange(idx, 'product_id', e.target.value)
                       }
                     >
-                      <option value="p1">Sal mineralizada 8%</option>
-                      <option value="p2">Ivermectina 1%</option>
-                      <option value="p3">Maíz ensilado</option>
-                      <option value="p4">Vacuna Clostridial</option>
+                      <option value="">Selecciona un producto</option>
+                      {products.map((product) => (
+                        <option key={String(product.id)} value={String(product.id)}>{String(product.name ?? product.id)}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -283,17 +300,19 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
             <div>
               <div className={styles.offlineTitle}>Disponible sin conexión</div>
               <div className={styles.offlineSubtitle}>
-                Si no hay señal, se guardará en sync_queue.
+                Si no hay señal, se guardará en la cola local de sincronización.
               </div>
             </div>
           </div>
+
+          {submitError && <p role="alert" className="text-danger">{submitError}</p>}
 
           <div className={styles.footer}>
             <button type="button" className={styles.cancelBtn} onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className={styles.saveBtn}>
-              Guardar compra
+            <button type="submit" className={styles.saveBtn} disabled={isSaving}>
+              {isSaving ? 'Guardando…' : 'Guardar compra'}
             </button>
           </div>
         </form>

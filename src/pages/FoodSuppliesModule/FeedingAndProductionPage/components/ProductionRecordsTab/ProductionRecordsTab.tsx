@@ -1,137 +1,105 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './ProductionRecordsTab.module.css';
 import { Plus } from 'lucide-react';
-import type { ProductionRecord } from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
 
 interface ProductionRecordsTabProps {
   onOpenModal: () => void;
 }
 
-type ProductionRecordUI = ProductionRecord & {
-  target_name: string;
-  type_badge: 'Leche' | 'Carne';
-  formatted_price: string;
-  formatted_revenue: string;
-};
-
-const MOCK_PRODUCTION_RECORDS: ProductionRecordUI[] = [
-  {
-    id: 'pr-1',
-    farm_id: 'farm-1',
-    production_date: '2025-06-16',
-    target_name: 'Lote Vacas de cría',
-    production_type: 'Leche',
-    type_badge: 'Leche',
-    quantity: 1320,
-    unit: 'L',
-    price_per_unit: 2050, // <--- Corregido: 'price_per_unit' según database.types.ts
-    revenue: 2706000,      // <--- Corregido: 'revenue' según database.types.ts
-    formatted_price: '$2,050 / L',
-    formatted_revenue: '$2,706,000'
-  },
-  {
-    id: 'pr-2',
-    farm_id: 'farm-1',
-    production_date: '2025-06-16',
-    target_name: 'BR-1042 · Esperanza',
-    production_type: 'Leche',
-    type_badge: 'Leche',
-    quantity: 24.5,
-    unit: 'L',
-    price_per_unit: 2050, // <--- Corregido
-    revenue: 50225,       // <--- Corregido
-    formatted_price: '$2,050 / L',
-    formatted_revenue: '$50,225'
-  },
-  {
-    id: 'pr-3',
-    farm_id: 'farm-1',
-    production_date: '2025-06-12',
-    target_name: 'Lote Ceba final',
-    production_type: 'Carne',
-    type_badge: 'Carne',
-    quantity: 2840,
-    unit: 'kg',
-    price_per_unit: 9800, // <--- Corregido
-    revenue: 27832000,    // <--- Corregido
-    formatted_price: '$9,800 / kg',
-    formatted_revenue: '$27,832,000'
-  }
-];
+const numberValue = (value: unknown) => Number(value ?? 0) || 0;
+const money = (value: number) => value.toLocaleString('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+  maximumFractionDigits: 2,
+});
 
 export const ProductionRecordsTab: React.FC<ProductionRecordsTabProps> = ({ onOpenModal }) => {
+  const { scope } = useFarmScope();
+  const [typeFilter, setTypeFilter] = useState('ALL');
+  const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+    'production_records',
+    '/production-records',
+    scope,
+  );
+  const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
+  const { records: lots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const today = new Date();
+  const month = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  const milkThisMonth = records
+    .filter((record) => String(record.production_type ?? '').toLowerCase() === 'leche'
+      && String(record.production_date ?? '').startsWith(month))
+    .reduce((sum, record) => sum + numberValue(record.quantity), 0);
+  const filtered = records
+    .filter((record) => typeFilter === 'ALL'
+      || String(record.production_type ?? '').toLowerCase() === typeFilter.toLowerCase())
+    .sort((left, right) => String(right.production_date ?? '').localeCompare(String(left.production_date ?? '')));
+
+  const rows = filtered.map((record) => {
+    const animal = animals.find((entry) => entry.id === record.animal_id);
+    const lot = lots.find((entry) => entry.id === record.lot_id);
+    const target = animal
+      ? `${String(animal.identifier_tag ?? animal.tag_number ?? animal.id)} · ${String(animal.name ?? 'Sin nombre')}`
+      : lot ? `Lote ${String(lot.name ?? '')}` : 'Destino no disponible';
+    const type = String(record.production_type ?? 'Producción');
+    return { record, target, type };
+  });
+
   return (
     <div className="d-flex flex-column gap-4">
-      {/* BANNER VERDE */}
       <div className={styles.bannerGreen}>
         <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
           <div>
-            <span className={styles.bannerLabel}>PRODUCCIÓN DE LECHE · JUNIO</span>
+            <span className={styles.bannerLabel}>PRODUCCIÓN DE LECHE · ESTE MES</span>
             <div className={styles.bannerValue}>
-              18,420 <span className={styles.bannerUnit}>litros</span>
+              {milkThisMonth.toLocaleString('es-MX')} <span className={styles.bannerUnit}>litros</span>
             </div>
-            <span className={styles.bannerSubtext}>+6.2% frente al mes anterior</span>
+            <span className={styles.bannerSubtext}>Calculado desde los registros locales</span>
           </div>
-
-          <button
-            type="button"
-            className={styles.bannerBtn}
-            onClick={onOpenModal}
-          >
-            <Plus size={16} />
-            <span>Registrar producción</span>
+          <button type="button" className={styles.bannerBtn} onClick={onOpenModal}>
+            <Plus size={16} /><span>Registrar producción</span>
           </button>
         </div>
       </div>
 
-      {/* TABLA DE REGISTROS */}
       <div className={styles.cardBox}>
         <div className={styles.cardHeaderFlex}>
           <div>
             <span className={styles.dbLabel}>PRODUCTION_RECORDS</span>
             <h2 className={styles.cardTitle}>Últimos registros</h2>
           </div>
-
-          <select className={styles.filterSelect} defaultValue="ALL">
+          <select className={styles.filterSelect} value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
             <option value="ALL">Todos los tipos</option>
             <option value="Leche">Leche</option>
             <option value="Carne">Carne</option>
           </select>
         </div>
-
+        {error && <p role="alert" className="text-danger">{error}</p>}
         <div className={styles.tableResponsiveContainer}>
           <table className={styles.customTable}>
             <thead>
-              <tr>
-                <th>DESTINO</th>
-                <th>TIPO</th>
-                <th>FECHA</th>
-                <th>CANTIDAD</th>
-                <th>PRECIO / UNIDAD</th>
-                <th>INGRESO</th>
-              </tr>
+              <tr><th>DESTINO</th><th>TIPO</th><th>FECHA</th><th>CANTIDAD</th><th>PRECIO / UNIDAD</th><th>INGRESO</th></tr>
             </thead>
             <tbody>
-              {MOCK_PRODUCTION_RECORDS.map((item) => (
-                <tr key={item.id}>
-                  <td className="fw-bold">{item.target_name}</td>
+              {rows.map(({ record, target, type }) => (
+                <tr key={String(record.id)}>
+                  <td className="fw-bold">{target}</td>
                   <td>
-                    <span
-                      className={`${styles.typeBadge} ${
-                        item.type_badge === 'Leche' ? styles.badgeMilk : styles.badgeMeat
-                      }`}
-                    >
-                      {item.type_badge}
+                    <span className={`${styles.typeBadge} ${type.toLowerCase() === 'leche' ? styles.badgeMilk : styles.badgeMeat}`}>
+                      {type}
                     </span>
                   </td>
-                  <td>{item.production_date}</td>
-                  <td className="fw-bold">
-                    {item.quantity} {item.unit}
-                  </td>
-                  <td>{item.formatted_price}</td>
-                  <td className="fw-bold">{item.formatted_revenue}</td>
+                  <td>{String(record.production_date ?? '').slice(0, 10)}</td>
+                  <td className="fw-bold">{numberValue(record.quantity)} {String(record.unit ?? '')}</td>
+                  <td>{money(numberValue(record.price_per_unit))} / {String(record.unit ?? 'unidad')}</td>
+                  <td className="fw-bold">{money(numberValue(record.revenue))}</td>
                 </tr>
               ))}
+              {!isLoading && rows.length === 0 && (
+                <tr><td colSpan={6} className="text-center text-secondary py-4">{error ?? 'No hay registros de producción para esta finca.'}</td></tr>
+              )}
+              {isLoading && <tr><td colSpan={6} role="status" className="text-center text-secondary py-4">Cargando registros…</td></tr>}
             </tbody>
           </table>
         </div>

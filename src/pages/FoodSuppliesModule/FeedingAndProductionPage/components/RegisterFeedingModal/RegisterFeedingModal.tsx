@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styles from './RegisterFeedingModal.module.css';
 import { X, CheckCircle, WifiOff, Users, User } from 'lucide-react';
-import type { FeedingRecord, SyncQueueEntry } from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
+import useNotification from '../../../../../hooks/useNotification';
 
 interface RegisterFeedingModalProps {
   isOpen: boolean;
@@ -14,50 +16,66 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
   onClose,
   onSuccess
 }) => {
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
+  const { records: lots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const { records: products } = useHatoCollection<Record<string, unknown>>('products', '/products', scope);
   const [targetType, setTargetType] = useState<'LOT' | 'ANIMAL'>('LOT');
-  const [lotId, setLotId] = useState('lot1');
-  const [animalId, setAnimalId] = useState('a1042');
-  const [productId, setProductId] = useState('p1');
-  const [feedingDate, setFeedingDate] = useState('2025-06-16');
-  const [quantity, setQuantity] = useState('1.5');
+  const [lotId, setLotId] = useState('');
+  const [animalId, setAnimalId] = useState('');
+  const [productId, setProductId] = useState('');
+  const [feedingDate, setFeedingDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
   const [unit, setUnit] = useState('ton');
-  const [totalCost, setTotalCost] = useState('477000');
+  const [quantity, setQuantity] = useState('1');
+  const [totalCost, setTotalCost] = useState('0');
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const recordId = crypto.randomUUID();
-
-    const feedingPayload: FeedingRecord = {
-      id: recordId,
-      farm_id: 'farm-1',
-      lot_id: targetType === 'LOT' ? lotId : undefined,
-      animal_id: targetType === 'ANIMAL' ? animalId : undefined,
-      product_id: productId,
-      feeding_date: new Date(feedingDate).toISOString(),
-      quantity: parseFloat(quantity) || 0,
-      unit,
-      cost: parseFloat(totalCost) || 0 // <--- Corregido: 'cost' en lugar de 'total_cost'
-    };
-
-    const syncEntry: SyncQueueEntry<FeedingRecord> = {
-      id: crypto.randomUUID(),
-      entity_name: 'feeding_records',
-      entity_id: recordId,
-      operation_type: 'CREATE',
-      payload: feedingPayload,
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: new Date().toISOString()
-    };
-
-    console.log('[Action Log]: Registrar Alimentación:', feedingPayload);
-    console.log('[Sync Queue]:', syncEntry);
-
-    if (onSuccess) onSuccess();
-    onClose();
+    if (!scope) {
+      setSubmitError('No hay una finca autorizada seleccionada.');
+      return;
+    }
+    if (targetType === 'LOT' ? !lotId : !animalId) {
+      setSubmitError(targetType === 'LOT' ? 'Selecciona un lote.' : 'Selecciona un animal.');
+      return;
+    }
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(scope, 'feeding_records', 'CREATE', {
+        farm_id: scope.farmId,
+        lot_id: targetType === 'LOT' ? lotId : undefined,
+        animal_id: targetType === 'ANIMAL' ? animalId : undefined,
+        product_id: productId || undefined,
+        feeding_date: feedingDate,
+        quantity: Number(quantity),
+        unit,
+        cost: Number(totalCost),
+      });
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Alimentación pendiente de sincronización' : 'Alimentación registrada',
+        message: result.lastError ?? (result.pending
+          ? 'El registro quedó guardado localmente y se sincronizará al recuperar la conexión.'
+          : 'El registro se guardó correctamente.'),
+      });
+      onSuccess?.();
+      onClose();
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo registrar la alimentación.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo guardar', message });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -105,8 +123,8 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
                   value={lotId}
                   onChange={(e) => setLotId(e.target.value)}
                 >
-                  <option value="lot1">Vacas de cría · 58 animales</option>
-                  <option value="lot2">Novillos levante · 63 animales</option>
+                  <option value="">Selecciona un lote</option>
+                  {lots.map((lot) => <option key={String(lot.id)} value={String(lot.id)}>{String(lot.name ?? lot.id)}</option>)}
                 </select>
               </div>
             ) : (
@@ -117,21 +135,29 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
                   value={animalId}
                   onChange={(e) => setAnimalId(e.target.value)}
                 >
-                  <option value="a1042">BR-1042 · Esperanza</option>
-                  <option value="a1088">BR-1088 · Magnate</option>
+                  <option value="">Selecciona un animal</option>
+                  {animals.map((animal) => (
+                    <option key={String(animal.id)} value={String(animal.id)}>
+                      {String(animal.identifier_tag ?? animal.tag_number ?? animal.id)} · {String(animal.name ?? 'Sin nombre')}
+                    </option>
+                  ))}
                 </select>
               </div>
             )}
 
             <div className="col-12 col-md-6">
-              <label className={styles.label}>Producto (products.id)</label>
+              <label className={styles.label}>Producto (opcional)</label>
               <select
                 className={styles.select}
                 value={productId}
                 onChange={(e) => setProductId(e.target.value)}
               >
-                <option value="p1">Maíz ensilado · 12.4 ton disponibles</option>
-                <option value="p2">Sal mineralizada 8% · 40 bultos disponibles</option>
+                <option value="">Sin producto</option>
+                {products.map((product) => (
+                  <option key={String(product.id)} value={String(product.id)}>
+                    {String(product.name ?? product.id)} · {Number(product.current_stock ?? 0)} {String(product.unit ?? '')} disponibles
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -192,18 +218,20 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
             <div>
               <div className={styles.offlineTitle}>Disponible sin conexión</div>
               <div className={styles.offlineSubtitle}>
-                Si no hay señal, se guardará en sync_queue.
+                Si no hay señal, se guardará en la cola local de sincronización.
               </div>
             </div>
           </div>
+
+          {submitError && <p role="alert" className="text-danger">{submitError}</p>}
 
           <div className={styles.footer}>
             <button type="button" className={styles.cancelBtn} onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className={styles.saveBtn}>
+            <button type="submit" className={styles.saveBtn} disabled={isSaving}>
               <CheckCircle size={18} />
-              <span>Guardar registro</span>
+              <span>{isSaving ? 'Guardando…' : 'Guardar registro'}</span>
             </button>
           </div>
         </form>
