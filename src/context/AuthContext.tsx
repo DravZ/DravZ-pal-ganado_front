@@ -33,6 +33,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   renewSession: () => Promise<void>;
+  updateUserDetails: (name: string, email: string) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -239,6 +240,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setOfflineReady(false);
   }, []);
 
+  const updateUserDetails = useCallback((name: string, email: string) => {
+    setUser((current) => current ? { ...current, name, email } : current);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -249,6 +254,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         renewSession,
+        updateUserDetails,
       }}
     >
       {children}

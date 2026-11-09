@@ -155,6 +155,34 @@ function responseId(payload: Record<string, unknown>): string | null {
   return typeof value === 'string' ? value : null;
 }
 
+function normalizeAdministrationPayload(payload: Record<string, unknown>): Record<string, unknown> {
+  const normalized = { ...payload };
+  const aliases: Record<string, string> = {
+    organizationId: 'organization_id',
+    farmId: 'farm_id',
+    farmName: 'farm_name',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    legalName: 'legal_name',
+    taxId: 'tax_id',
+    totalAreaHectares: 'total_area_hectares',
+    areaHectares: 'area_hectares',
+    forageType: 'forage_type',
+    capacityAnimalUnits: 'capacity_animal_units',
+    resolvedAt: 'resolved_at',
+    resolvedBy: 'resolved_by',
+    alertType: 'alert_type',
+    detectedAt: 'detected_at',
+    dueDate: 'due_date',
+  };
+  for (const [source, target] of Object.entries(aliases)) {
+    if (normalized[target] === undefined && normalized[source] !== undefined) {
+      normalized[target] = normalized[source];
+    }
+  }
+  return normalized;
+}
+
 async function activeAnimalFarm(userId: string, animalId: string): Promise<string | null> {
   const animal = await offlineDatabase.records.get([userId, 'animals', animalId]);
   return animal?.farmId ?? null;
@@ -430,14 +458,15 @@ export async function cacheAdministrationRecord(
   resource: 'users' | 'farms',
   payload: Record<string, unknown>,
 ): Promise<void> {
-  const recordOrganizationId = payload.organization_id;
+  const normalized = normalizeAdministrationPayload(payload);
+  const recordOrganizationId = normalized.organization_id;
   if (typeof recordOrganizationId !== 'string' || recordOrganizationId !== organizationId) {
     throw new Error('El registro devuelto pertenece a otra organización.');
   }
   await mergeRemoteRecords(
     { userId, organizationId, farmId: '' },
     resource,
-    [payload],
+    [normalized],
     false,
   );
 }
