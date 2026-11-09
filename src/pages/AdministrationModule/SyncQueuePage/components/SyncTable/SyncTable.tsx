@@ -1,14 +1,25 @@
 import React from 'react';
-import { MoreHorizontal, HardDrive } from 'lucide-react';
+import { HardDrive } from 'lucide-react';
 import styles from './SyncTable.module.css';
-import type { SyncQueueEntry } from '../../../../../types/database.types';
 import type { SyncStatusFilter } from '../../SyncQueuePage';
 
+export interface SyncQueueRow {
+  id: string;
+  entity_name: string;
+  entity_id: string;
+  operation_type: 'CREATE' | 'UPDATE' | 'DELETE';
+  payload: Record<string, unknown>;
+  status: 'PENDING' | 'FAILED';
+  created_at: string;
+  error_message?: string;
+}
+
 interface SyncTableProps {
-  queue: SyncQueueEntry[];
+  queue: SyncQueueRow[];
   totalItems: number;
   statusFilter: SyncStatusFilter;
   entityFilter: string;
+  entityOptions: string[];
   onStatusFilterChange: (status: SyncStatusFilter) => void;
   onEntityFilterChange: (entity: string) => void;
   onViewPayload: (payload: Record<string, unknown>) => void;
@@ -19,6 +30,7 @@ export const SyncTable: React.FC<SyncTableProps> = ({
   totalItems,
   statusFilter,
   entityFilter,
+  entityOptions,
   onStatusFilterChange,
   onEntityFilterChange,
   onViewPayload
@@ -49,15 +61,7 @@ export const SyncTable: React.FC<SyncTableProps> = ({
           className={`${styles.tabBtn} ${statusFilter === 'FAILED' ? styles.activeTab : ''}`}
           onClick={() => onStatusFilterChange('FAILED')}
         >
-          Fallidos
-        </button>
-
-        <button
-          type="button"
-          className={`${styles.tabBtn} ${statusFilter === 'SYNCED' ? styles.activeTab : ''}`}
-          onClick={() => onStatusFilterChange('SYNCED')}
-        >
-          Sincronizados
+          Conflictos
         </button>
       </div>
 
@@ -68,10 +72,7 @@ export const SyncTable: React.FC<SyncTableProps> = ({
           onChange={(e) => onEntityFilterChange(e.target.value)}
         >
           <option value="ALL">Todas las entidades</option>
-          <option value="feeding_records">feeding_records</option>
-          <option value="expenses">expenses</option>
-          <option value="animal_weights">animal_weights</option>
-          <option value="treatments">treatments</option>
+          {entityOptions.map((entity) => <option key={entity} value={entity}>{entity}</option>)}
         </select>
       </div>
     </div>
@@ -86,9 +87,7 @@ export const SyncTable: React.FC<SyncTableProps> = ({
             <th>PAYLOAD ↑↓</th>
             <th>CREATED_AT ↑↓</th>
             <th>ESTADO ↑↓</th>
-            <th>REINTENTOS ↑↓</th>
             <th>ERROR_MESSAGE ↑↓</th>
-            <th style={{ width: '40px' }}></th>
           </tr>
         </thead>
         <tbody>
@@ -118,10 +117,9 @@ export const SyncTable: React.FC<SyncTableProps> = ({
               <td className={styles.dateText}>{item.created_at}</td>
               <td>
                 <span className={`${styles.statusBadge} ${styles[`status_${item.status}`]}`}>
-                  {item.status}
+                  {item.status === 'FAILED' ? 'CONFLICTO' : 'PENDIENTE'}
                 </span>
               </td>
-              <td className={styles.attemptsText}>{item.retry_count}</td>
               <td>
                 {item.error_message ? (
                   <span className={styles.errorText}>{item.error_message}</span>
@@ -129,13 +127,15 @@ export const SyncTable: React.FC<SyncTableProps> = ({
                   <span className={styles.dashText}>—</span>
                 )}
               </td>
-              <td>
-                <button type="button" className={styles.menuBtn}>
-                  <MoreHorizontal size={18} />
-                </button>
-              </td>
             </tr>
           ))}
+          {queue.length === 0 && (
+            <tr>
+              <td colSpan={6} className="text-center text-secondary py-4">
+                No hay operaciones en la cola para estos filtros.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
@@ -143,29 +143,14 @@ export const SyncTable: React.FC<SyncTableProps> = ({
     {/* Paginador y Pie de Persistencia */}
     <div className={styles.tableFooterFlex}>
       <span className={styles.counterSubtext}>
-        Mostrando {queue.length} operaciones locales
+        Mostrando {queue.length} de {totalItems} operaciones locales pendientes o en conflicto
       </span>
-
-      <div className={styles.paginationFlex}>
-        <button type="button" className={styles.pageArrowBtn} disabled>
-          Anterior
-        </button>
-        <button type="button" className={`${styles.pageNumBtn} ${styles.activePage}`}>
-          1
-        </button>
-        <button type="button" className={styles.pageNumBtn}>
-          2
-        </button>
-        <button type="button" className={styles.pageArrowBtn}>
-          Siguiente
-        </button>
-      </div>
     </div>
 
     <div className={styles.persistenceNote}>
       <HardDrive size={16} />
       <span>
-        <strong>Persistencia local:</strong> los datos permanecen en IndexedDB incluso si cierras la aplicación. Último intento: hoy, 14:35.
+        <strong>Persistencia local:</strong> las operaciones permanecen en IndexedDB hasta recibir confirmación del servidor.
       </span>
     </div>
   </div>

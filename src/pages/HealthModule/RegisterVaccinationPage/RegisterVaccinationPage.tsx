@@ -1,112 +1,85 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './RegisterVaccinationPage.module.css';
 import { ArrowLeft, CheckCircle, WifiOff } from 'lucide-react';
-
-import type {
-  Animal,
-  Vaccination,
-  SyncQueueEntry
-} from '../../../types/database.types';
-
-// Datos de prueba fuertemente tipados
-const MOCK_ANIMALS: (Animal & { identifier_tag: string })[] = [
-  {
-    id: 'a1042',
-    farm_id: 'f1',
-    name: 'Esperanza',
-    identifier_tag: 'BR-1042',
-    breed: 'Nelore',
-    sex: 'Hembra',
-    species: 'bovino',
-    status: 'active',
-    created_at: '2026-01-01'
-  },
-  {
-    id: 'a1088',
-    farm_id: 'f1',
-    name: 'Magnate',
-    identifier_tag: 'BR-1088',
-    breed: 'Angus',
-    sex: 'Macho',
-    species: 'bovino',
-    status: 'active',
-    created_at: '2026-01-01'
-  },
-  {
-    id: 'a1124',
-    farm_id: 'f1',
-    name: 'Canela',
-    identifier_tag: 'BR-1124',
-    breed: 'Braford',
-    sex: 'Hembra',
-    species: 'bovino',
-    status: 'active',
-    created_at: '2026-01-01'
-  }
-];
+import { useFarmScope } from '../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
+import useNotification from '../../../hooks/useNotification';
 
 export const RegisterVaccinationPage: React.FC = () => {
   const navigate = useNavigate();
-
+  const [searchParams] = useSearchParams();
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
+    'animals',
+    '/animals',
+    scope,
+  );
+  const animals = rawAnimals.filter((animal) =>
+    String(animal.status ?? '').toLowerCase() === 'active',
+  );
   // Estados del formulario
-  const [animalId, setAnimalId] = useState<string>(MOCK_ANIMALS[0].id);
-  const [vaccineName, setVaccineName] = useState<string>('');
+  const [animalId, setAnimalId] = useState<string>(searchParams.get('animalId') ?? '');
+  const [vaccineName, setVaccineName] = useState<string>(searchParams.get('vaccineName') ?? '');
   const [manufacturer, setManufacturer] = useState<string>('');
   const [veterinarian, setVeterinarian] = useState<string>('');
-  const [applicationDate, setApplicationDate] = useState<string>('2025-06-16');
-  const [nextDueDate, setNextDueDate] = useState<string>('2026-06-16');
+  const [applicationDate, setApplicationDate] = useState<string>(
+    new Date().toISOString().slice(0, 10),
+  );
+  const [nextDueDate, setNextDueDate] = useState<string>('');
   const [dose, setDose] = useState<string>('2');
   const [doseUnit, setDoseUnit] = useState<string>('mL');
-
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const newErrors: { [key: string]: string } = {};
+    if (!scope) newErrors.scope = 'No hay una finca autorizada seleccionada.';
+    if (!animalId) newErrors.animal = 'Selecciona un animal.';
     if (!vaccineName.trim()) {
       newErrors.vaccineName = 'El nombre de la vacuna es obligatorio.';
+    }
+    if (!Number.isFinite(Number(dose)) || Number(dose) <= 0) {
+      newErrors.dose = 'La dosis debe ser mayor que cero.';
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-
     setErrors({});
-
-    const vaccinationId = crypto.randomUUID();
-
-    // 1. DTO de la tabla vaccinations
-    const vaccinationPayload: Vaccination = {
-      id: vaccinationId,
-      animal_id: animalId,
-      vaccine_name: vaccineName,
-      manufacturer: manufacturer || undefined,
-      application_date: new Date(applicationDate).toISOString(),
-      next_due_date: nextDueDate ? nextDueDate : undefined,
-      dose: parseFloat(dose) || 0,
-      dose_unit: doseUnit,
-      veterinarian_name: veterinarian || undefined
-    };
-
-    // 2. Registro para la cola de sincronización offline (sync_queue)
-    const syncQueueEntry: SyncQueueEntry<Vaccination> = {
-      id: crypto.randomUUID(),
-      entity_name: 'vaccinations',
-      entity_id: vaccinationId,
-      operation_type: 'CREATE',
-      payload: vaccinationPayload,
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: new Date().toISOString()
-    };
-
-    console.log('[Action Log]: Registrando vacunación:', vaccinationPayload);
-    console.log('[Sync Queue Payload]:', syncQueueEntry);
-
-    navigate(-1);
+    if (!scope) return;
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(scope, 'vaccinations', 'CREATE', {
+        animal_id: animalId,
+        vaccine_name: vaccineName.trim(),
+        manufacturer: manufacturer.trim() || undefined,
+        application_date: `${applicationDate}T00:00:00`,
+        next_due_date: nextDueDate || undefined,
+        dose: Number(dose),
+        dose_unit: doseUnit,
+        veterinarian_name: veterinarian.trim() || undefined,
+      });
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Vacunación pendiente de sincronización' : 'Vacunación registrada',
+        message: result.lastError ?? (result.pending
+          ? 'La vacunación quedó guardada en la cola local.'
+          : 'La aplicación quedó registrada correctamente.'),
+      });
+      navigate(-1);
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo registrar la vacunación.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo registrar la vacunación', message });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -136,13 +109,17 @@ export const RegisterVaccinationPage: React.FC = () => {
               className={styles.select}
               value={animalId}
               onChange={(e) => setAnimalId(e.target.value)}
+              required
             >
-              {MOCK_ANIMALS.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.identifier_tag} · {a.name}
+              <option value="">Selecciona un animal</option>
+              {animals.map((animal) => (
+                <option key={String(animal.id)} value={String(animal.id)}>
+                  {String(animal.identifier_tag ?? animal.tag_number ?? animal.id)}
+                  {' · '}{String(animal.name ?? 'Sin nombre')}
                 </option>
               ))}
             </select>
+            {errors.animal && <span className={styles.errorText}>{errors.animal}</span>}
           </div>
 
           {/* Nombre de la vacuna */}
@@ -233,6 +210,7 @@ export const RegisterVaccinationPage: React.FC = () => {
                 <option value="Dosis">Dosis</option>
               </select>
             </div>
+            {errors.dose && <span className={styles.errorText}>{errors.dose}</span>}
           </div>
         </div>
 
@@ -242,7 +220,7 @@ export const RegisterVaccinationPage: React.FC = () => {
           <div>
             <div className={styles.offlineTitle}>Disponible sin conexión</div>
             <div className={styles.offlineSubtitle}>
-              Si no hay señal, se guardará en sync_queue.
+              Si no hay señal, se guardará localmente y aparecerá en la cola de sincronización.
             </div>
           </div>
         </div>
@@ -256,11 +234,14 @@ export const RegisterVaccinationPage: React.FC = () => {
           >
             Cancelar
           </button>
-          <button type="submit" className={styles.saveBtn}>
+          <button type="submit" className={styles.saveBtn} disabled={isSaving}>
             <CheckCircle size={18} />
-            <span>Guardar registro</span>
+            <span>{isSaving ? 'Guardando…' : 'Guardar registro'}</span>
           </button>
         </div>
+        {(errors.scope || submitError) && (
+          <p role="alert" className="text-danger mt-3">{submitError ?? errors.scope}</p>
+        )}
       </form>
     </div>
   );

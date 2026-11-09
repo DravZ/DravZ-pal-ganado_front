@@ -1,156 +1,82 @@
 import React, { useState } from 'react';
 import styles from './EventsAndTreatmentsTab.module.css';
 import { Syringe, Bell, Activity, Search, Beef } from 'lucide-react';
-import type { HealthEvent, Treatment, Animal } from '../../../../../types/database.types';
-
-// Tipos adaptados a partir del esquema DBML usando los types globales
-type HealthEventWithUI = HealthEvent & {
-  animal: Animal & { identifier_tag: string };
-  treatment?: Treatment & { medication_name: string };
-  status: 'En tratamiento' | 'Completado';
-};
-
-type WithdrawalUI = {
-  id: string;
-  days_remaining: number;
-  animal_tag: string;
-  animal_name: string;
-  type: 'Carne' | 'Leche';
-  medication: string;
-  until_date: string;
-};
-
-const MOCK_EVENTS: HealthEventWithUI[] = [
-  {
-    id: 'he-1',
-    animal_id: 'a1088',
-    event_type: 'Enfermedad respiratoria',
-    event_date: '14 jun 2025',
-    diagnosis: 'Enfermedad respiratoria',
-    symptoms: 'Tos, fiebre y decaimiento',
-    status: 'En tratamiento',
-    animal: {
-      id: 'a1088',
-      farm_id: 'f1',
-      name: 'Magnate',
-      identifier_tag: 'BR-1088',
-      breed: 'Angus',
-      sex: 'Macho',
-      species: 'bovino',
-      status: 'active',
-      created_at: '2026-01-01'
-    },
-    treatment: {
-      id: 't-1',
-      animal_id: 'a1088',
-      medication_id: 'm1',
-      medication_name: 'Oxitetraciclina LA',
-      start_date: '2025-06-14',
-      dose: 20,
-      dose_unit: 'mL',
-      frequency: 'Cada 48 h'
-    }
-  },
-  {
-    id: 'he-2',
-    animal_id: 'a1042',
-    event_type: 'Control parasitario',
-    event_date: '10 jun 2025',
-    diagnosis: 'Control parasitario',
-    symptoms: 'Tratamiento preventivo',
-    status: 'Completado',
-    animal: {
-      id: 'a1042',
-      farm_id: 'f1',
-      name: 'Esperanza',
-      identifier_tag: 'BR-1042',
-      breed: 'Nelore',
-      sex: 'Hembra',
-      species: 'bovino',
-      status: 'active',
-      created_at: '2026-01-01'
-    },
-    treatment: {
-      id: 't-2',
-      animal_id: 'a1042',
-      medication_id: 'm2',
-      medication_name: 'Ivermectina 1%',
-      start_date: '2025-06-10',
-      dose: 10,
-      dose_unit: 'mL',
-      frequency: 'Dosis única'
-    }
-  },
-  {
-    id: 'he-3',
-    animal_id: 'a1124',
-    event_type: 'Lesión podal',
-    event_date: '06 jun 2025',
-    diagnosis: 'Lesión podal',
-    symptoms: 'Cojera miembro posterior',
-    status: 'Completado',
-    animal: {
-      id: 'a1124',
-      farm_id: 'f1',
-      name: 'Canela',
-      identifier_tag: 'BR-1124',
-      breed: 'Braford',
-      sex: 'Hembra',
-      species: 'bovino',
-      status: 'active',
-      created_at: '2026-01-01'
-    },
-    treatment: {
-      id: 't-3',
-      animal_id: 'a1124',
-      medication_id: 'm3',
-      medication_name: 'Flunixin 5%',
-      start_date: '2025-06-06',
-      dose: 8,
-      dose_unit: 'mL',
-      frequency: 'Cada 24 h'
-    }
-  }
-];
-
-const MOCK_WITHDRAWALS: WithdrawalUI[] = [
-  {
-    id: 'w1',
-    days_remaining: 2,
-    animal_tag: 'BR-1124',
-    animal_name: 'Canela',
-    type: 'Leche',
-    medication: 'Flunixin 5%',
-    until_date: 'Hasta 18 jun 2025'
-  },
-  {
-    id: 'w2',
-    days_remaining: 7,
-    animal_tag: 'BR-1088',
-    animal_name: 'Magnate',
-    type: 'Carne',
-    medication: 'Oxitetraciclina',
-    until_date: 'Hasta 23 jun 2025'
-  },
-  {
-    id: 'w3',
-    days_remaining: 22,
-    animal_tag: 'BR-1042',
-    animal_name: 'Esperanza',
-    type: 'Carne',
-    medication: 'Ivermectina',
-    until_date: 'Hasta 08 jul 2025'
-  }
-];
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
 
 export const EventsAndTreatmentsTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredEvents = MOCK_EVENTS.filter(
-    (e) =>
-      e.animal.identifier_tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (e.animal.name && e.animal.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  const [now] = useState(() => Date.now());
+  const { scope } = useFarmScope();
+  const { records: healthRecords, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+    'health_records',
+    '/health-records',
+    scope,
   );
+  const { records: treatments } = useHatoCollection<Record<string, unknown>>(
+    'treatments',
+    '/treatments',
+    scope,
+  );
+  const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
+  const { records: medications } = useHatoCollection<Record<string, unknown>>(
+    'medications',
+    '/medications',
+    scope,
+  );
+  const activeTreatments = treatments.filter((treatment) =>
+    String(treatment.status ?? '').toUpperCase() === 'ACTIVO',
+  );
+  const withdrawals = treatments.flatMap((treatment) => {
+    const until = String(treatment.withdrawal_until ?? '');
+    const untilTime = Date.parse(until);
+    if (!until || !Number.isFinite(untilTime) || untilTime < now) return [];
+    const animalId = String(treatment.animal_id ?? '');
+    const animal = animals.find((entry) => entry.id === animalId);
+    const medication = medications.find((entry) => entry.id === treatment.medication_id);
+    return [{
+      id: String(treatment.id),
+      daysRemaining: Math.ceil((untilTime - now) / 86_400_000),
+      animalTag: String(animal?.tag_number ?? animal?.identifier_tag ?? animalId),
+      animalName: String(animal?.name ?? 'Sin nombre'),
+      medication: String(medication?.name ?? 'Medicamento'),
+      untilDate: new Date(untilTime).toLocaleDateString('es-MX'),
+    }];
+  });
+  const events = healthRecords.map((record) => {
+    const animalId = String(record.animal_id ?? '');
+    const animal = animals.find((entry) => entry.id === animalId);
+    const treatment = treatments.find((entry) => entry.health_event_id === record.id);
+    const medication = medications.find((entry) => entry.id === treatment?.medication_id);
+    const active = treatment
+      && String(treatment.status ?? '').toUpperCase() === 'ACTIVO'
+      && (!treatment.end_date || Date.parse(String(treatment.end_date)) >= now);
+    return {
+      id: String(record.id),
+      animalId,
+      animalTag: String(animal?.tag_number ?? animal?.identifier_tag ?? animalId),
+      animalName: String(animal?.name ?? 'Sin nombre'),
+      breed: String(animal?.breed ?? '—'),
+      diagnosis: String(record.diagnosis ?? record.event_type ?? 'Evento sanitario'),
+      symptoms: String(record.symptoms ?? ''),
+      eventDate: String(record.event_date ?? ''),
+      medication: treatment ? String(medication?.name ?? 'Tratamiento') : '',
+      dose: treatment ? `${treatment.dose ?? ''} ${treatment.dose_unit ?? ''}`.trim() : '',
+      frequency: treatment ? String(treatment.frequency ?? '') : '',
+      status: active ? 'En tratamiento' : 'Completado',
+    };
+  }).filter((event) => (
+    event.animalTag.toLowerCase().includes(searchTerm.toLowerCase())
+    || event.animalName.toLowerCase().includes(searchTerm.toLowerCase())
+  ));
+  const eventsThisMonth = healthRecords.filter((record) => {
+    const date = Date.parse(String(record.event_date ?? ''));
+    const current = new Date(now);
+    const eventDate = new Date(date);
+    return Number.isFinite(date)
+      && eventDate.getMonth() === current.getMonth()
+      && eventDate.getFullYear() === current.getFullYear();
+  }).length;
 
   return (
     <div className="d-flex flex-column gap-4">
@@ -163,8 +89,8 @@ export const EventsAndTreatmentsTab: React.FC = () => {
             </div>
             <div>
               <span className={styles.metricLabel}>TRATAMIENTOS ACTIVOS</span>
-              <div className={styles.metricValue}>12</div>
-              <span className={styles.metricSubtext}>4 finalizan esta semana</span>
+              <div className={styles.metricValue}>{activeTreatments.length}</div>
+              <span className={styles.metricSubtext}>Según el registro local sincronizado</span>
             </div>
           </div>
         </div>
@@ -176,7 +102,7 @@ export const EventsAndTreatmentsTab: React.FC = () => {
             </div>
             <div>
               <span className={styles.metricLabel}>EN RETIRO</span>
-              <div className={styles.metricValue}>8</div>
+              <div className={styles.metricValue}>{withdrawals.length}</div>
               <span className={styles.metricSubtext}>Carne o leche restringida</span>
             </div>
           </div>
@@ -189,8 +115,8 @@ export const EventsAndTreatmentsTab: React.FC = () => {
             </div>
             <div>
               <span className={styles.metricLabel}>EVENTOS ESTE MES</span>
-              <div className={styles.metricValue}>34</div>
-              <span className={styles.metricSubtextGreen}>-8% frente al mes anterior</span>
+              <div className={styles.metricValue}>{eventsThisMonth}</div>
+              <span className={styles.metricSubtextGreen}>Eventos registrados este mes</span>
             </div>
           </div>
         </div>
@@ -231,7 +157,7 @@ export const EventsAndTreatmentsTab: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEvents.map((item) => (
+                  {events.map((item) => (
                     <tr key={item.id}>
                       <td>
                         <div className="d-flex align-items-center gap-2">
@@ -239,9 +165,9 @@ export const EventsAndTreatmentsTab: React.FC = () => {
                             <Beef size={18} color="#1e4b27" />
                           </div>
                           <div>
-                            <div className="fw-bold">{item.animal.identifier_tag}</div>
+                            <div className="fw-bold">{item.animalTag}</div>
                             <div className={styles.subText}>
-                              {item.animal.name} · {item.animal.breed}
+                              {item.animalName} · {item.breed}
                             </div>
                           </div>
                         </div>
@@ -250,14 +176,13 @@ export const EventsAndTreatmentsTab: React.FC = () => {
                         <div className="fw-bold">{item.diagnosis}</div>
                         <div className={styles.subText}>{item.symptoms}</div>
                       </td>
-                      <td>{item.event_date}</td>
+                      <td>{item.eventDate}</td>
                       <td>
-                        {item.treatment && (
+                        {item.medication && (
                           <>
-                            <div className="fw-bold">{item.treatment.medication_name}</div>
+                            <div className="fw-bold">{item.medication}</div>
                             <div className={styles.subText}>
-                              {item.treatment.dose} {item.treatment.dose_unit} ·{' '}
-                              {item.treatment.frequency}
+                              {item.dose} · {item.frequency}
                             </div>
                           </>
                         )}
@@ -275,6 +200,13 @@ export const EventsAndTreatmentsTab: React.FC = () => {
                       </td>
                     </tr>
                   ))}
+                  {!isLoading && events.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="text-center text-secondary py-4">
+                        {error ?? 'No hay eventos sanitarios para esta finca.'}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -289,33 +221,34 @@ export const EventsAndTreatmentsTab: React.FC = () => {
                 <span className={styles.dbLabel}>RETIRO SANITARIO</span>
                 <h2 className={styles.cardTitle}>Próximas liberaciones</h2>
               </div>
-              <span className={styles.activePill}>8 activos</span>
+              <span className={styles.activePill}>{withdrawals.length} activos</span>
             </div>
 
             <div className="d-flex flex-column gap-3 mb-3">
-              {MOCK_WITHDRAWALS.map((w) => (
+              {withdrawals.map((w) => (
                 <div key={w.id} className={styles.withdrawalItem}>
                   <div className={styles.daysBadge}>
-                    <span className={styles.daysNumber}>{w.days_remaining}</span>
+                    <span className={styles.daysNumber}>{w.daysRemaining}</span>
                     <span className={styles.daysText}>días</span>
                   </div>
 
                   <div>
                     <div className={styles.withdrawalTitle}>
-                      {w.animal_tag} · {w.animal_name}
+                      {w.animalTag} · {w.animalName}
                     </div>
                     <div className={styles.withdrawalSubtitle}>
-                      {w.type} · {w.medication}
+                      Retiro sanitario · {w.medication}
                     </div>
-                    <div className={styles.withdrawalDate}>{w.until_date}</div>
+                    <div className={styles.withdrawalDate}>Hasta {w.untilDate}</div>
                   </div>
                 </div>
               ))}
+              {withdrawals.length === 0 && (
+                <p className="text-secondary mb-0">No hay retiros sanitarios próximos registrados.</p>
+              )}
             </div>
 
-            <button type="button" className={styles.secondaryBtn}>
-              Ver todos los retiros
-            </button>
+            {isLoading && <p role="status" className="text-secondary">Actualizando registros…</p>}
           </div>
         </div>
       </div>

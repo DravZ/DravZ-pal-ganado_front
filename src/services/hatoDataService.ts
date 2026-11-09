@@ -11,6 +11,8 @@ export type HatoResource =
   | 'animals'
   | 'weight_records'
   | 'reproductive_records'
+  | 'health_records'
+  | 'vaccinations'
   | 'movements'
   | 'sales_records'
   | 'treatments'
@@ -45,6 +47,8 @@ const endpointByResource: Record<HatoResource, string> = {
   animals: '/animals',
   weight_records: '/weight-records',
   reproductive_records: '/reproductive-records',
+  health_records: '/health-records',
+  vaccinations: '/vaccinations',
   movements: '/movements',
   sales_records: '/sales-records',
   treatments: '/treatments',
@@ -59,6 +63,8 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   animals: ['CREATE', 'UPDATE', 'DELETE'],
   weight_records: ['CREATE', 'UPDATE', 'DELETE'],
   reproductive_records: ['CREATE', 'UPDATE', 'DELETE'],
+  health_records: ['CREATE', 'UPDATE', 'DELETE'],
+  vaccinations: ['CREATE'],
   movements: ['CREATE'],
   sales_records: ['CREATE', 'UPDATE', 'DELETE'],
   treatments: ['CREATE'],
@@ -70,6 +76,14 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
 };
 
 const onlineOnlyResources = new Set(['users', 'organizations', 'farms', 'roles', 'permissions']);
+const animalScopedResources = new Set<HatoResource>([
+  'weight_records',
+  'reproductive_records',
+  'health_records',
+  'vaccinations',
+  'treatments',
+  'animal_identifiers',
+]);
 const queueProcessors = new Map<string, Promise<void>>();
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -110,23 +124,46 @@ export function useHatoCollection<T extends Record<string, unknown>>(
   scope: HatoScope | null,
 ): HatoCollection<T> {
   const [error, setError] = useState<string | null>(null);
+  const scopedAnimalIds = useLiveQuery<string[]>(
+    async () => {
+      if (!scope) return [];
+      const animals = await offlineDatabase.records
+        .where('[userId+resourceType]')
+        .equals([scope.userId, 'animals'])
+        .toArray();
+      return animals
+        .filter((animal) => animal.farmId === scope.farmId)
+        .map((animal) => animal.recordId)
+        .sort();
+    },
+    [scope?.userId, scope?.farmId],
+  ) ?? [];
+  const scopedAnimalIdsKey = scopedAnimalIds.join('|');
   const cached = useLiveQuery<CachedRecord[]>(
-    () => scope
-      ? offlineDatabase.records
+    async () => {
+      if (!scope) return [];
+      const records = await offlineDatabase.records
         .where('[userId+resourceType]')
         .equals([scope.userId, resource])
-        .toArray()
-      : Promise.resolve([]),
+        .toArray();
+      const inScope = await Promise.all(records.map(async (record) =>
+        recordMatchesFarm(record, scope.farmId)
+        || await hatoRecordFarmId(scope.userId, record) === scope.farmId
+      ));
+      return records.filter((_, index) => inScope[index]);
+    },
     [resource, scope?.userId, scope?.farmId],
   );
-  const records = (cached ?? [])
-    .filter(() => scope !== null)
-    .filter((record) => recordMatchesFarm(record, scope?.farmId ?? ''))
-    .map((record) => record.payload as T);
+  const records = (cached ?? []).map((record) => record.payload as T);
 
   const refresh = useCallback(async () => {
     if (!scope || !endpoint || !navigator.onLine) return;
     const url = new URL(`${apiBaseUrl}${endpoint}`, window.location.origin);
+    if (
+      animalScopedResources.has(resource)
+      && !url.searchParams.has('animal_id')
+      && scopedAnimalIds.length === 0
+    ) return;
     if (resource === 'customers' && !url.searchParams.has('organization_id')) {
       url.searchParams.set('organization_id', scope.organizationId);
     } else if (resource === 'animals' && !url.searchParams.has('farm_id')) {
@@ -139,22 +176,37 @@ export function useHatoCollection<T extends Record<string, unknown>>(
       url.searchParams.set('farm_id', scope.farmId);
     }
 
-    const response = await fetch(url.toString(), {
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    });
-    if (!response.ok) throw new Error(`No se pudieron actualizar los datos (${response.status}).`);
-    const body: unknown = await response.json();
-    if (!Array.isArray(body) || !body.every(isObject)) {
+    const urls = animalScopedResources.has(resource) && !url.searchParams.has('animal_id')
+      ? scopedAnimalIds.map((animalId) => {
+        const animalUrl = new URL(url);
+        animalUrl.searchParams.set('animal_id', animalId);
+        return animalUrl.toString();
+      })
+      : [url.toString()];
+    const body = (await Promise.all(urls.map(async (requestUrl) => {
+      const response = await fetch(requestUrl, {
+        credentials: 'include',
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error(`No se pudieron actualizar los datos (${response.status}).`);
+      }
+      const payload: unknown = await response.json();
+      if (!Array.isArray(payload) || !payload.every(isObject)) {
+        throw new Error('El servidor devolvió una respuesta de datos inválida.');
+      }
+      return payload;
+    }))).flat();
+    if (!Array.isArray(body)) {
       throw new Error('El servidor devolvió una respuesta de datos inválida.');
     }
     await mergeRemoteRecords(
       scope,
       resource,
       body,
-      !url.searchParams.has('animal_id'),
+      urls.length > 1 || !url.searchParams.has('animal_id'),
     );
-  }, [endpoint, resource, scope]);
+  }, [endpoint, resource, scope, scopedAnimalIdsKey]);
 
   useEffect(() => {
     if (!scope) return;
@@ -601,6 +653,12 @@ export function flushPendingHatoOperations(userId: string): Promise<void> {
             operation,
             error instanceof Error ? error.message : 'El servidor rechazó la operación.',
           );
+        } else if (operation.id !== undefined) {
+          await offlineDatabase.syncQueue.update(operation.id, {
+            lastError: error instanceof Error
+              ? error.message
+              : 'No se pudo sincronizar; se reintentará cuando haya conexión.',
+          });
         }
         throw error;
       }

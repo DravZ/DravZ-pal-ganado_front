@@ -1,150 +1,113 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import styles from '../shared/ManagementPage.module.css';
-import type { SyncQueueEntry } from '../../../types/database.types';
-
-// Componentes Modularizados
+import { offlineDatabase, type SyncQueueOperation } from '../../../services/offlineDatabase';
+import { flushPendingHatoOperations } from '../../../services/hatoDataService';
+import { useAuth } from '../../../context/AuthContext';
+import useNotification from '../../../hooks/useNotification';
 import SyncHeader from './components/SyncHeader/SyncHeader';
 import SyncOfflineBanner from './components/SyncOfflineBanner/SyncOfflineBanner';
-import SyncTable from './components/SyncTable/SyncTable';
+import SyncTable, { type SyncQueueRow } from './components/SyncTable/SyncTable';
 import JsonPayloadModal from './components/JsonPayloadModal/JsonPayloadModal';
 
-export type SyncStatusFilter = 'ALL' | 'PENDING' | 'FAILED' | 'SYNCED';
+export type SyncStatusFilter = 'ALL' | 'PENDING' | 'FAILED';
+
+function displayDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('es-MX');
+}
+
+function toQueueRow(operation: SyncQueueOperation): SyncQueueRow {
+  return {
+    id: String(operation.id ?? operation.idempotencyKey),
+    entity_name: operation.resourceType,
+    entity_id: operation.recordId ?? '—',
+    operation_type: operation.operation,
+    payload: operation.payload,
+    status: operation.status === 'CONFLICT' ? 'FAILED' : 'PENDING',
+    created_at: displayDate(operation.createdAt),
+    error_message: operation.lastError,
+  };
+}
 
 export const SyncQueuePage: React.FC = () => {
+  const { user, isOffline } = useAuth();
+  const { showNotification } = useNotification();
   const [statusFilter, setStatusFilter] = useState<SyncStatusFilter>('ALL');
-  const [entityFilter, setEntityFilter] = useState<string>('ALL');
+  const [entityFilter, setEntityFilter] = useState('ALL');
   const [selectedJsonPayload, setSelectedJsonPayload] = useState<Record<string, unknown> | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const isOnline = !isOffline && navigator.onLine;
 
-  // Lista mock mapeada exactamente como en las imágenes
-  const [queueItems, setQueueItems] = useState<SyncQueueEntry[]>([
-    {
-      id: 'fr_9a71',
-      entity_name: 'feeding_records',
-      entity_id: 'fr_9a71',
-      operation_type: 'CREATE',
-      payload: {
-        lot_id: 'lot_02',
-        product_id: 'prod_99',
-        quantity: 150,
-        unit: 'kg',
-        registered_by: 'user-123'
-      },
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: '16 jun · 14:32'
-    },
-    {
-      id: 'exp_3f20',
-      entity_name: 'expenses',
-      entity_id: 'exp_3f20',
-      operation_type: 'CREATE',
-      payload: {
-        supplier_id: 'sup_08',
-        category: 'Insumos Alimentos',
-        amount: 450000,
-        currency: 'COP'
-      },
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: '16 jun · 13:18'
-    },
-    {
-      id: 'aw_821c',
-      entity_name: 'animal_weights',
-      entity_id: 'aw_821c',
-      operation_type: 'UPDATE',
-      payload: {
-        animal_id: 'ani_1042',
-        weight: 485.5,
-        weighed_at: '2025-06-16'
-      },
-      status: 'FAILED',
-      retry_count: 2,
-      error_message: 'Tiempo de espera agotado',
-      created_at: '16 jun · 10:42'
-    },
-    {
-      id: 'tr_11bd',
-      entity_name: 'treatments',
-      entity_id: 'tr_11bd',
-      operation_type: 'CREATE',
-      payload: {
-        animal_id: 'ani_1088',
-        medication: 'Ivermax 1%',
-        dose: '10ml',
-        administered_by: 'Vet. Torres'
-      },
-      status: 'SYNCED',
-      retry_count: 0,
-      created_at: '15 jun · 17:05'
+  const operations = useLiveQuery(
+    () => user
+      ? offlineDatabase.syncQueue.where('userId').equals(user.id).sortBy('id')
+      : Promise.resolve([] as SyncQueueOperation[]),
+    [user?.id],
+  ) ?? [];
+  const queueItems = useMemo(() => operations.map(toQueueRow), [operations]);
+  const metrics = useMemo(() => ({
+    total: queueItems.length,
+    pending: operations.filter((operation) => operation.status === 'PENDING').length,
+    failed: operations.filter((operation) => operation.status === 'CONFLICT').length,
+  }), [operations, queueItems.length]);
+  const entityOptions = useMemo(
+    () => [...new Set(queueItems.map((item) => item.entity_name))].sort(),
+    [queueItems],
+  );
+  const filteredQueue = useMemo(() => queueItems.filter((item) => (
+    (statusFilter === 'ALL' || item.status === statusFilter)
+    && (entityFilter === 'ALL' || item.entity_name === entityFilter)
+  )), [entityFilter, queueItems, statusFilter]);
+
+  const handleSyncNow = async () => {
+    if (!user || isSyncing) return;
+    if (!isOnline) {
+      const message = 'Conéctate a internet para enviar las operaciones pendientes.';
+      setSyncError(message);
+      showNotification({ type: 'alert', title: 'Sin conexión', message });
+      return;
     }
-  ]);
 
-  // Cálculos dinámicos de métricas
-  const metrics = useMemo(() => {
-    return {
-      total: queueItems.length,
-      pending: queueItems.filter((item) => item.status === 'PENDING').length,
-      failed: queueItems.filter((item) => item.status === 'FAILED').length,
-      synced: queueItems.filter((item) => item.status === 'SYNCED').length
-    };
-  }, [queueItems]);
-
-  // Limpiar sincronizados
-  const handleClearSynced = () => {
-    setQueueItems((prev) => prev.filter((item) => item.status !== 'SYNCED'));
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      await flushPendingHatoOperations(user.id);
+      showNotification({
+        type: 'success',
+        title: 'Sincronización terminada',
+        message: 'Se procesaron las operaciones pendientes. Los conflictos requieren revisión.',
+      });
+    } catch (cause) {
+      const message = cause instanceof Error
+        ? cause.message
+        : 'No se pudieron sincronizar todas las operaciones.';
+      setSyncError(message);
+      showNotification({ type: 'error', title: 'Sincronización incompleta', message });
+    } finally {
+      setIsSyncing(false);
+    }
   };
-
-  // Simulación de Sincronizar Ahora
-  const handleSyncNow = () => {
-    setQueueItems((prev) =>
-      prev.map((item) =>
-        item.status === 'PENDING' || item.status === 'FAILED'
-          ? { ...item, status: 'SYNCED', error_message: undefined }
-          : item
-      )
-    );
-  };
-
-  // Filtrado de la tabla
-  const filteredQueue = useMemo(() => {
-    return queueItems.filter((item) => {
-      const matchesStatus =
-        statusFilter === 'ALL' ||
-        (statusFilter === 'PENDING' && item.status === 'PENDING') ||
-        (statusFilter === 'FAILED' && item.status === 'FAILED') ||
-        (statusFilter === 'SYNCED' && item.status === 'SYNCED');
-
-      const matchesEntity =
-        entityFilter === 'ALL' || item.entity_name === entityFilter;
-
-      return matchesStatus && matchesEntity;
-    });
-  }, [queueItems, statusFilter, entityFilter]);
 
   return (
     <div className={`container-fluid ${styles.pageContainer}`}>
-      {/* Encabezado Principal */}
-      <SyncHeader
-        onClearSynced={handleClearSynced}
-        onSyncNow={handleSyncNow}
+      <SyncHeader onSyncNow={() => void handleSyncNow()} isSyncing={isSyncing} />
+      <SyncOfflineBanner
+        metrics={metrics}
+        isOnline={isOnline}
       />
-
-      {/* Banner de Estado Offline y Métricas */}
-      <SyncOfflineBanner metrics={metrics} />
-
-      {/* Contenedor de la Tabla y Filtros */}
+      {syncError && <p role="alert" className="alert alert-danger">{syncError}</p>}
       <SyncTable
         queue={filteredQueue}
         totalItems={metrics.total}
         statusFilter={statusFilter}
         entityFilter={entityFilter}
+        entityOptions={entityOptions}
         onStatusFilterChange={setStatusFilter}
         onEntityFilterChange={setEntityFilter}
-        onViewPayload={(payload) => setSelectedJsonPayload(payload)}
+        onViewPayload={setSelectedJsonPayload}
       />
-
-      {/* Modal Inspector de Payload JSON */}
       {selectedJsonPayload && (
         <JsonPayloadModal
           payload={selectedJsonPayload}

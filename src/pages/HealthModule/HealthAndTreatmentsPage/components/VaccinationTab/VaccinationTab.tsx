@@ -1,38 +1,82 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './VaccinationTab.module.css';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
 
-interface ScheduledVaccineUI {
-  id: string;
-  day: string;
-  month: string;
-  vaccine_name: string;
-  animal_count: number;
-  lot_name: string;
-}
-
-const MOCK_SCHEDULED_VACCINES: ScheduledVaccineUI[] = [
-  {
-    id: 'v1',
-    day: '18',
-    month: 'JUN',
-    vaccine_name: 'Clostridial 8 vías',
-    animal_count: 12,
-    lot_name: 'Lote Vacas de cría'
-  },
-  {
-    id: 'v2',
-    day: '23',
-    month: 'JUN',
-    vaccine_name: 'Fiebre aftosa',
-    animal_count: 14,
-    lot_name: 'Lote Novillos'
-  }
-];
+const DAY_MS = 86_400_000;
 
 export const VaccinationTab: React.FC = () => {
+  const navigate = useNavigate();
+  const { scope } = useFarmScope();
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const { records: vaccinations, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+    'vaccinations',
+    '/vaccinations',
+    scope,
+  );
+  const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
+  const { records: lots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const [now] = useState(() => new Date());
+  const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+  const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
+  const monthLabel = selectedMonth.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+  const today = useMemo(
+    () => new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+    [now],
+  );
+
+  const upcoming = useMemo(() => vaccinations.flatMap((vaccination) => {
+    const dueDate = String(vaccination.next_due_date ?? '');
+    const time = Date.parse(dueDate);
+    if (!dueDate || !Number.isFinite(time) || time < today.getTime()) return [];
+    const animalId = String(vaccination.animal_id ?? '');
+    const animal = animals.find((entry) => entry.id === animalId);
+    const lot = lots.find((entry) => entry.id === animal?.lot_id);
+    return [{
+      id: String(vaccination.id),
+      animalId,
+      name: String(vaccination.vaccine_name ?? 'Vacuna'),
+      date: new Date(`${dueDate.slice(0, 10)}T00:00:00`),
+      animalTag: String(animal?.tag_number ?? animal?.identifier_tag ?? animalId),
+      animalName: String(animal?.name ?? 'Sin nombre'),
+      lotName: String(lot?.name ?? 'Sin lote'),
+    }];
+  }).sort((left, right) => left.date.getTime() - right.date.getTime()), [animals, lots, today, vaccinations]);
+
+  const calendarDays = useMemo(() => {
+    const offset = (monthStart.getDay() + 6) % 7;
+    const daysInMonth = monthEnd.getDate();
+    const total = Math.ceil((offset + daysInMonth) / 7) * 7;
+    return Array.from({ length: total }, (_, index) => {
+      const day = index - offset + 1;
+      if (day < 1 || day > daysInMonth) return null;
+      const date = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), day);
+      const hasDueVaccination = upcoming.some((item) =>
+        item.date.getFullYear() === date.getFullYear()
+        && item.date.getMonth() === date.getMonth()
+        && item.date.getDate() === date.getDate(),
+      );
+      return { day, hasDueVaccination };
+    });
+  }, [monthEnd, monthStart, selectedMonth, upcoming]);
+  const monthOptions = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() + index, 1);
+    return {
+      value: `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`,
+      label: date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }),
+    };
+  });
+  const selectedMonthValue = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth()).padStart(2, '0')}`;
+  const nextThirtyDays = upcoming.filter((item) =>
+    item.date.getTime() < today.getTime() + 30 * DAY_MS,
+  );
+
   return (
     <div className="row g-4">
-      {/* Calendario Sanitario */}
       <div className="col-12 col-lg-7">
         <div className={styles.cardBox}>
           <div className="d-flex justify-content-between align-items-center mb-3">
@@ -40,50 +84,39 @@ export const VaccinationTab: React.FC = () => {
               <span className={styles.dbLabel}>CALENDARIO SANITARIO</span>
               <h2 className={styles.cardTitle}>Próximas vacunas</h2>
             </div>
-            <select className={styles.monthSelect} defaultValue="JUN_2025">
-              <option value="JUN_2025">Junio 2025</option>
-              <option value="JUL_2025">Julio 2025</option>
+            <select
+              className={styles.monthSelect}
+              value={selectedMonthValue}
+              onChange={(event) => {
+                const [year, month] = event.target.value.split('-').map(Number);
+                setSelectedMonth(new Date(year, month, 1));
+              }}
+            >
+              {monthOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
           </div>
 
-          {/* Grid del Calendario */}
+          <p className="text-secondary text-capitalize">{monthLabel}</p>
           <div className={styles.calendarGrid}>
-            <div className={styles.dayHeader}>LUN</div>
-            <div className={styles.dayHeader}>MAR</div>
-            <div className={styles.dayHeader}>MIÉ</div>
-            <div className={styles.dayHeader}>JUE</div>
-            <div className={styles.dayHeader}>VIE</div>
-            <div className={styles.dayHeader}>SÁB</div>
-            <div className={styles.dayHeader}>DOM</div>
-
-            {[27, 28, 29, 30, 31, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
-              <div key={d} className={styles.calendarCell}>{d}</div>
+            {['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'].map((day) => (
+              <div key={day} className={styles.dayHeader}>{day}</div>
             ))}
-
-            <div className={`${styles.calendarCell} ${styles.cellSelected}`}>11</div>
-            <div className={styles.calendarCell}>12</div>
-            <div className={styles.calendarCell}>13</div>
-
-            <div className={`${styles.calendarCell} ${styles.cellHasDot}`}>
-              14 <span className={styles.dot}></span>
-            </div>
-
-            {[15, 16, 17, 18].map((d) => (
-              <div key={d} className={styles.calendarCell}>{d}</div>
-            ))}
-
-            <div className={`${styles.calendarCell} ${styles.cellHasDot}`}>
-              19 <span className={styles.dot}></span>
-            </div>
-
-            {[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map((d) => (
-              <div key={d} className={styles.calendarCell}>{d}</div>
+            {calendarDays.map((date, index) => (
+              <div
+                key={`${selectedMonthValue}-${index}`}
+                className={`${styles.calendarCell} ${date?.hasDueVaccination ? styles.cellHasDot : ''}`}
+              >
+                {date?.day}
+                {date?.hasDueVaccination && <span className={styles.dot} />}
+              </div>
             ))}
           </div>
+          {error && <p role="alert" className="text-danger mt-3">{error}</p>}
         </div>
       </div>
 
-      {/* Programación Próximos 30 Días */}
       <div className="col-12 col-lg-5">
         <div className={styles.cardBox}>
           <div className="d-flex justify-content-between align-items-center mb-3">
@@ -91,32 +124,39 @@ export const VaccinationTab: React.FC = () => {
               <span className={styles.dbLabel}>PRÓXIMOS 30 DÍAS</span>
               <h2 className={styles.cardTitle}>Vacunaciones programadas</h2>
             </div>
-            <span className={styles.animalPill}>26 animales</span>
+            <span className={styles.animalPill}>{nextThirtyDays.length} dosis</span>
           </div>
 
           <div className="d-flex flex-column gap-3">
-            {MOCK_SCHEDULED_VACCINES.map((item) => (
+            {nextThirtyDays.map((item) => (
               <div key={item.id} className={styles.scheduledCard}>
-                {/* Bloque de Fecha con Dimensiones Fijas */}
                 <div className={styles.dateBlock}>
-                  <span className={styles.dateDay}>{item.day}</span>
-                  <span className={styles.dateMonth}>{item.month}</span>
+                  <span className={styles.dateDay}>{item.date.getDate()}</span>
+                  <span className={styles.dateMonth}>
+                    {item.date.toLocaleDateString('es-MX', { month: 'short' }).toUpperCase()}
+                  </span>
                 </div>
-
-                {/* Información de la Vacuna */}
                 <div className={styles.vaccineInfo}>
-                  <div className={styles.vaccineTitle}>{item.vaccine_name}</div>
+                  <div className={styles.vaccineTitle}>{item.name}</div>
                   <div className={styles.vaccineSubtitle}>
-                    {item.animal_count} animales · {item.lot_name}
+                    {item.animalTag} · {item.animalName} · {item.lotName}
                   </div>
                 </div>
-
-                {/* Botón de Acción */}
-                <button type="button" className={styles.registerBtn}>
+                <button
+                  type="button"
+                  className={styles.registerBtn}
+                  onClick={() => navigate(`/salud/vacunacion?animalId=${encodeURIComponent(item.animalId)}&vaccineName=${encodeURIComponent(item.name)}`)}
+                >
                   Registrar
                 </button>
               </div>
             ))}
+            {!isLoading && nextThirtyDays.length === 0 && (
+              <p className="text-secondary mb-0">
+                {error ?? 'No hay dosis programadas en los próximos 30 días.'}
+              </p>
+            )}
+            {isLoading && <p role="status" className="text-secondary mb-0">Cargando vacunaciones…</p>}
           </div>
         </div>
       </div>

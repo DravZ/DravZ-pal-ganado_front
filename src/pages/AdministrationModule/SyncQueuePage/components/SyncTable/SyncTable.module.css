@@ -112,6 +112,7 @@
 
 .op_CREATE { background-color: #e2e8f0; color: #334155; }
 .op_UPDATE { background-color: #fef3c7; color: #92400e; }
+.op_DELETE { background-color: #fecdd3; color: #9f1239; }
 
 .payloadPreview {
   font-family: monospace;
