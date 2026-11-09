@@ -31,7 +31,7 @@ export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId, animal }) 
 
   const handleApplyTreatment = () => {
     console.log(`[Router Log]: Redirigiendo a tratamiento para animal ${animalId}`);
-    navigate(`/salud/tratamientos/nuevo?animalId=${animalId}`);
+    navigate(`/salud/tratamientos?animalId=${encodeURIComponent(animalId)}`);
   };
 
   return (

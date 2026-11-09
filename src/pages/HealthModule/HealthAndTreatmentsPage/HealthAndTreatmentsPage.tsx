@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './HealthAndTreatmentsPage.module.css';
 import HealthTabSelector from './components/HealthTabSelector/HealthTabSelector';
 import EventsAndTreatmentsTab from './components/EventsAndTreatmentsTab/EventsAndTreatmentsTab';
@@ -9,6 +10,7 @@ import MedicationsTab from './components/MedicationsTab/MedicationsTab';
 export type HealthTabType = 'EVENTS' | 'VACCINATION' | 'MEDICATIONS';
 
 export const HealthAndTreatmentsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<HealthTabType>('EVENTS');
 
   const getActionButtonText = () => {
@@ -18,12 +20,12 @@ export const HealthAndTreatmentsPage: React.FC = () => {
       case 'VACCINATION':
         return 'Registrar vacuna';
       case 'MEDICATIONS':
-        return 'Nuevo medicamento';
+        return '';
     }
   };
 
   const handlePrimaryAction = () => {
-    console.log(`[Action Log]: Nueva acción iniciada para la pestaña ${activeTab}`);
+    navigate(activeTab === 'VACCINATION' ? '/salud/vacunacion' : '/salud/tratamientos');
   };
 
   return (
@@ -38,14 +40,16 @@ export const HealthAndTreatmentsPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          className={styles.primaryBtn}
-          onClick={handlePrimaryAction}
-        >
-          <Plus size={18} />
-          <span className={styles.btnText}>{getActionButtonText()}</span>
-        </button>
+        {activeTab !== 'MEDICATIONS' && (
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            onClick={handlePrimaryAction}
+          >
+            <Plus size={18} />
+            <span className={styles.btnText}>{getActionButtonText()}</span>
+          </button>
+        )}
       </header>
 
       {/* Selector de Pestañas Sanitarias */}

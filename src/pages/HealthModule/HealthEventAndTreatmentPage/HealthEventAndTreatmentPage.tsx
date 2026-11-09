@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './HealthEventAndTreatmentPage.module.css';
 import DoseKeypad from './components/DoseKeypad/DoseKeypad';
 import { ArrowLeft, Bell, CheckCircle } from 'lucide-react';
@@ -20,6 +20,7 @@ function localDate(date: Date): string {
 
 export const HealthEventAndTreatmentPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { scope } = useFarmScope();
   const { showNotification } = useNotification();
   const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
@@ -39,7 +40,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
     String(medication.status ?? 'active').toLowerCase() !== 'inactive',
   );
   // Estado Sección 1: Evento de Salud
-  const [animalId, setAnimalId] = useState<string>('');
+  const [animalId, setAnimalId] = useState<string>(searchParams.get('animalId') ?? '');
   const [eventType, setEventType] = useState<string>('Enfermedad');
   const [eventDate, setEventDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [veterinarian, setVeterinarian] = useState<string>('');
