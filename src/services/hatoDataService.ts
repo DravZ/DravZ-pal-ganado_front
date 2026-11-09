@@ -25,7 +25,9 @@ export type HatoResource =
   | 'production_records'
   | 'products'
   | 'purchase_records'
-  | 'suppliers';
+  | 'suppliers'
+  | 'expenses'
+  | 'cost_allocations';
 
 export interface HatoScope {
   userId: string;
@@ -67,6 +69,8 @@ const endpointByResource: Record<HatoResource, string> = {
   products: '/products',
   purchase_records: '/purchase-records',
   suppliers: '/suppliers',
+  expenses: '/expenses',
+  cost_allocations: '/cost-allocations',
 };
 
 const supportedOperations: Record<HatoResource, WriteOperation[]> = {
@@ -88,6 +92,8 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   products: ['CREATE', 'UPDATE', 'DELETE'],
   purchase_records: ['CREATE', 'UPDATE', 'DELETE'],
   suppliers: [],
+  expenses: ['CREATE'],
+  cost_allocations: ['CREATE'],
 };
 
 const onlineOnlyResources = new Set(['users', 'organizations', 'farms', 'roles', 'permissions']);
@@ -204,6 +210,8 @@ export function useHatoCollection<T extends Record<string, unknown>>(
         'feeding_records',
         'production_records',
         'purchase_records',
+        'expenses',
+        'cost_allocations',
       ].includes(resource)
       && !url.searchParams.has('farm_id')
     ) {

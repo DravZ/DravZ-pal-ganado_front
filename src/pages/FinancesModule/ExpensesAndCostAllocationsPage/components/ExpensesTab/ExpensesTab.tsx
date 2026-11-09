@@ -1,68 +1,52 @@
 import React, { useState } from 'react';
 import styles from './ExpensesTab.module.css';
 import { Search } from 'lucide-react';
-import type { Expense } from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
 
-type ExpenseUI = Expense & {
-  supplier_name: string;
-  assignment_text: string;
-  formatted_amount: string;
-};
+const money = (value: number) => value.toLocaleString('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+  maximumFractionDigits: 2,
+});
 
-const MOCK_EXPENSES: ExpenseUI[] = [
-  {
-    id: 'exp-1',
-    farm_id: 'farm-1',
-    supplier_id: 'sup-1',
-    supplier_name: 'Veterinaria San Martín',
-    expense_date: '14 jun 2025',
-    category: 'Sanidad',
-    description: 'Compra vacuna clostridial',
-    amount: 1062075,
-    status: 'Asignado',
-    assignment_text: 'Vacas de cría',
-    formatted_amount: '$1,062,075'
-  },
-  {
-    id: 'exp-2',
-    farm_id: 'farm-1',
-    supplier_id: 'sup-2',
-    supplier_name: 'Servicios Rurales SAS',
-    expense_date: '10 jun 2025',
-    category: 'Infraestructura',
-    description: 'Mantenimiento de cercas',
-    amount: 840000,
-    status: 'Asignado',
-    assignment_text: 'Potrero Norte',
-    formatted_amount: '$840,000'
-  },
-  {
-    id: 'exp-3',
-    farm_id: 'farm-1',
-    supplier_id: 'sup-3',
-    supplier_name: 'Dra. Ana Costa',
-    expense_date: '08 jun 2025',
-    category: 'Servicios',
-    description: 'Honorarios veterinarios',
-    amount: 650000,
-    status: 'Pendiente',
-    assignment_text: 'Sin asignar',
-    formatted_amount: '$650,000'
-  }
-];
+const amountOf = (value: unknown) => Number(value ?? 0) || 0;
 
 export const ExpensesTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { scope } = useFarmScope();
+  const { records: expenses, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+    'expenses',
+    '/expenses',
+    scope,
+  );
+  const { records: allocations } = useHatoCollection<Record<string, unknown>>(
+    'cost_allocations',
+    '/cost-allocations',
+    scope,
+  );
+  const { records: suppliers } = useHatoCollection<Record<string, unknown>>(
+    'suppliers',
+    '/suppliers',
+    scope,
+  );
+  const filtered = [...expenses]
+    .filter((expense) => {
+      const supplier = suppliers.find((item) => item.id === expense.supplier_id);
+      const query = searchTerm.toLowerCase();
+      return String(expense.description ?? '').toLowerCase().includes(query)
+        || String(supplier?.name ?? '').toLowerCase().includes(query)
+        || String(expense.category ?? '').toLowerCase().includes(query);
+    })
+    .sort((left, right) => String(right.expense_date ?? '').localeCompare(String(left.expense_date ?? '')));
 
   return (
     <div className={styles.cardBox}>
-      {/* CABECERA CON BÚSQUEDA */}
       <div className={styles.cardHeaderFlex}>
         <div>
           <span className={styles.dbLabel}>EXPENSES</span>
           <h2 className={styles.cardTitle}>Movimientos recientes</h2>
         </div>
-
         <div className={styles.searchBox}>
           <Search size={18} className={styles.searchIcon} />
           <input
@@ -70,12 +54,11 @@ export const ExpensesTab: React.FC = () => {
             placeholder="Buscar gasto..."
             className={styles.searchInput}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(event) => setSearchTerm(event.target.value)}
           />
         </div>
       </div>
-
-      {/* TABLA RESPONSIVA */}
+      {error && <p role="alert" className="text-danger">{error}</p>}
       <div className={styles.tableResponsiveContainer}>
         <table className={styles.customTable}>
           <thead>
@@ -89,31 +72,41 @@ export const ExpensesTab: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {MOCK_EXPENSES.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  <div className="fw-bold">{item.description}</div>
-                  <div className={styles.subText}>{item.supplier_name}</div>
-                </td>
-                <td>{item.expense_date}</td>
-                <td>
-                  <span className={styles.categoryBadge}>{item.category}</span>
-                </td>
-                <td>{item.assignment_text}</td>
-                <td className="fw-bold">{item.formatted_amount}</td>
-                <td>
-                  <span
-                    className={`${styles.statusBadge} ${
-                      item.status === 'Asignado'
-                        ? styles.badgeAssigned
-                        : styles.badgePending
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {filtered.map((expense) => {
+              const allocationsForExpense = allocations.filter((allocation) =>
+                allocation.expense_id === expense.id,
+              );
+              const allocated = allocationsForExpense.reduce(
+                (sum, allocation) => sum + amountOf(allocation.amount),
+                0,
+              );
+              const assigned = allocated >= amountOf(expense.amount) && amountOf(expense.amount) > 0;
+              const supplier = suppliers.find((item) => item.id === expense.supplier_id);
+              return (
+                <tr key={String(expense.id)}>
+                  <td>
+                    <div className="fw-bold">{String(expense.description ?? 'Gasto')}</div>
+                    <div className={styles.subText}>{String(supplier?.name ?? 'Proveedor no especificado')}</div>
+                  </td>
+                  <td>{String(expense.expense_date ?? '').slice(0, 10)}</td>
+                  <td><span className={styles.categoryBadge}>{String(expense.category ?? 'Sin categoría')}</span></td>
+                  <td>{assigned ? `${allocationsForExpense.length} asignación(es)` : 'Sin asignar'}</td>
+                  <td className="fw-bold">{money(amountOf(expense.amount))}</td>
+                  <td>
+                    <span className={`${styles.statusBadge} ${assigned ? styles.badgeAssigned : styles.badgePending}`}>
+                      {assigned ? 'Asignado' : 'Pendiente'}
+                    </span>
+                    {String(expense.id ?? '').startsWith('local:') && (
+                      <div className={styles.subText}>Pendiente de sincronización</div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+            {!isLoading && filtered.length === 0 && (
+              <tr><td colSpan={6} className="text-center text-secondary py-4">{error ?? 'No hay gastos registrados para esta finca.'}</td></tr>
+            )}
+            {isLoading && <tr><td colSpan={6} role="status" className="text-center text-secondary py-4">Cargando gastos…</td></tr>}
           </tbody>
         </table>
       </div>

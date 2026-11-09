@@ -1,25 +1,84 @@
 import React, { useState } from 'react';
 import styles from './CostAllocationsTab.module.css';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
+
+const colors = ['#1e4b27', '#52796f', '#d97706', '#64748b', '#a855f7', '#0891b2'];
+const money = (value: number) => value.toLocaleString('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+  maximumFractionDigits: 2,
+});
 
 export const CostAllocationsTab: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState('Junio 2025');
+  const { scope } = useFarmScope();
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const { records: allocations, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+    'cost_allocations',
+    '/cost-allocations',
+    scope,
+  );
+  const { records: expenses } = useHatoCollection<Record<string, unknown>>('expenses', '/expenses', scope);
+  const { records: lots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
 
-  const categories = [
-    { name: 'Alimentación', amount: '$12.8 M', percent: '48%', color: '#1e4b27' },
-    { name: 'Sanidad', amount: '$6.4 M', percent: '24%', color: '#52796f' },
-    { name: 'Infraestructura', amount: '$4.2 M', percent: '16%', color: '#d97706' },
-    { name: 'Otros', amount: '$3.1 M', percent: '12%', color: '#cbd5e1' }
-  ];
+  const monthOptions = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date();
+    date.setDate(1);
+    date.setMonth(date.getMonth() - index);
+    const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return { value, label: date.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' }) };
+  });
+  const monthAllocations = allocations.filter((allocation) =>
+    String(allocation.allocation_date ?? '').startsWith(selectedMonth),
+  );
+  const byCategory = new Map<string, number>();
+  const byLot = new Map<string, { amount: number; count: number }>();
 
-  const lotsCost = [
-    { name: 'Vacas de cría', countText: '58 animales', amount: '$8.42 M', progress: 85 },
-    { name: 'Novillos levante', countText: '63 animales', amount: '$7.18 M', progress: 72 },
-    { name: 'Ceba final', countText: '24 animales', amount: '$5.86 M', progress: 58 }
-  ];
+  for (const allocation of monthAllocations) {
+    const expense = expenses.find((item) => item.id === allocation.expense_id);
+    const category = String(expense?.category ?? 'Otros');
+    byCategory.set(category, (byCategory.get(category) ?? 0) + (Number(allocation.amount) || 0));
+    if (typeof allocation.lot_id === 'string') {
+      const current = byLot.get(allocation.lot_id) ?? { amount: 0, count: 0 };
+      current.amount += Number(allocation.amount) || 0;
+      current.count += 1;
+      byLot.set(allocation.lot_id, current);
+    }
+  }
+
+  const categoryRows = [...byCategory.entries()]
+    .map(([name, amount]) => ({ name, amount }))
+    .sort((left, right) => right.amount - left.amount);
+  const lotRows = [...byLot.entries()]
+    .map(([id, value]) => ({
+      id,
+      name: String(lots.find((lot) => lot.id === id)?.name ?? 'Lote'),
+      ...value,
+    }))
+    .sort((left, right) => right.amount - left.amount);
+  const totalAssigned = categoryRows.reduce((sum, item) => sum + item.amount, 0);
+  const totalExpenses = expenses
+    .filter((expense) => String(expense.expense_date ?? '').startsWith(selectedMonth))
+    .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+  const unassigned = Math.max(totalExpenses - totalAssigned, 0);
+  const maxLotAmount = Math.max(...lotRows.map((lot) => lot.amount), 1);
+  const monthLabel = monthOptions.find((option) => option.value === selectedMonth)?.label ?? selectedMonth;
+  const donutSegments = categoryRows.map((category, index) => ({
+    ...category,
+    color: colors[index % colors.length],
+    percentage: totalAssigned ? category.amount / totalAssigned * 100 : 0,
+    offset: 25 - categoryRows
+      .slice(0, index)
+      .reduce((sum, previous) => sum + (totalAssigned ? previous.amount / totalAssigned * 100 : 0), 0),
+  }));
 
   return (
     <div className="row g-4">
-      {/* DONUT CHART - DISTRIBUCIÓN POR CATEGORÍA */}
+      {error && <div className="col-12"><p role="alert" className="text-danger">{error}</p></div>}
       <div className="col-12 col-lg-5">
         <div className={styles.cardBox}>
           <div className={styles.headerFlex}>
@@ -27,107 +86,80 @@ export const CostAllocationsTab: React.FC = () => {
               <span className={styles.dbLabel}>COSTOS ASIGNADOS</span>
               <h2 className={styles.cardTitle}>Distribución por categoría</h2>
             </div>
-
-            <select
-              className={styles.monthSelect}
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-            >
-              <option value="Junio 2025">Junio 2025</option>
-              <option value="Mayo 2025">Mayo 2025</option>
+            <select className={styles.monthSelect} value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)}>
+              {monthOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </div>
-
           <div className="d-flex align-items-center gap-4 mt-4 flex-wrap">
-            {/* GRÁFICO SVG DONUT */}
             <div className={styles.donutContainer}>
               <svg viewBox="0 0 36 36" className={styles.donutSvg}>
-                <path
-                  className={styles.donutSegment}
-                  stroke="#1e4b27"
-                  strokeDasharray="48 52"
-                  strokeDashoffset="25"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className={styles.donutSegment}
-                  stroke="#52796f"
-                  strokeDasharray="24 76"
-                  strokeDashoffset="-23"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className={styles.donutSegment}
-                  stroke="#d97706"
-                  strokeDasharray="16 84"
-                  strokeDashoffset="-47"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className={styles.donutSegment}
-                  stroke="#cbd5e1"
-                  strokeDasharray="12 88"
-                  strokeDashoffset="-63"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
+                {donutSegments.map((segment) => (
+                  <path
+                    key={segment.name}
+                    className={styles.donutSegment}
+                    stroke={segment.color}
+                    strokeDasharray={`${segment.percentage} ${100 - segment.percentage}`}
+                    strokeDashoffset={segment.offset}
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                ))}
               </svg>
               <div className={styles.donutCenter}>
-                <span className={styles.centerValue}>$26.5 M</span>
+                <span className={styles.centerValue}>{money(totalAssigned)}</span>
                 <span className={styles.centerLabel}>ASIGNADO</span>
               </div>
             </div>
-
-            {/* LEYENDA */}
             <div className="d-flex flex-column gap-2">
-              {categories.map((c) => (
-                <div key={c.name} className="d-flex align-items-center gap-2">
-                  <span className={styles.dot} style={{ backgroundColor: c.color }}></span>
+              {categoryRows.map((category, index) => (
+                <div key={category.name} className="d-flex align-items-center gap-2">
+                  <span className={styles.dot} style={{ backgroundColor: colors[index % colors.length] }} />
                   <div>
-                    <div className="fw-bold" style={{ fontSize: '0.85rem' }}>
-                      {c.name}
-                    </div>
+                    <div className="fw-bold" style={{ fontSize: '0.85rem' }}>{category.name}</div>
                     <div className={styles.subText}>
-                      {c.amount} · {c.percent}
+                      {money(category.amount)} · {totalAssigned ? `${(category.amount / totalAssigned * 100).toFixed(1)}%` : '0%'}
                     </div>
                   </div>
                 </div>
               ))}
+              {categoryRows.length === 0 && <p className="text-secondary mb-0">No hay asignaciones en {monthLabel}.</p>}
             </div>
+          </div>
+          <div className="mt-4">
+            <span className={styles.dbLabel}>GASTOS SIN ASIGNAR · {monthLabel}</span>
+            <div className={styles.cardTitle}>{money(unassigned)}</div>
           </div>
         </div>
       </div>
 
-      {/* LOTES CON MAYOR COSTO */}
       <div className="col-12 col-lg-7">
         <div className={styles.cardBox}>
           <div className="mb-3">
             <span className={styles.dbLabel}>POR CENTRO DE COSTO</span>
             <h2 className={styles.cardTitle}>Lotes con mayor costo</h2>
           </div>
-
           <div className="d-flex flex-column gap-4 mt-3">
-            {lotsCost.map((lot) => (
-              <div key={lot.name}>
+            {lotRows.map((lot) => (
+              <div key={lot.id}>
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <div>
-                    <span className="fw-bold d-block" style={{ fontSize: '0.9rem' }}>
-                      {lot.name}
-                    </span>
-                    <span className={styles.subText}>{lot.countText}</span>
+                    <span className="fw-bold d-block" style={{ fontSize: '0.9rem' }}>{lot.name}</span>
+                    <span className={styles.subText}>{lot.count} asignación(es)</span>
                   </div>
-                  <span className="fw-bold" style={{ fontSize: '1rem', color: '#0f172a' }}>
-                    {lot.amount}
-                  </span>
+                  <span className="fw-bold" style={{ fontSize: '1rem', color: '#0f172a' }}>{money(lot.amount)}</span>
                 </div>
                 <div className={styles.progressBarBg}>
-                  <div
-                    className={styles.progressBarFill}
-                    style={{ width: `${lot.progress}%` }}
-                  ></div>
+                  <div className={styles.progressBarFill} style={{ width: `${lot.amount / maxLotAmount * 100}%` }} />
                 </div>
               </div>
             ))}
+            {!isLoading && lotRows.length === 0 && (
+              <p className="text-secondary mb-0">No hay costos asignados a lotes en {monthLabel}.</p>
+            )}
+            {isLoading && <p role="status" className="text-secondary mb-0">Cargando asignaciones…</p>}
           </div>
+          {animals.length > 0 && (
+            <p className={styles.subText}>También hay {monthAllocations.filter((allocation) => typeof allocation.animal_id === 'string').length} asignación(es) directa(s) a animales.</p>
+          )}
         </div>
       </div>
     </div>

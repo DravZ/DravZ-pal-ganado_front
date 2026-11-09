@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styles from './CreateExpenseModal.module.css';
 import { X, Check, WifiOff } from 'lucide-react';
-import type { Expense, SyncQueueEntry } from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
+import useNotification from '../../../../../hooks/useNotification';
 
 interface CreateExpenseModalProps {
   isOpen: boolean;
@@ -14,46 +16,60 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
   onClose,
   onSuccess
 }) => {
-  const [supplierId, setSupplierId] = useState('sup-1');
-  const [expenseDate, setExpenseDate] = useState('2025-06-16');
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records: suppliers } = useHatoCollection<Record<string, unknown>>('suppliers', '/suppliers', scope);
+  const [supplierId, setSupplierId] = useState('');
+  const [expenseDate, setExpenseDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
   const [category, setCategory] = useState('Sanidad');
   const [amount, setAmount] = useState('0');
   const [description, setDescription] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const expenseId = crypto.randomUUID();
-
-    const expensePayload: Expense = {
-      id: expenseId,
-      farm_id: 'farm-1',
-      supplier_id: supplierId,
-      expense_date: new Date(expenseDate).toISOString(),
-      category,
-      description,
-      amount: parseFloat(amount) || 0,
-      status: 'Pendiente'
-    };
-
-    const syncEntry: SyncQueueEntry<Expense> = {
-      id: crypto.randomUUID(),
-      entity_name: 'expenses',
-      entity_id: expenseId,
-      operation_type: 'CREATE',
-      payload: expensePayload,
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: new Date().toISOString()
-    };
-
-    console.log('[Action Log]: Registrar Gasto:', expensePayload);
-    console.log('[Sync Queue]:', syncEntry);
-
-    if (onSuccess) onSuccess();
-    onClose();
+    if (!scope) {
+      setSubmitError('No hay una finca autorizada seleccionada.');
+      return;
+    }
+    if (Number(amount) <= 0 || !Number.isFinite(Number(amount))) {
+      setSubmitError('El monto debe ser mayor que cero.');
+      return;
+    }
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(scope, 'expenses', 'CREATE', {
+        farm_id: scope.farmId,
+        supplier_id: supplierId || undefined,
+        expense_date: expenseDate,
+        category,
+        description: description.trim() || undefined,
+        amount: Number(amount),
+        status: 'PENDING',
+      });
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Gasto pendiente de sincronización' : 'Gasto registrado',
+        message: result.lastError ?? (result.pending
+          ? 'El gasto quedó guardado localmente y se sincronizará al recuperar la conexión.'
+          : 'El gasto se guardó correctamente.'),
+      });
+      onSuccess?.();
+      onClose();
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo registrar el gasto.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo guardar', message });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -81,8 +97,10 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
                 value={supplierId}
                 onChange={(e) => setSupplierId(e.target.value)}
               >
-                <option value="sup-1">Veterinaria San Martín · NIT 901.221.047</option>
-                <option value="sup-2">Servicios Rurales SAS · NIT 800.992.110</option>
+                <option value="">Sin proveedor</option>
+                {suppliers.map((supplier) => (
+                  <option key={String(supplier.id)} value={String(supplier.id)}>{String(supplier.name ?? supplier.id)}</option>
+                ))}
               </select>
             </div>
 
@@ -144,18 +162,20 @@ export const CreateExpenseModal: React.FC<CreateExpenseModalProps> = ({
             <div>
               <div className={styles.offlineTitle}>Disponible sin conexión</div>
               <div className={styles.offlineSubtitle}>
-                Si no hay señal, se guardará en sync_queue.
+                Si no hay señal, se guardará en la cola local de sincronización.
               </div>
             </div>
           </div>
+
+          {submitError && <p role="alert" className="text-danger">{submitError}</p>}
 
           <div className={styles.footer}>
             <button type="button" className={styles.cancelBtn} onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className={styles.saveBtn}>
+            <button type="submit" className={styles.saveBtn} disabled={isSaving}>
               <Check size={18} />
-              <span>Guardar registro</span>
+              <span>{isSaving ? 'Guardando…' : 'Guardar registro'}</span>
             </button>
           </div>
         </form>
