@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../shared/ManagementPage.module.css';
 import type { User } from '../../../types/database.types';
-
-// Componentes Modularizados
+import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../services/hatoDataService';
 import UsersHeader from './components/UsersHeader/UsersHeader';
-import UsersStateSelector from './components/UsersStateSelector/UsersStateSelector';
 import UsersFilterBar from './components/UsersFilterBar/UsersFilterBar';
 import UsersTable from './components/UsersTable/UsersTable';
 import UsersLoadingState from './components/UsersLoadingState/UsersLoadingState';
@@ -14,124 +13,73 @@ import UsersErrorState from './components/UsersErrorState/UsersErrorState';
 
 export type UserPageState = 'LIST' | 'LOADING' | 'EMPTY' | 'ERROR';
 
-// Interfaz extendida para la vista de UI (mapeada a database.types.ts)
 export interface UserUIItem extends User {
   role: string;
   farm_name: string;
   initials: string;
 }
 
+function displayRole(role: unknown): string {
+  if (typeof role !== 'string' || !role.trim()) return 'Perfil por confirmar';
+  const normalized = role.toUpperCase();
+  if (normalized.includes('ADMIN')) return 'Administrador';
+  return role.replaceAll('_', ' ').toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase());
+}
+
 export const UsersManagementPage: React.FC = () => {
   const navigate = useNavigate();
-  const [pageState, setPageState] = useState<UserPageState>('LIST');
-  const [usersList, setUsersList] = useState<UserUIItem[]>([]);
+  const { scope } = useFarmScope();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [roleFilter, setRoleFilter] = useState('ALL');
+  const { records, isLoading, error, refresh } = useHatoCollection<Record<string, unknown>>(
+    'users',
+    '/users',
+    scope,
+  );
+  const { records: farms } = useHatoCollection<Record<string, unknown>>('farms', '/farms', scope);
+  const usersList = useMemo(() => records.map((record): UserUIItem => {
+    const name = String(record.name ?? '');
+    const farmId = typeof record.farm_id === 'string' ? record.farm_id : '';
+    const farmName = typeof record.farm_name === 'string'
+      ? record.farm_name
+      : String(farms.find((farm) => farm.id === farmId)?.name ?? '');
+    return {
+      id: String(record.id ?? ''),
+      organization_id: String(record.organization_id ?? scope?.organizationId ?? ''),
+      name,
+      email: String(record.email ?? ''),
+      phone: typeof record.phone === 'string' ? record.phone : undefined,
+      status: String(record.status ?? 'inactive'),
+      created_at: String(record.created_at ?? ''),
+      role: displayRole(record.role),
+      farm_name: farmName,
+      initials: name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join(''),
+    };
+  }), [farms, records, scope?.organizationId]);
 
-  // Petición / Simulación de Carga
-  const fetchUsers = async () => {
-    setPageState('LOADING');
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const mockUsers: UserUIItem[] = [
-        {
-          id: 'user-1',
-          organization_id: 'org-123',
-          name: 'Rafael Mendes',
-          email: 'rafael@serraverde.com',
-          phone: '+57 300 482 1930',
-          status: 'active',
-          role: 'Administrador',
-          farm_name: 'Finca Serra Verde',
-          initials: 'RM',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 'user-2',
-          organization_id: 'org-123',
-          name: 'Laura Gómez',
-          email: 'laura@serraverde.com',
-          phone: '+57 315 774 2091',
-          status: 'pending_invitation',
-          role: 'Perfil por confirmar',
-          farm_name: 'Finca Serra Verde',
-          initials: 'LG',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 'user-3',
-          organization_id: 'org-123',
-          name: 'Ana Costa',
-          email: 'ana@veterinaria.com',
-          phone: '+57 301 555 0148',
-          status: 'active',
-          role: 'Perfil por confirmar',
-          farm_name: 'Finca Serra Verde',
-          initials: 'AC',
-          created_at: new Date().toISOString()
-        }
-      ];
-
-      setUsersList(mockUsers);
-      setPageState('LIST');
-    } catch {
-      setPageState('ERROR');
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  // Filtro dinámico en memoria
-  const filteredUsers = useMemo(() => {
-    return usersList.filter((u) => {
-      const matchQuery =
-        u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchStatus =
-        statusFilter === 'ALL' ||
-        (statusFilter === 'ACTIVE' && u.status === 'active') ||
-        (statusFilter === 'PENDING' && u.status === 'pending_invitation');
-
-      const matchRole =
-        roleFilter === 'ALL' ||
-        (roleFilter === 'ADMIN' && u.role === 'Administrador') ||
-        (roleFilter === 'UNCONFIRMED' && u.role === 'Perfil por confirmar');
-
-      return matchQuery && matchStatus && matchRole;
-    });
-  }, [usersList, searchTerm, statusFilter, roleFilter]);
+  const filteredUsers = useMemo(() => usersList.filter((user) => {
+    const matchQuery = user.name.toLowerCase().includes(searchTerm.toLowerCase())
+      || user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const status = user.status.toLowerCase();
+    const matchStatus = statusFilter === 'ALL'
+      || (statusFilter === 'ACTIVE' && status === 'active')
+      || (statusFilter === 'PENDING' && (status.includes('pending') || status.includes('invitation')));
+    const matchRole = roleFilter === 'ALL'
+      || (roleFilter === 'ADMIN' && user.role === 'Administrador')
+      || (roleFilter === 'UNCONFIRMED' && user.role === 'Perfil por confirmar');
+    return matchQuery && matchStatus && matchRole;
+  }), [roleFilter, searchTerm, statusFilter, usersList]);
 
   return (
     <div className={`container-fluid ${styles.pageContainer}`}>
-      {/* Encabezado con Redirección al Crear Usuario */}
       <UsersHeader onCreateUser={() => navigate('/usuarios/nuevo')} />
-
-      {/* Selector de Simulación de Estados (Lista, Carga, Vacío, Error) */}
-      <UsersStateSelector
-        currentState={pageState}
-        onChangeState={(state) => {
-          setPageState(state);
-          if (state === 'LIST' && usersList.length === 0) {
-            fetchUsers();
-          }
-        }}
-      />
-
-      {/* RENDERIZADO CONDICIONAL DE ESTADOS */}
-      {pageState === 'LOADING' && <UsersLoadingState />}
-
-      {pageState === 'ERROR' && <UsersErrorState onRetry={fetchUsers} />}
-
-      {pageState === 'EMPTY' && (
-        <UsersEmptyState onCreateUser={() => navigate('/usuarios/nuevo')} />
-      )}
-
-      {pageState === 'LIST' && (
+      {error && <p role="alert">{error}. Se muestran los datos locales disponibles.</p>}
+      {isLoading ? <UsersLoadingState /> : usersList.length === 0 ? (
+        error ? <UsersErrorState onRetry={() => void refresh()} /> : (
+          <UsersEmptyState onCreateUser={() => navigate('/usuarios/nuevo')} />
+        )
+      ) : (
         <>
           <UsersFilterBar
             searchTerm={searchTerm}
@@ -141,11 +89,7 @@ export const UsersManagementPage: React.FC = () => {
             roleFilter={roleFilter}
             onRoleChange={setRoleFilter}
           />
-
-          <UsersTable
-            users={filteredUsers}
-            onUserClick={(user) => navigate(`/usuarios/${user.id}`)}
-          />
+          <UsersTable users={filteredUsers} onUserClick={(user) => navigate(`/usuarios/${user.id}`)} />
         </>
       )}
     </div>

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../shared/ManagementPage.module.css';
 import type { Farm } from '../../../types/database.types';
-
-// Subcomponentes
+import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../services/hatoDataService';
 import FarmsHeader from './components/FarmsHeader/FarmsHeader';
-import FarmsStateSelector from './components/FarmsStateSelector/FarmsStateSelector';
 import FarmsFilterBar from './components/FarmsFilterBar/FarmsFilterBar';
 import FarmsTable from './components/FarmsTable/FarmsTable';
 import FarmsLoadingState from './components/FarmsLoadingState/FarmsLoadingState';
@@ -16,100 +15,45 @@ export type FarmPageState = 'LIST' | 'LOADING' | 'EMPTY' | 'ERROR';
 
 export const FarmsManagementPage: React.FC = () => {
   const navigate = useNavigate();
-  const [pageState, setPageState] = useState<FarmPageState>('LIST');
-  const [farmsList, setFarmsList] = useState<Farm[]>([]);
+  const { scope } = useFarmScope();
   const [searchTerm, setSearchTerm] = useState('');
+  const { records, isLoading, error, refresh } = useHatoCollection<Record<string, unknown>>(
+    'farms',
+    '/farms',
+    scope,
+  );
+  const farmsList = useMemo(() => records.map((record): Farm => ({
+    id: String(record.id ?? ''),
+    organization_id: String(record.organization_id ?? scope?.organizationId ?? ''),
+    name: String(record.name ?? ''),
+    code: typeof record.code === 'string' ? record.code : undefined,
+    state: typeof record.state === 'string' ? record.state : undefined,
+    municipality: typeof record.municipality === 'string' ? record.municipality : undefined,
+    locality: typeof record.locality === 'string' ? record.locality : undefined,
+    address: typeof record.address === 'string' ? record.address : undefined,
+    hectares: Number(record.hectares ?? record.total_area_hectares ?? 0) || undefined,
+    status: String(record.status ?? 'inactive'),
+    created_at: String(record.created_at ?? ''),
+  })), [records, scope?.organizationId]);
 
-  // Petición / Simulación de Carga
-  const fetchFarms = async () => {
-    setPageState('LOADING');
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const mockFarms: Farm[] = [
-        {
-          id: 'farm-1',
-          organization_id: 'org-123',
-          name: 'Finca Serra Verde',
-          code: 'FIN-001',
-          state: 'Antioquia',
-          municipality: 'Puerto Berrío',
-          locality: 'Vía Puerto Berrío, km 18',
-          hectares: 159.5,
-          status: 'active',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 'farm-2',
-          organization_id: 'org-123',
-          name: 'Finca El Porvenir',
-          code: 'FIN-002',
-          state: 'Córdoba',
-          municipality: 'Montería',
-          locality: 'Corregimiento El Retiro',
-          hectares: 84.0,
-          status: 'active',
-          created_at: new Date().toISOString()
-        }
-      ];
-
-      setFarmsList(mockFarms);
-      setPageState('LIST');
-    } catch {
-      setPageState('ERROR');
-    }
-  };
-
-  useEffect(() => {
-    fetchFarms();
-  }, []);
-
-  // Filtro en memoria
-  const filteredFarms = useMemo(() => {
-    return farmsList.filter((f) => {
-      const query = searchTerm.toLowerCase();
-      const matchName = f.name.toLowerCase().includes(query);
-      const matchCode = f.code ? f.code.toLowerCase().includes(query) : false;
-      const matchMuni = f.municipality
-        ? f.municipality.toLowerCase().includes(query)
-        : false;
-
-      return matchName || matchCode || matchMuni;
-    });
-  }, [farmsList, searchTerm]);
+  const filteredFarms = useMemo(() => farmsList.filter((farm) => {
+    const query = searchTerm.toLowerCase();
+    return farm.name.toLowerCase().includes(query)
+      || Boolean(farm.code?.toLowerCase().includes(query))
+      || Boolean(farm.municipality?.toLowerCase().includes(query));
+  }), [farmsList, searchTerm]);
 
   return (
     <div className={`container-fluid ${styles.pageContainer}`}>
-      {/* Encabezado */}
       <FarmsHeader onCreateFarm={() => navigate('/fincas/nueva')} />
-
-      {/* Selector de Simulación de Estados */}
-      <FarmsStateSelector
-        currentState={pageState}
-        onChangeState={(state) => {
-          setPageState(state);
-          if (state === 'LIST' && farmsList.length === 0) {
-            fetchFarms();
-          }
-        }}
-      />
-
-      {/* RENDERIZADO DE ESTADOS */}
-      {pageState === 'LOADING' && <FarmsLoadingState />}
-
-      {pageState === 'ERROR' && <FarmsErrorState onRetry={fetchFarms} />}
-
-      {pageState === 'EMPTY' && (
-        <FarmsEmptyState onCreateFarm={() => navigate('/fincas/nueva')} />
-      )}
-
-      {pageState === 'LIST' && (
+      {error && <p role="alert">{error}. Se muestran los datos locales disponibles.</p>}
+      {isLoading ? <FarmsLoadingState /> : farmsList.length === 0 ? (
+        error ? <FarmsErrorState onRetry={() => void refresh()} /> : (
+          <FarmsEmptyState onCreateFarm={() => navigate('/fincas/nueva')} />
+        )
+      ) : (
         <>
-          <FarmsFilterBar
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-          />
-
+          <FarmsFilterBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
           <FarmsTable
             farms={filteredFarms}
             onFarmClick={(farm) => navigate(`/fincas/${farm.id}`)}

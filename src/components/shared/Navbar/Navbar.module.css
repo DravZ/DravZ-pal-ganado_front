@@ -217,13 +217,20 @@
   color: #ffffff;
   font-size: 0.65rem;
   font-weight: 700;
-  width: 18px;
+  min-width: 18px;
   height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #ffffff;
+}
+
+.syncBadge {
+  background-color: #1e4b27;
+  border-radius: 9px;
 }
 
 /* Avatar de Usuario */

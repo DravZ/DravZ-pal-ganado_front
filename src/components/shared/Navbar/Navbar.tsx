@@ -4,6 +4,7 @@ import {
     Menu,
     ChevronDown,
     Bell,
+    RefreshCw,
     ShieldCheck,
     User as UserIcon,
     Settings,
@@ -31,6 +32,8 @@ interface NavbarProps {
     farms?: FarmOption[];
     onSelectFarm?: (farm: FarmOption) => void;
     onLogout?: () => void;
+    pendingSyncCount?: number;
+    alertCount?: number;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -44,7 +47,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     },
     farms = [],
     onSelectFarm,
-    onLogout
+    onLogout,
+    pendingSyncCount = 0,
+    alertCount = 0
 }) => {
     const sortedFarms = [...farms].sort((left, right) =>
         left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }),
@@ -190,11 +195,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <button
                         type="button"
                         className={styles.notificationButton}
+                        onClick={() => navigate('/admin/sincronizacion')}
+                        aria-label={`Sincronizaciones pendientes: ${pendingSyncCount}`}
+                        title="Cola de sincronización"
+                    >
+                        <RefreshCw size={17} strokeWidth={2} />
+                        {pendingSyncCount > 0 && (
+                            <span className={`${styles.notificationBadge} ${styles.syncBadge}`}>
+                                {pendingSyncCount > 99 ? '99+' : pendingSyncCount}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.notificationButton}
                         onClick={() => navigate('/admin/alertas')}
                         aria-label="Notificaciones"
                     >
                         <Bell size={18} strokeWidth={2} />
-                        <span className={styles.notificationBadge}>4</span>
+                        {alertCount > 0 && (
+                            <span className={styles.notificationBadge}>
+                                {alertCount > 99 ? '99+' : alertCount}
+                            </span>
+                        )}
                     </button>
 
                     {/* Avatar y Menú Desplegable de Perfil */}

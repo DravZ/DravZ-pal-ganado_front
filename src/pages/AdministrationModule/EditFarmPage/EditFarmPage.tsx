@@ -1,269 +1,112 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './EditFarmPage.module.css';
-import type { Farm } from '../../../types/database.types';
-
-type EditFarmFormData = Pick<Farm, 'name' | 'code' | 'state' | 'municipality' | 'locality' | 'address'> & {
-  hectares: string;
-};
+import { useAuth } from '../../../context/AuthContext';
+import { useFarmScope } from '../../../context/FarmScopeContext';
+import useNotification from '../../../hooks/useNotification';
+import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
+import { cacheAdministrationRecord, useHatoCollection } from '../../../services/hatoDataService';
 
 export const EditFarmPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user, isOffline } = useAuth();
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>('farms', '/farms', scope);
+  const farm = useMemo(() => records.find((record) => record.id === id), [id, records]);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Estados del formulario inicializados con datos precargados
-  const [formData, setFormData] = useState<EditFarmFormData>({
-    name: 'Finca Serra Verde',
-    code: 'FIN-001',
-    state: 'Antioquia',
-    municipality: 'Puerto Berrío',
-    locality: 'Vereda La Sierra',
-    hectares: '159.5',
-    address: 'Vía Puerto Berrío, km 18'
-  });
-
-  const [showServerError, setShowServerError] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // Manejador de cambios en inputs editables
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Guardar cambios
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (showServerError) {
-      // Si la simulación de error está activa, conserva los valores en pantalla
-      return;
-    }
-
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!id) return;
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-
-      // Payload mapeado para la tabla farms y sync_queue
-      const updatedFarmPayload: Partial<Farm> = {
-        id: id || 'farm-1',
-        name: formData.name,
-        code: formData.code,
-        state: formData.state || undefined,
-        municipality: formData.municipality || undefined,
-        locality: formData.locality || undefined,
-        hectares: formData.hectares ? parseFloat(formData.hectares) : undefined,
-        address: formData.address || undefined,
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('[Action Log]: Finca actualizada con éxito', updatedFarmPayload);
+    setSubmissionError(null);
+    try {
+      if (!user) throw new Error('No se pudo determinar la cuenta de la sesión.');
+      const fields = new FormData(event.currentTarget);
+      const field = (name: string) => String(fields.get(name) ?? '').trim();
+      const savedFarm = await requestOnlineAdministrationWrite(`/farms/${id}`, 'PATCH', {
+        name: field('name'),
+        state: field('state') || undefined,
+        municipality: field('municipality') || undefined,
+        locality: field('locality') || undefined,
+        hectares: field('hectares') ? Number(field('hectares')) : undefined,
+        address: field('address') || undefined,
+      });
+      await cacheAdministrationRecord(user.id, user.organization_id, 'farms', savedFarm);
+      showNotification({ type: 'success', title: 'Finca actualizada', message: 'Los cambios se guardaron en el backend.' });
       navigate('/admin/fincas');
-    }, 600);
+    } catch (cause: unknown) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo actualizar la finca.';
+      setSubmissionError(message);
+      showNotification({ type: 'error', title: 'No se pudo actualizar la finca', message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) return <p className="container-fluid">Cargando datos locales de la finca…</p>;
+  if (!farm) return <p className="container-fluid" role="alert">{error ?? 'La finca no está disponible en este dispositivo.'}</p>;
 
   return (
     <div className={`container-fluid ${styles.pageContainer}`}>
-      {/* Botón Volver */}
-      <button
-        type="button"
-        className={styles.backBtn}
-        onClick={() => navigate('/admin/fincas')}
-      >
-        <ArrowLeft size={18} />
-        <span>Volver a fincas</span>
+      <button type="button" className={styles.backBtn} onClick={() => navigate('/admin/fincas')}>
+        <ArrowLeft size={18} /><span>Volver a fincas</span>
       </button>
-
-      {/* Encabezado */}
       <div className={styles.headerFlex}>
         <span className={styles.sectionSubtitle}>ADMINISTRACIÓN · EDITAR FINCA</span>
         <h1 className={styles.sectionTitle}>Editar finca</h1>
-        <p className={styles.sectionDescription}>
-          Registra únicamente la información soportada por el modelo actual de fincas.
-        </p>
+        <p className={styles.sectionDescription}>Registra únicamente la información soportada por el modelo actual de fincas.</p>
       </div>
-
-      {/* BANNER DE ERROR SIMULADO DE SERVIDOR */}
-      {showServerError && (
-        <div className={styles.errorBanner}>
+      {isOffline && <p role="status">La visualización sigue disponible offline; para guardar cambios debes conectarte a internet.</p>}
+      {submissionError && (
+        <div className={styles.errorBanner} role="alert">
           <AlertTriangle className={styles.errorIcon} size={22} />
-          <div>
-            <h4 className={styles.errorTitle}>No pudimos guardar la finca</h4>
-            <p className={styles.errorDescription}>
-              Los valores ingresados se conservan para volver a intentarlo.
-            </p>
-          </div>
+          <div><h4 className={styles.errorTitle}>No pudimos guardar la finca</h4><p className={styles.errorDescription}>{submissionError}</p></div>
         </div>
       )}
-
-      {/* FORMULARIO PRINCIPAL DE EDICIÓN */}
       <form onSubmit={handleSubmit} className={styles.formCard}>
-        {/* SECCIÓN 1: IDENTIFICACIÓN */}
         <div className={styles.formSection}>
           <span className={styles.sectionTag}>IDENTIFICACIÓN</span>
           <h2 className={styles.groupTitle}>Información principal</h2>
-
           <div className="row g-4 mt-1">
-            {/* Nombre de la finca */}
             <div className="col-12 col-md-6">
-              <label htmlFor="name" className={styles.label}>
-                Nombre de la finca (farms.name)
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                className={styles.input}
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
+              <label htmlFor="name" className={styles.label}>Nombre de la finca</label>
+              <input id="name" name="name" className={styles.input} defaultValue={String(farm.name ?? '')} required />
             </div>
-
-            {/* Código (Deshabilitado / Solo lectura para trazabilidad) */}
             <div className="col-12 col-md-6">
-              <label htmlFor="code" className={styles.label}>
-                Código (farms.code)
-              </label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                className={`${styles.input} ${styles.readOnlyInput}`}
-                value={formData.code}
-                readOnly
-                disabled
-              />
-              <span className={styles.fieldHelpText}>
-                Identificador conservado para trazabilidad.
-              </span>
+              <label htmlFor="code" className={styles.label}>Código</label>
+              <input id="code" className={`${styles.input} ${styles.readOnlyInput}`} defaultValue={String(farm.code ?? '')} disabled />
             </div>
-          </div>
-        </div>
-
-        <hr className={styles.divider} />
-
-        {/* SECCIÓN 2: UBICACIÓN Y SUPERFICIE */}
-        <div className={styles.formSection}>
-          <span className={styles.sectionTag}>UBICACIÓN Y SUPERFICIE</span>
-          <h2 className={styles.groupTitle}>Datos de la finca</h2>
-
-          <div className="row g-4 mt-1">
-            {/* Departamento / Estado */}
             <div className="col-12 col-md-6">
-              <label htmlFor="state" className={styles.label}>
-                Departamento / Estado (farms.state)
-              </label>
-              <input
-                id="state"
-                name="state"
-                type="text"
-                className={styles.input}
-                value={formData.state}
-                onChange={handleChange}
-              />
+              <label htmlFor="state" className={styles.label}>Departamento / Estado</label>
+              <input id="state" name="state" className={styles.input} defaultValue={String(farm.state ?? '')} />
             </div>
-
-            {/* Municipio */}
             <div className="col-12 col-md-6">
-              <label htmlFor="municipality" className={styles.label}>
-                Municipio (farms.municipality)
-              </label>
-              <input
-                id="municipality"
-                name="municipality"
-                type="text"
-                className={styles.input}
-                value={formData.municipality}
-                onChange={handleChange}
-              />
+              <label htmlFor="municipality" className={styles.label}>Municipio</label>
+              <input id="municipality" name="municipality" className={styles.input} defaultValue={String(farm.municipality ?? '')} />
             </div>
-
-            {/* Vereda / Localidad */}
             <div className="col-12 col-md-6">
-              <label htmlFor="locality" className={styles.label}>
-                Vereda / Localidad (farms.locality)
-              </label>
-              <input
-                id="locality"
-                name="locality"
-                type="text"
-                className={styles.input}
-                value={formData.locality}
-                onChange={handleChange}
-              />
-              <span className={styles.optionalText}>Opcional</span>
+              <label htmlFor="locality" className={styles.label}>Vereda / Localidad</label>
+              <input id="locality" name="locality" className={styles.input} defaultValue={String(farm.locality ?? '')} />
             </div>
-
-            {/* Hectáreas */}
             <div className="col-12 col-md-6">
-              <label htmlFor="hectares" className={styles.label}>
-                Hectáreas (farms.hectares)
-              </label>
-              <div className={styles.inputWithSuffix}>
-                <input
-                  id="hectares"
-                  name="hectares"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className={styles.input}
-                  value={formData.hectares}
-                  onChange={handleChange}
-                />
-                <span className={styles.suffix}>ha</span>
-              </div>
+              <label htmlFor="hectares" className={styles.label}>Hectáreas</label>
+              <input id="hectares" name="hectares" type="number" min="0" step="0.01" className={styles.input} defaultValue={String(farm.hectares ?? farm.total_area_hectares ?? '')} />
             </div>
-
-            {/* Dirección / Referencia */}
             <div className="col-12">
-              <label htmlFor="address" className={styles.label}>
-                Dirección / referencia (farms.address)
-              </label>
-              <input
-                id="address"
-                name="address"
-                type="text"
-                className={styles.input}
-                value={formData.address}
-                onChange={handleChange}
-              />
-              <span className={styles.optionalText}>Opcional</span>
+              <label htmlFor="address" className={styles.label}>Dirección / referencia</label>
+              <input id="address" name="address" className={styles.input} defaultValue={String(farm.address ?? '')} />
             </div>
           </div>
         </div>
-
-        {/* ACCIONES DEL FORMULARIO */}
         <div className={styles.formActionsFlex}>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={() => navigate('/admin/fincas')}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
-          </button>
-        </div>
-
-        {/* BOTÓN INFERIOR DE SIMULACIÓN DE ERROR */}
-        <div className={styles.simulationFooter}>
-          <button
-            type="button"
-            className={styles.simulateErrorBtn}
-            onClick={() => setShowServerError((prev) => !prev)}
-          >
-            {showServerError ? 'Ocultar error de servidor' : 'Simular error de servidor'}
+          <button type="button" className={styles.cancelBtn} onClick={() => navigate('/admin/fincas')}>Cancelar</button>
+          <button type="submit" className={styles.submitBtn} disabled={isSubmitting || isOffline}>
+            {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
           </button>
         </div>
       </form>

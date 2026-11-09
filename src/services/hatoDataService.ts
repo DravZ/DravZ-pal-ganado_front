@@ -27,7 +27,11 @@ export type HatoResource =
   | 'purchase_records'
   | 'suppliers'
   | 'expenses'
-  | 'cost_allocations';
+  | 'cost_allocations'
+  | 'users'
+  | 'farms'
+  | 'alerts'
+  | 'organizations';
 
 export interface HatoScope {
   userId: string;
@@ -71,6 +75,10 @@ const endpointByResource: Record<HatoResource, string> = {
   suppliers: '/suppliers',
   expenses: '/expenses',
   cost_allocations: '/cost-allocations',
+  users: '/users',
+  farms: '/farms',
+  alerts: '/alerts',
+  organizations: '/organizations',
 };
 
 const supportedOperations: Record<HatoResource, WriteOperation[]> = {
@@ -83,7 +91,7 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   sales_records: ['CREATE', 'UPDATE', 'DELETE'],
   treatments: ['CREATE'],
   lots: [],
-  paddocks: [],
+  paddocks: ['CREATE', 'UPDATE', 'DELETE'],
   customers: [],
   medications: [],
   animal_identifiers: [],
@@ -94,14 +102,21 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   suppliers: [],
   expenses: ['CREATE'],
   cost_allocations: ['CREATE'],
+  users: [],
+  farms: [],
+  alerts: ['UPDATE'],
+  organizations: ['UPDATE'],
 };
 
-const onlineOnlyResources = new Set(['users', 'organizations', 'farms', 'roles', 'permissions']);
+const onlineOnlyResources = new Set(['users', 'farms', 'roles', 'permissions']);
 const organizationScopedResources = new Set<string>([
   'customers',
   'medications',
   'products',
   'suppliers',
+  'users',
+  'farms',
+  'organizations',
 ]);
 const animalScopedResources = new Set<HatoResource>([
   'weight_records',
@@ -186,12 +201,16 @@ export function useHatoCollection<T extends Record<string, unknown>>(
   const refresh = useCallback(async () => {
     if (!scope || !endpoint || !navigator.onLine) return;
     const url = new URL(`${apiBaseUrl}${endpoint}`, window.location.origin);
+    const animalIds = scopedAnimalIdsKey ? scopedAnimalIdsKey.split('|') : [];
     if (
       animalScopedResources.has(resource)
       && !url.searchParams.has('animal_id')
-      && scopedAnimalIds.length === 0
+      && animalIds.length === 0
     ) return;
-    if (resource === 'customers' && !url.searchParams.has('organization_id')) {
+    if (
+      ['customers', 'users', 'farms'].includes(resource)
+      && !url.searchParams.has('organization_id')
+    ) {
       url.searchParams.set('organization_id', scope.organizationId);
     } else if (
       organizationScopedResources.has(resource)
@@ -217,9 +236,12 @@ export function useHatoCollection<T extends Record<string, unknown>>(
     ) {
       url.searchParams.set('farm_id', scope.farmId);
     }
+    if (resource === 'alerts' && !url.searchParams.has('farm_id')) {
+      url.searchParams.set('farm_id', scope.farmId);
+    }
 
     const urls = animalScopedResources.has(resource) && !url.searchParams.has('animal_id')
-      ? scopedAnimalIds.map((animalId) => {
+      ? animalIds.map((animalId) => {
         const animalUrl = new URL(url);
         animalUrl.searchParams.set('animal_id', animalId);
         return animalUrl.toString();
@@ -332,19 +354,26 @@ async function mergeRemoteRecords(
   for (const payload of payloads) {
     const id = responseId(payload);
     if (!id) throw new Error(`Un registro de ${resource} no contiene identificador.`);
+    const recordOrganizationId = payload.organization_id ?? payload.scope_organization_id;
+    if (
+      typeof recordOrganizationId === 'string'
+      && recordOrganizationId !== scope.organizationId
+    ) {
+      throw new Error('El servidor devolvió información de otra organización.');
+    }
     const animalId = typeof payload.animal_id === 'string' ? payload.animal_id : null;
     const farmId = typeof payload.farm_id === 'string'
       ? payload.farm_id
       : animalId
         ? await activeAnimalFarm(scope.userId, animalId)
         : organizationScopedResources.has(resource) ? null : scope.farmId;
-    if (farmId && farmId !== scope.farmId) {
+    if (!organizationScopedResources.has(resource) && farmId && farmId !== scope.farmId) {
       throw new Error('El servidor devolvió información de otra finca.');
     }
     remoteRecords.push({
       userId: scope.userId,
       organizationId: scope.organizationId,
-      farmId: farmId ?? scope.farmId,
+      farmId: organizationScopedResources.has(resource) ? null : farmId ?? scope.farmId,
       resourceType: resource,
       recordId: id,
       version: typeof payload.version === 'number' ? payload.version : null,
@@ -378,7 +407,10 @@ async function mergeRemoteRecords(
       if (completeCollection) {
         for (const record of current) {
           if (receivedIds.has(record.recordId) || protectedIds.has(record.recordId)) continue;
-          if (await hatoRecordFarmId(scope.userId, record) === scope.farmId) stale.push(record);
+          if (
+            organizationScopedResources.has(resource)
+            || await hatoRecordFarmId(scope.userId, record) === scope.farmId
+          ) stale.push(record);
         }
       }
       if (stale.length) {
@@ -389,6 +421,24 @@ async function mergeRemoteRecords(
         ] as [string, string, string]));
       }
     },
+  );
+}
+
+export async function cacheAdministrationRecord(
+  userId: string,
+  organizationId: string,
+  resource: 'users' | 'farms',
+  payload: Record<string, unknown>,
+): Promise<void> {
+  const recordOrganizationId = payload.organization_id;
+  if (typeof recordOrganizationId !== 'string' || recordOrganizationId !== organizationId) {
+    throw new Error('El registro devuelto pertenece a otra organización.');
+  }
+  await mergeRemoteRecords(
+    { userId, organizationId, farmId: '' },
+    resource,
+    [payload],
+    false,
   );
 }
 
@@ -524,7 +574,9 @@ async function requestQueuedOperation(
   if (!endpoint) throw new Error(`No existe endpoint de sincronización para ${operation.resourceType}.`);
   const method = operation.operation === 'CREATE'
     ? 'POST'
-    : operation.operation === 'UPDATE' ? 'PUT' : 'DELETE';
+    : operation.operation === 'UPDATE'
+      ? ['alerts', 'organizations'].includes(operation.resourceType) ? 'PATCH' : 'PUT'
+      : 'DELETE';
   const csrfToken = await requestCsrfToken();
   const response = await fetch(`${apiBaseUrl}${endpoint}${method === 'POST' ? '' : `/${recordId}`}`, {
     method,

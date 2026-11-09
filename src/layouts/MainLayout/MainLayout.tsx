@@ -5,18 +5,33 @@ import Navbar from '../../components/shared/Navbar/Navbar';
 import { useAuth } from '../../context/AuthContext';
 import useNotification from '../../hooks/useNotification';
 import { FarmScopeProvider, useFarmScope } from '../../context/FarmScopeContext';
-import { flushPendingHatoOperations } from '../../services/hatoDataService';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { offlineDatabase } from '../../services/offlineDatabase';
+import { flushPendingHatoOperations, useHatoCollection } from '../../services/hatoDataService';
 
 const MainLayoutContent: React.FC = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const userId = user?.id;
   const { showNotification } = useNotification();
-  const { farms, activeFarm, setActiveFarmId } = useFarmScope();
+  const { farms, activeFarm, setActiveFarmId, scope } = useFarmScope();
+  const { records: alerts } = useHatoCollection<Record<string, unknown>>('alerts', '/alerts', scope);
+  const pendingSyncCount = useLiveQuery(
+    () => user
+      ? offlineDatabase.syncQueue
+        .where('userId')
+        .equals(user.id)
+        .filter((operation) => operation.status === 'PENDING' || operation.status === 'CONFLICT')
+        .count()
+      : Promise.resolve(0),
+    [user?.id],
+  ) ?? 0;
+  const alertCount = alerts.filter((alert) => String(alert.status ?? '').toLowerCase() === 'open').length;
 
   useEffect(() => {
-    if (!user) return undefined;
+    if (!userId) return undefined;
     const processQueue = () => {
-      void flushPendingHatoOperations(user.id).catch((error: unknown) => {
+      void flushPendingHatoOperations(userId).catch((error: unknown) => {
         showNotification({
           type: 'error',
           title: 'No se pudieron sincronizar los cambios',
@@ -28,7 +43,7 @@ const MainLayoutContent: React.FC = () => {
     if (navigator.onLine) processQueue();
     window.addEventListener('online', processQueue);
     return () => window.removeEventListener('online', processQueue);
-  }, [showNotification, user?.id]);
+  }, [showNotification, userId]);
 
   const handleLogout = async () => {
     try {
@@ -60,6 +75,8 @@ const MainLayoutContent: React.FC = () => {
         farms={farms}
         onSelectFarm={(farm) => setActiveFarmId(farm.id)}
         onLogout={handleLogout}
+        pendingSyncCount={pendingSyncCount}
+        alertCount={alertCount}
       />
 
       {/* 2. Área principal donde se renderiza la pantalla activa */}

@@ -1,265 +1,122 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './EditUserPage.module.css';
-import type { CreateUserFormValues, User } from '../../../types/database.types';
-
-type EditUserFormData = CreateUserFormValues;
+import { useAuth } from '../../../context/AuthContext';
+import { useFarmScope } from '../../../context/FarmScopeContext';
+import useNotification from '../../../hooks/useNotification';
+import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
+import { cacheAdministrationRecord, useHatoCollection } from '../../../services/hatoDataService';
 
 export const EditUserPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { user, isOffline } = useAuth();
+  const { farms, scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>('users', '/users', scope);
+  const userRecord = useMemo(() => records.find((record) => record.id === id), [id, records]);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Estados del formulario inicializados con datos por defecto/precargados
-  const [formData, setFormData] = useState<EditUserFormData>({
-    first_name: 'Rafael',
-    last_name: 'Mendes',
-    email: 'rafael@serraverde.com',
-    phone: '+57 300 482 1930',
-    role: 'Administrador',
-    status: 'Activo',
-    farm_id: 'farm-serra-verde'
-  });
-
-  const [showServerError, setShowServerError] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // Manejador de cambios en inputs
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Enviar formulario / Actualizar usuario
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (showServerError) {
-      // Si la simulación de error está activa, conserva la información en pantalla
-      return;
-    }
-
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!id) return;
     setIsSubmitting(true);
-
-    setTimeout(() => {
+    setSubmissionError(null);
+    try {
+      if (!user) throw new Error('No se pudo determinar la cuenta de la sesión.');
+      const fields = new FormData(event.currentTarget);
+      const field = (name: string) => String(fields.get(name) ?? '').trim();
+      const savedUser = await requestOnlineAdministrationWrite(`/users/${id}`, 'PATCH', {
+        name: `${field('first_name')} ${field('last_name')}`.trim(),
+        email: field('email'),
+        phone: field('phone') || undefined,
+        farm_id: field('farm_id') || null,
+      });
+      await cacheAdministrationRecord(user.id, user.organization_id, 'users', savedUser);
+      showNotification({ type: 'success', title: 'Usuario actualizado', message: 'Los cambios se guardaron en el backend.' });
+      navigate('/admin/usuarios');
+    } catch (cause: unknown) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo actualizar el usuario.';
+      setSubmissionError(message);
+      showNotification({ type: 'error', title: 'No se pudo actualizar el usuario', message });
+    } finally {
       setIsSubmitting(false);
-
-      // Payload mapeado para la tabla users y sync_queue
-      const updatedUserPayload: Partial<User> & { farm_id: string; role: string } = {
-        id: id || 'user-1',
-        name: `${formData.first_name} ${formData.last_name}`.trim(),
-        email: formData.email,
-        phone: formData.phone,
-        role: formData.role,
-        farm_id: formData.farm_id,
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('[Action Log]: Usuario actualizado con éxito', updatedUserPayload);
-      navigate('/usuarios');
-    }, 600);
+    }
   };
+
+  if (isLoading) return <p className="container-fluid">Cargando datos locales del usuario…</p>;
+  if (!userRecord) return <p className="container-fluid" role="alert">{error ?? 'El usuario no está disponible en este dispositivo.'}</p>;
 
   return (
     <div className={`container-fluid ${styles.pageContainer}`}>
-      {/* Botón Volver */}
-      <button
-        type="button"
-        className={styles.backBtn}
-        onClick={() => navigate('/usuarios')}
-      >
-        <ArrowLeft size={18} />
-        <span>Volver a usuarios</span>
+      <button type="button" className={styles.backBtn} onClick={() => navigate('/admin/usuarios')}>
+        <ArrowLeft size={18} /><span>Volver a usuarios</span>
       </button>
-
-      {/* Encabezado */}
       <div className={styles.headerFlex}>
         <span className={styles.sectionSubtitle}>ADMINISTRACIÓN · EDITAR USUARIO</span>
         <h1 className={styles.sectionTitle}>Editar usuario</h1>
-        <p className={styles.sectionDescription}>
-          La información de cuenta y perfil se gestiona en un único formulario compartido.
-        </p>
+        <p className={styles.sectionDescription}>La información de cuenta y perfil se gestiona en un único formulario compartido.</p>
       </div>
-
-      {/* BANNER DE ERROR SIMULADO DE SERVIDOR */}
-      {showServerError && (
-        <div className={styles.errorBanner}>
+      {isOffline && <p role="status">La visualización sigue disponible offline; para guardar cambios debes conectarte a internet.</p>}
+      {submissionError && (
+        <div className={styles.errorBanner} role="alert">
           <AlertTriangle className={styles.errorIcon} size={22} />
-          <div>
-            <h4 className={styles.errorTitle}>No pudimos guardar el usuario</h4>
-            <p className={styles.errorDescription}>
-              La información se conserva. Inténtalo nuevamente.
-            </p>
-          </div>
+          <div><h4 className={styles.errorTitle}>No pudimos guardar el usuario</h4><p className={styles.errorDescription}>{submissionError}</p></div>
         </div>
       )}
-
-      {/* FORMULARIO PRINCIPAL DE EDICIÓN */}
       <form onSubmit={handleSubmit} className={styles.formCard}>
-        {/* SECCIÓN 1: DATOS PERSONALES */}
         <div className={styles.formSection}>
           <span className={styles.sectionTag}>INFORMACIÓN DE CUENTA Y PERFIL</span>
           <h2 className={styles.groupTitle}>Datos personales</h2>
-
           <div className="row g-4 mt-1">
-            {/* Nombre */}
             <div className="col-12 col-md-6">
-              <label htmlFor="first_name" className={styles.label}>
-                Nombre (users.first_name)
-              </label>
-              <input
-                id="first_name"
-                name="first_name"
-                type="text"
-                className={styles.input}
-                value={formData.first_name}
-                onChange={handleChange}
-                required
-              />
+              <label htmlFor="first_name" className={styles.label}>Nombre</label>
+              <input id="first_name" name="first_name" className={styles.input} defaultValue={String(userRecord.name ?? '').split(/\s+/).filter(Boolean).slice(0, 1)[0] ?? ''} required />
             </div>
-
-            {/* Apellidos */}
             <div className="col-12 col-md-6">
-              <label htmlFor="last_name" className={styles.label}>
-                Apellidos (users.last_name)
-              </label>
-              <input
-                id="last_name"
-                name="last_name"
-                type="text"
-                className={styles.input}
-                value={formData.last_name}
-                onChange={handleChange}
-                required
-              />
+              <label htmlFor="last_name" className={styles.label}>Apellidos</label>
+              <input id="last_name" name="last_name" className={styles.input} defaultValue={String(userRecord.name ?? '').split(/\s+/).filter(Boolean).slice(1).join(' ')} required />
             </div>
-
-            {/* Correo electrónico */}
             <div className="col-12 col-md-6">
-              <label htmlFor="email" className={styles.label}>
-                Correo electrónico (users.email)
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                className={styles.input}
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+              <label htmlFor="email" className={styles.label}>Correo electrónico</label>
+              <input id="email" name="email" type="email" className={styles.input} defaultValue={String(userRecord.email ?? '')} required />
             </div>
-
-            {/* Teléfono */}
             <div className="col-12 col-md-6">
-              <label htmlFor="phone" className={styles.label}>
-                Teléfono (users.phone)
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="text"
-                className={styles.input}
-                value={formData.phone}
-                onChange={handleChange}
-              />
+              <label htmlFor="phone" className={styles.label}>Teléfono</label>
+              <input id="phone" name="phone" className={styles.input} defaultValue={String(userRecord.phone ?? '')} />
             </div>
           </div>
         </div>
-
         <hr className={styles.divider} />
-
-        {/* SECCIÓN 2: ASIGNACIÓN ADMINISTRATIVA */}
         <div className={styles.formSection}>
           <span className={styles.sectionTag}>ASIGNACIÓN ADMINISTRATIVA</span>
           <h2 className={styles.groupTitle}>Acceso y finca</h2>
-
           <div className="row g-4 mt-1">
-            {/* Rol (Solo lectura) */}
             <div className="col-12 col-md-6">
-              <label htmlFor="role" className={styles.label}>
-                Rol (organization_users.role)
-              </label>
-              <input
-                id="role"
-                type="text"
-                className={`${styles.input} ${styles.readOnlyInput}`}
-                value={formData.role}
-                readOnly
-                disabled
-              />
-              <span className={styles.fieldHelpText}>
-                Los perfiles disponibles dependen de reglas de autorización aún no definidas.
-              </span>
+              <label htmlFor="role" className={styles.label}>Rol</label>
+              <input id="role" className={`${styles.input} ${styles.readOnlyInput}`} defaultValue={String(userRecord.role ?? 'Perfil por confirmar')} readOnly disabled />
             </div>
-
-            {/* Estado (Solo lectura) */}
             <div className="col-12 col-md-6">
-              <label htmlFor="status" className={styles.label}>
-                Estado (organization_users.status)
-              </label>
-              <input
-                id="status"
-                type="text"
-                className={`${styles.input} ${styles.readOnlyInput}`}
-                value={formData.status}
-                readOnly
-                disabled
-              />
+              <label htmlFor="status" className={styles.label}>Estado</label>
+              <input id="status" className={`${styles.input} ${styles.readOnlyInput}`} defaultValue={String(userRecord.status ?? '')} readOnly disabled />
             </div>
-
-            {/* Finca asociada */}
             <div className="col-12 col-md-6">
-              <label htmlFor="farm_id" className={styles.label}>
-                Finca asociada (organization_users.farm_id)
-              </label>
+              <label htmlFor="farm_id" className={styles.label}>Finca asociada</label>
               <div className={styles.selectWrapper}>
-                <select
-                  id="farm_id"
-                  name="farm_id"
-                  className={styles.selectInput}
-                  value={formData.farm_id}
-                  onChange={handleChange}
-                >
-                  <option value="farm-serra-verde">Finca Serra Verde</option>
-                  <option value="farm-san-jose">Finca San José</option>
+                <select id="farm_id" name="farm_id" className={styles.selectInput} defaultValue={String(userRecord.farm_id ?? '')}>
+                  <option value="" disabled>Sin finca asignada (no editable)</option>
+                  {farms.map((farm) => <option key={farm.id} value={farm.id}>{farm.name}</option>)}
                 </select>
               </div>
             </div>
           </div>
         </div>
-
-        {/* BOTONES DE ACCIÓN */}
         <div className={styles.formActionsFlex}>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={() => navigate('/usuarios')}
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
-          </button>
-        </div>
-
-        {/* BOTÓN INFERIOR DE SIMULACIÓN DE ERROR */}
-        <div className={styles.simulationFooter}>
-          <button
-            type="button"
-            className={styles.simulateErrorBtn}
-            onClick={() => setShowServerError((prev) => !prev)}
-          >
-            {showServerError ? 'Ocultar error de servidor' : 'Simular error de servidor'}
+          <button type="button" className={styles.cancelBtn} onClick={() => navigate('/admin/usuarios')}>Cancelar</button>
+          <button type="submit" className={styles.submitBtn} disabled={isSubmitting || isOffline}>
+            {isSubmitting ? 'Guardando…' : 'Guardar cambios'}
           </button>
         </div>
       </form>
