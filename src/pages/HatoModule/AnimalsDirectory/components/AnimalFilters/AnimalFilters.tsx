@@ -13,6 +13,8 @@ interface AnimalFiltersProps {
   onSexoChange: (value: string) => void;
   selectedEstado: string;
   onEstadoChange: (value: string) => void;
+  lots: { id: string; name: string }[];
+  paddocks: { id: string; name: string }[];
 }
 
 export const AnimalFilters: React.FC<AnimalFiltersProps> = ({
@@ -26,6 +28,8 @@ export const AnimalFilters: React.FC<AnimalFiltersProps> = ({
   onSexoChange,
   selectedEstado,
   onEstadoChange,
+  lots,
+  paddocks,
 }) => {
   return (
     <div className={styles.filtersWrapper}>
@@ -48,10 +52,7 @@ export const AnimalFilters: React.FC<AnimalFiltersProps> = ({
         onChange={(e) => onLoteChange(e.target.value)}
       >
         <option value="">Todos los lotes</option>
-        <option value="Vacas de cría">Vacas de cría</option>
-        <option value="Novillos levante">Novillos levante</option>
-        <option value="Ceba final">Ceba final</option>
-        <option value="Hembras reemplazo">Hembras reemplazo</option>
+        {lots.map((lot) => <option key={lot.id} value={lot.id}>{lot.name}</option>)}
       </select>
 
       {/* Select Potreros */}
@@ -61,9 +62,9 @@ export const AnimalFilters: React.FC<AnimalFiltersProps> = ({
         onChange={(e) => onPotreroChange(e.target.value)}
       >
         <option value="">Todos los potreros</option>
-        <option value="Potrero Norte">Potrero Norte</option>
-        <option value="La Quebrada">La Quebrada</option>
-        <option value="Loma Alta">Loma Alta</option>
+        {paddocks.map((paddock) => (
+          <option key={paddock.id} value={paddock.id}>{paddock.name}</option>
+        ))}
       </select>
 
       {/* Select Sexo */}

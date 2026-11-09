@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './SaleForm.module.css';
 import { Plus, Trash2, CheckCircle, WifiOff } from 'lucide-react';
-
-import type {
-  Customer,
-  CreateSaleDTO,
-  SyncQueueEntry
-} from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
+import useNotification from '../../../../../hooks/useNotification';
 
 interface UIItemLine {
   id: string;
@@ -18,58 +15,68 @@ interface UIItemLine {
   unit_price: number;
 }
 
-const MOCK_CUSTOMERS: Customer[] = [
-  {
-    id: 'c1111111-0000-0000-0000-111111111111',
-    organization_id: 'org-123',
-    name: 'Frigorífico Central',
-    tax_id: '900.882.114',
-    status: 'active'
-  },
-  {
-    id: 'c2222222-0000-0000-0000-222222222222',
-    organization_id: 'org-123',
-    name: 'Cooperativa del Valle',
-    tax_id: '800.123.456',
-    status: 'active'
-  }
-];
-
 export const SaleForm: React.FC = () => {
-  const [customerId, setCustomerId] = useState<string>(MOCK_CUSTOMERS[0].id);
-  const [saleDate, setSaleDate] = useState<string>('2025-06-16');
-  const [saleNumber, setSaleNumber] = useState<string>('VEN-2025-0048');
-
-  const [lines, setLines] = useState<UIItemLine[]>([
-    {
-      id: '1',
-      item_type: 'ANIMAL',
-      entity_id: 'a2022222-0000-0000-0000-222222222222',
-      display_name: 'BR-1088 · Magnate',
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records: customers } = useHatoCollection<Record<string, unknown>>(
+    'customers',
+    '/customers',
+    scope,
+  );
+  const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
+    'animals',
+    '/animals',
+    scope,
+  );
+  const { records: rawLots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const animals = useMemo(() => rawAnimals.map((animal) => ({
+    id: String(animal.id ?? ''),
+    name: String(animal.name ?? 'Sin nombre'),
+    tag: String(animal.identifier_tag ?? animal.tag_number ?? ''),
+    weight: Number(animal.current_weight ?? 0),
+    lotId: String(animal.lot_id ?? ''),
+    status: String(animal.status ?? ''),
+  })), [rawAnimals]);
+  const lots = rawLots.map((lot) => ({ id: String(lot.id ?? ''), name: String(lot.name ?? '') }));
+  const options = [
+    ...animals.filter((animal) => animal.status === 'active').map((animal) => ({
+      value: `ANIMAL:${animal.id}`,
+      label: `${animal.tag} · ${animal.name}`,
+      type: 'ANIMAL' as const,
+      id: animal.id,
       quantity: 1,
-      weight: 536,
-      unit_price: 9800
-    },
-    {
-      id: '2',
-      item_type: 'LOT',
-      entity_id: '8a11e8a2-23bf-4d80-8772-23fa00100002',
-      display_name: 'Lote Ceba final',
-      quantity: 24,
-      weight: 12840,
-      unit_price: 9800
-    }
-  ]);
+      weight: animal.weight,
+    })),
+    ...lots.map((lot) => {
+      const members = animals.filter((animal) => animal.lotId === lot.id && animal.status === 'active');
+      return {
+        value: `LOT:${lot.id}`,
+        label: `Lote ${lot.name}`,
+        type: 'LOT' as const,
+        id: lot.id,
+        quantity: members.length,
+        weight: members.reduce((total, animal) => total + animal.weight, 0),
+      };
+    }),
+  ];
+  const [customerId, setCustomerId] = useState('');
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().slice(0, 10));
+  const [saleNumber, setSaleNumber] = useState('');
+  const [lines, setLines] = useState<UIItemLine[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAddLine = () => {
+    const option = options[0];
+    if (!option) return;
     const newLine: UIItemLine = {
       id: crypto.randomUUID(),
-      item_type: 'ANIMAL',
-      entity_id: 'a1011111-0000-0000-0000-111111111111',
-      display_name: 'BR-1042 · Esperanza',
-      quantity: 1,
-      weight: 482,
-      unit_price: 9800
+      item_type: option.type,
+      entity_id: option.id,
+      display_name: option.label,
+      quantity: option.quantity,
+      weight: option.weight,
+      unit_price: 0,
     };
     setLines([...lines, newLine]);
   };
@@ -85,49 +92,84 @@ export const SaleForm: React.FC = () => {
   ) => {
     setLines(lines.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
   };
+  const handleSelectLine = (lineId: string, value: string) => {
+    const option = options.find((item) => item.value === value);
+    if (!option) return;
+    setLines((current) => current.map((line) => line.id === lineId
+      ? {
+        ...line,
+        item_type: option.type,
+        entity_id: option.id,
+        display_name: option.label,
+        quantity: option.quantity,
+        weight: option.weight,
+      }
+      : line));
+  };
 
   const totalWeight = lines.reduce((acc, curr) => acc + (curr.weight || 0), 0);
   const totalAmount = lines.reduce((acc, curr) => acc + (curr.weight * curr.unit_price || 0), 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const farmId = 'f9d12345-0000-0000-0000-000000000001';
-    const saleId = crypto.randomUUID();
+    if (!scope) {
+      setSubmitError('No hay una finca autorizada seleccionada.');
+      return;
+    }
+    if (!customerId || !lines.length) {
+      setSubmitError('Selecciona un cliente y agrega al menos una línea de venta.');
+      return;
+    }
+    if (lines.some((line) => line.quantity <= 0 || line.weight <= 0 || line.unit_price <= 0)) {
+      setSubmitError('Las cantidades, pesos y precios deben ser mayores a cero.');
+      return;
+    }
+    if (new Set(lines.map((line) => `${line.item_type}:${line.entity_id}`)).size !== lines.length) {
+      setSubmitError('No repitas el mismo animal o lote en varias líneas.');
+      return;
+    }
 
-    const salePayload: CreateSaleDTO = {
-      farm_id: farmId,
-      customer_id: customerId,
-      sale_number: saleNumber,
-      sale_date: saleDate,
-      subtotal: totalAmount,
-      tax: 0,
-      total: totalAmount,
-      payment_status: 'Pendiente',
-      lines: lines.map((l) => ({
-        item_type: l.item_type,
-        animal_id: l.item_type === 'ANIMAL' ? l.entity_id : undefined,
-        lot_id: l.item_type === 'LOT' ? l.entity_id : undefined,
-        quantity: l.quantity,
-        weight: l.weight,
-        unit_price: l.unit_price,
-        subtotal: l.weight * l.unit_price
-      }))
-    };
-
-    const syncQueueEntry: SyncQueueEntry<CreateSaleDTO> = {
-      id: crypto.randomUUID(),
-      entity_name: 'sales',
-      entity_id: saleId,
-      operation_type: 'CREATE',
-      payload: salePayload,
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: new Date().toISOString()
-    };
-
-    console.log('[Action Log]: Guardando Venta comercial:', salePayload);
-    console.log('[Sync Queue Payload]:', syncQueueEntry);
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(scope, 'sales_records', 'CREATE', {
+        organization_id: scope.organizationId,
+        farm_id: scope.farmId,
+        customer_id: customerId,
+        sale_number: saleNumber.trim() || undefined,
+        sale_date: saleDate,
+        subtotal: totalAmount,
+        tax: 0,
+        total: totalAmount,
+        payment_status: 'Pendiente',
+        lines: lines.map((line) => ({
+          item_type: line.item_type,
+          animal_id: line.item_type === 'ANIMAL' ? line.entity_id : undefined,
+          lot_id: line.item_type === 'LOT' ? line.entity_id : undefined,
+          quantity: line.quantity,
+          weight: line.weight,
+          unit_price: line.unit_price,
+          subtotal: line.weight * line.unit_price,
+        })),
+      });
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Venta pendiente de sincronización' : 'Venta registrada',
+        message: result.lastError ?? (result.pending
+          ? 'La venta quedó guardada en la cola local.'
+          : 'La venta y sus líneas fueron confirmadas por el servidor.'),
+      });
+      setLines([]);
+      setCustomerId('');
+      setSaleNumber('');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo registrar la venta.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo registrar la venta', message });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -147,9 +189,11 @@ export const SaleForm: React.FC = () => {
             onChange={(e) => setCustomerId(e.target.value)}
             required
           >
-            {MOCK_CUSTOMERS.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} · NIT {c.tax_id}
+            <option value="">Selecciona un cliente</option>
+            {customers.map((c) => (
+              <option key={String(c.id)} value={String(c.id)}>
+                {String(c.name ?? 'Sin nombre')}
+                {c.tax_id ? ` · NIT ${String(c.tax_id)}` : ''}
               </option>
             ))}
           </select>
@@ -212,12 +256,13 @@ export const SaleForm: React.FC = () => {
                 <span className={styles.fieldMicroLabel}>Item a vender</span>
                 <select
                   className={styles.selectCompact}
-                  value={line.display_name}
-                  onChange={(e) => handleUpdateLine(line.id, 'display_name', e.target.value)}
+                  value={`${line.item_type}:${line.entity_id}`}
+                  onChange={(e) => handleSelectLine(line.id, e.target.value)}
                 >
-                  <option value="BR-1088 · Magnate">BR-1088 · Magnate</option>
-                  <option value="Lote Ceba final">Lote Ceba final</option>
-                  <option value="BR-1042 · Esperanza">BR-1042 · Esperanza</option>
+                  <option value="">Selecciona animal o lote</option>
+                  {options.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
                 </select>
               </div>
 
@@ -317,12 +362,17 @@ export const SaleForm: React.FC = () => {
             <span className={styles.grandTotalValue}>${totalAmount.toLocaleString('es-CO')}</span>
           </div>
 
-          <button type="submit" className={`${styles.saveBtn} mt-2`}>
+          <button type="submit" className={`${styles.saveBtn} mt-2`} disabled={isSaving}>
             <CheckCircle size={18} />
-            <span>Registrar venta</span>
+            <span>{isSaving ? 'Guardando…' : 'Registrar venta'}</span>
           </button>
         </div>
       </div>
+      {(submitError || !options.length) && (
+        <p role={submitError ? 'alert' : 'status'} className="text-danger">
+          {submitError ?? 'No hay animales o lotes disponibles para vender en esta finca.'}
+        </p>
+      )}
     </form>
   );
 };

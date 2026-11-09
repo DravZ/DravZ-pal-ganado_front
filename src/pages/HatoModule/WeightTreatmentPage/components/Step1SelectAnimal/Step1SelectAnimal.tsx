@@ -2,7 +2,7 @@ import React from 'react';
 import { Scan, Beef } from 'lucide-react';
 import styles from './Step1SelectAnimal.module.css';
 
-interface AnimalOption {
+export interface AnimalOption {
   id: string;
   tag: string;
   name: string;
@@ -12,48 +12,20 @@ interface AnimalOption {
   status: string;
 }
 
-const MOCK_ANIMALS: AnimalOption[] = [
-  {
-    id: 'BR-1042',
-    tag: 'BR-1042',
-    name: 'Esperanza',
-    breed: 'Nelore',
-    sex: 'Hembra',
-    lote: 'Vacas de cría',
-    status: 'Activo',
-  },
-  {
-    id: 'BR-1088',
-    tag: 'BR-1088',
-    name: 'Magnate',
-    breed: 'Angus',
-    sex: 'Macho',
-    lote: 'Ceba final',
-    status: 'Activo',
-  },
-  {
-    id: 'BR-1124',
-    tag: 'BR-1124',
-    name: 'Canela',
-    breed: 'Braford',
-    sex: 'Hembra',
-    lote: 'Hembras reemplazo',
-    status: 'Activo',
-  },
-];
-
 interface Step1Props {
   selectedAnimalId: string;
   onSelectAnimal: (animal: AnimalOption) => void;
+  animals: AnimalOption[];
   error?: string;
 }
 
 export const Step1SelectAnimal: React.FC<Step1Props> = ({
   selectedAnimalId,
   onSelectAnimal,
+  animals,
   error,
 }) => {
-  const currentAnimal = MOCK_ANIMALS.find((a) => a.id === selectedAnimalId) || MOCK_ANIMALS[0];
+  const currentAnimal = animals.find((animal) => animal.id === selectedAnimalId);
 
   const handleOpenScanner = () => {
     console.log('[Action Log]: Abriendo cámara para escaneo de arete...');
@@ -89,11 +61,12 @@ export const Step1SelectAnimal: React.FC<Step1Props> = ({
           className={styles.selectControl}
           value={selectedAnimalId}
           onChange={(e) => {
-            const found = MOCK_ANIMALS.find((a) => a.id === e.target.value);
+            const found = animals.find((animal) => animal.id === e.target.value);
             if (found) onSelectAnimal(found);
           }}
         >
-          {MOCK_ANIMALS.map((a) => (
+          <option value="">Selecciona un animal</option>
+          {animals.map((a) => (
             <option key={a.id} value={a.id}>
               {a.tag} · {a.breed} · {a.sex}
             </option>
@@ -101,6 +74,7 @@ export const Step1SelectAnimal: React.FC<Step1Props> = ({
         </select>
         {error && <div className={styles.errorMessage}>{error}</div>}
       </div>
+      {animals.length === 0 && <p role="status">No hay animales disponibles en esta finca.</p>}
 
       {/* Tarjeta del Animal Seleccionado */}
       {currentAnimal && (

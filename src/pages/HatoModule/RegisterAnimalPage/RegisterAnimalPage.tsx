@@ -7,44 +7,145 @@ import { Step2Identifiers } from './components/Step2Identifiers/Step2Identifiers
 import { Step3LocationGenealogy } from './components/Step3LocationGenealogy/Step3LocationGenealogy';
 import { Step4InitialWeight } from './components/Step4InitialWeight/Step4InitialWeight';
 import styles from './RegisterAnimalPage.module.css';
+import { useFarmScope } from '../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
+import useNotification from '../../../hooks/useNotification';
+import type { AnimalFormData } from './types';
 
 export const RegisterAnimalPage: React.FC = () => {
   const navigate = useNavigate();
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { records: rawLots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const { records: rawPaddocks } = useHatoCollection<Record<string, unknown>>(
+    'paddocks',
+    '/paddocks',
+    scope,
+  );
+  const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
+    'animals',
+    '/animals',
+    scope,
+  );
+  const text = (value: unknown): string => typeof value === 'string' ? value : '';
 
-  // Estado unificado del formulario
-  const [formData, setFormData] = useState({
-    name: 'Esperanza',
+  const [formData, setFormData] = useState<AnimalFormData>({
+    name: '',
     sex: 'Hembra',
-    species: 'Bovino',
-    breed: 'Nelore',
+    species: 'bovino',
+    breed: '',
     birthDate: '',
     birthWeight: '',
     acquisitionDate: '',
     acquisitionCost: '',
-    identifierType: 'Siniga',
-    identifierCode: 'BR-',
+    identifierType: 'SINIGA',
+    identifierCode: '',
     isOfficial: true,
     isCurrent: true,
-    loteId: 'Vacas de cría',
-    potreroId: 'Potrero Norte',
+    loteId: '',
+    potreroId: '',
     sireId: '',
     damId: '',
     currentWeight: '0',
-    currentWeightDate: '2025-06-16',
+    currentWeightDate: new Date().toISOString().slice(0, 10),
     measurementMethod: 'Báscula digital',
   });
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = <K extends keyof AnimalFormData>(
+    field: K,
+    value: AnimalFormData[K],
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSave = async () => {
+    if (!scope) {
+      setSubmitError('No hay una finca autorizada seleccionada.');
+      return;
+    }
+    if (!formData.identifierCode.trim()) {
+      setCurrentStep(2);
+      setSubmitError('El identificador del animal es obligatorio.');
+      return;
+    }
+
+    const weight = Number(formData.currentWeight);
+    if (!Number.isFinite(weight) || weight < 0) {
+      setCurrentStep(4);
+      setSubmitError('El peso debe ser un número mayor o igual a cero.');
+      return;
+    }
+
+    setSubmitError(null);
+    setIsSaving(true);
+    try {
+      const payload: Record<string, unknown> = {
+        organization_id: scope.organizationId,
+        farm_id: scope.farmId,
+        name: formData.name.trim() || undefined,
+        gender: formData.sex,
+        species: formData.species,
+        breed: formData.breed || undefined,
+        tag_number: formData.identifierCode.trim(),
+        identifier_type: formData.identifierType,
+        identifier_code: formData.identifierCode.trim(),
+        is_official: formData.isOfficial,
+        is_current: formData.isCurrent,
+        lot_id: formData.loteId || undefined,
+        paddock_id: formData.potreroId || undefined,
+        sire_id: formData.sireId || undefined,
+        dam_id: formData.damId || undefined,
+        birth_date: formData.birthDate || undefined,
+        weight_at_birth: formData.birthWeight ? Number(formData.birthWeight) : undefined,
+        acquisition_date: formData.acquisitionDate || undefined,
+        acquisition_cost: formData.acquisitionCost ? Number(formData.acquisitionCost) : undefined,
+        current_weight: weight || undefined,
+        current_weight_date: weight ? formData.currentWeightDate : undefined,
+      };
+      const result = await queueHatoWrite(scope, 'animals', 'CREATE', payload);
+      let pending = result.pending;
+      let lastError = result.lastError;
+      if (weight > 0) {
+        const weightResult = await queueHatoWrite(scope, 'weight_records', 'CREATE', {
+          animal_id: result.recordId,
+          weigh_date: formData.currentWeightDate,
+          weight_kg: weight,
+          method: formData.measurementMethod,
+        });
+        pending ||= weightResult.pending;
+        lastError = weightResult.lastError ?? lastError;
+      }
+
+      showNotification({
+        type: pending ? 'alert' : 'success',
+        title: pending ? 'Cambios pendientes de sincronización' : 'Animal registrado',
+        message: pending
+          ? lastError ?? 'El registro quedó en la cola y se enviará cuando haya conexión.'
+          : 'El animal y su peso inicial se registraron correctamente.',
+      });
+      navigate('/hato/animales');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo guardar el animal.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo registrar el animal', message });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleNext = () => {
+    setSubmitError(null);
     if (currentStep < 4) {
+      if (currentStep === 2 && !formData.identifierCode.trim()) {
+        setSubmitError('El identificador del animal es obligatorio.');
+        return;
+      }
       setCurrentStep((prev) => prev + 1);
     } else {
-      console.log('[Action Log]: Formulario enviado ->', formData);
-      navigate('/hato/animales');
+      void handleSave();
     }
   };
 
@@ -96,12 +197,28 @@ export const RegisterAnimalPage: React.FC = () => {
             <Step2Identifiers formData={formData} onChange={handleFieldChange} />
           )}
           {currentStep === 3 && (
-            <Step3LocationGenealogy formData={formData} onChange={handleFieldChange} />
+            <Step3LocationGenealogy
+              formData={formData}
+              onChange={handleFieldChange}
+              lots={rawLots.map((lot) => ({ id: text(lot.id), name: text(lot.name) }))}
+              paddocks={rawPaddocks.map((paddock) => ({
+                id: text(paddock.id),
+                name: text(paddock.name),
+              }))}
+              animals={rawAnimals.map((animal) => ({
+                id: text(animal.id),
+                tag: text(animal.identifier_tag) || text(animal.tag_number),
+                name: text(animal.name) || 'Sin nombre',
+                sex: text(animal.gender) || text(animal.sex),
+                status: text(animal.status),
+              }))}
+            />
           )}
           {currentStep === 4 && (
             <Step4InitialWeight formData={formData} onChange={handleFieldChange} />
           )}
         </div>
+        {submitError && <p role="alert" className="text-danger px-4">{submitError}</p>}
 
         {/* Pie de Navegación de la Página */}
         <div className={styles.bottomBarFooter}>
@@ -123,8 +240,9 @@ export const RegisterAnimalPage: React.FC = () => {
               type="button"
               className={styles.btnPrimary}
               onClick={handleNext}
+              disabled={isSaving}
             >
-              <span>{currentStep === 4 ? 'Guardar animal' : 'Continuar'}</span>
+              <span>{isSaving ? 'Guardando…' : currentStep === 4 ? 'Guardar animal' : 'Continuar'}</span>
               {currentStep === 4 ? (
                 <Check size={18} strokeWidth={2.5} />
               ) : (

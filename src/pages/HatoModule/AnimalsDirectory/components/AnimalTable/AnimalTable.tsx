@@ -12,7 +12,9 @@ export interface AnimalItem {
   date: string;
   lote: string;
   potrero: string;
-  status: 'Activo' | 'Tratamiento';
+  status: string;
+  lotId: string;
+  paddockId: string;
 }
 
 interface AnimalTableProps {
@@ -155,7 +157,9 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, onSelectAnima
 
       {/* Pie de Paginación */}
       <div className={styles.tableFooter}>
-        <span className={styles.counterText + ' d-none d-md-block'}>Mostrando 1–4 de 1,284 animales</span>
+        <span className={styles.counterText + ' d-none d-md-block'}>
+          Mostrando {animals.length} animales
+        </span>
         <div className={styles.paginationControls}>
           <button type="button" className={styles.pageBtn} disabled>
             Anterior

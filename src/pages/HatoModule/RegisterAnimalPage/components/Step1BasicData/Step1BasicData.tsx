@@ -1,10 +1,11 @@
 import React from 'react';
 import { Beef } from 'lucide-react';
 import styles from './Step1BasicData.module.css';
+import type { AnimalFormChange, AnimalFormData } from '../../types';
 
 interface Step1Props {
-  formData: any;
-  onChange: (field: string, value: any) => void;
+  formData: AnimalFormData;
+  onChange: AnimalFormChange;
 }
 
 export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => {

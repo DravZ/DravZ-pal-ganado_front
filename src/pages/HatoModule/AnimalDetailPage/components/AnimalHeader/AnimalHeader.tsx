@@ -5,10 +5,18 @@ import styles from './AnimalHeader.module.css';
 
 interface AnimalHeaderProps {
   animalId: string;
+  animal: Record<string, unknown>;
 }
 
-export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId }) => {
+export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId, animal }) => {
   const navigate = useNavigate();
+  const tag = String(animal.identifier_tag ?? animal.tag_number ?? animalId);
+  const name = String(animal.name ?? 'Sin nombre');
+  const breed = String(animal.breed ?? 'Sin raza');
+  const sex = String(animal.gender ?? animal.sex ?? 'Sin sexo');
+  const status = String(animal.status ?? 'Sin estado');
+  const weight = Number(animal.current_weight ?? 0);
+  const weightDate = String(animal.current_weight_date ?? '');
 
   // Redirecciones hacia los flujos de acción
   const handleRegisterWeight = () => {
@@ -42,12 +50,12 @@ export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId }) => {
                 <Beef size={26} strokeWidth={2.2} />
               </div>
               <div>
-                <div className={styles.kickerTag}>ARETE OFICIAL · SINIGA</div>
+                <div className={styles.kickerTag}>IDENTIFICACIÓN</div>
                 <div className={styles.tagTitleGroup}>
-                  <h1 className={styles.tagTitle}>BR-1042</h1>
-                  <span className={styles.statusPill}>Activo</span>
+                  <h1 className={styles.tagTitle}>{tag}</h1>
+                  <span className={styles.statusPill}>{status}</span>
                 </div>
-                <div className={styles.subDetailsText}>Esperanza · Nelore · Hembra</div>
+                <div className={styles.subDetailsText}>{name} · {breed} · {sex}</div>
               </div>
             </div>
 
@@ -56,9 +64,9 @@ export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId }) => {
             <div className="d-none d-md-block">
               <div className={styles.kickerTag}>PESO ACTUAL</div>
               <div className={styles.metricValue}>
-                482 <span className={styles.metricUnit}>kg</span>
+                {weight.toLocaleString('es-CO')} <span className={styles.metricUnit}>kg</span>
               </div>
-              <div className={styles.subDetailsText}>Medido el 12 jun 2025</div>
+              <div className={styles.subDetailsText}>{weightDate || 'Sin fecha de medición'}</div>
             </div>
           </div>
 

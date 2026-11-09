@@ -22,6 +22,7 @@ export interface FarmOption {
 interface NavbarProps {
     currentFarmName?: string;
     activePath?: string;
+    activeFarmId?: string | null;
     user?: {
         name: string;
         email: string;
@@ -33,22 +34,25 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-    currentFarmName = 'Finca Serra Verde',
+    currentFarmName,
+    activeFarmId,
     activePath = '/dashboard',
     user = {
         name: 'Rafael Mendes',
         email: 'rafael@serraverde.com',
         initials: 'RM'
     },
-    farms = [
-        { id: 'farm-1', name: 'Finca Serra Verde' },
-        { id: 'farm-2', name: 'Finca El Porvenir' }
-    ],
+    farms = [],
     onSelectFarm,
     onLogout
 }) => {
-    // Estado local para controlar la finca actualmente seleccionada
-    const [selectedFarm, setSelectedFarm] = useState<string>(currentFarmName);
+    const sortedFarms = [...farms].sort((left, right) =>
+        left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }),
+    );
+    const defaultFarmName = sortedFarms[0]?.name ?? 'Sin fincas disponibles';
+
+    const selectedFarm = sortedFarms.find((farm) => farm.id === activeFarmId) ?? sortedFarms[0];
+    const selectedFarmName = selectedFarm?.name ?? currentFarmName ?? defaultFarmName;
 
     // Estados de apertura de desplegables
     const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
@@ -60,11 +64,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     // Referencias para detectar clics fuera de los menús desplegables
     const profileDropdownRef = useRef<HTMLDivElement>(null);
     const farmDropdownRef = useRef<HTMLDivElement>(null);
-
-    // Actualizar el estado si el prop externo cambia
-    useEffect(() => {
-        setSelectedFarm(currentFarmName);
-    }, [currentFarmName]);
 
     // Listener para cerrar los menús al hacer clic afuera
     useEffect(() => {
@@ -96,7 +95,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     // Función que cambia efectivamente la finca en pantalla
     const handleSelectFarmItem = (farm: FarmOption) => {
-        setSelectedFarm(farm.name); // <- Cambia el valor mostrado
         setIsFarmMenuOpen(false);   // <- Cierra el desplegable
 
         if (onSelectFarm) {
@@ -150,12 +148,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                             type="button"
                             className={styles.farmSelectorButton}
                             onClick={() => setIsFarmMenuOpen(!isFarmMenuOpen)}
-                            title={selectedFarm}
+                            title={selectedFarmName}
                             aria-expanded={isFarmMenuOpen}
                         >
                             <div className={styles.farmTextWrapper}>
                                 <div className={styles.farmLabel}>FINCA ACTUAL</div>
-                                <div className={styles.farmValue}>{selectedFarm}</div>
+                                <div className={styles.farmValue}>{selectedFarmName}</div>
                             </div>
                             <ChevronDown
                                 size={14}
@@ -168,8 +166,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         {isFarmMenuOpen && (
                             <div className={styles.farmDropdownMenu}>
                                 <div className={styles.dropdownHeaderLabel}>Seleccionar finca</div>
-                                {farms.map((farm) => {
-                                    const isSelected = farm.name === selectedFarm;
+                                {sortedFarms.map((farm) => {
+                                    const isSelected = farm.id === selectedFarm?.id;
                                     return (
                                         <button
                                             key={farm.id}

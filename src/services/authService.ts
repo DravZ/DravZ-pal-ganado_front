@@ -1,4 +1,5 @@
 import type { FarmFormValues, RegistrationFormValues } from '../types/database.types';
+import type { AuthSession } from './offlineSyncService';
 
 interface RegistrationPayload {
   user_name: string;
@@ -21,7 +22,7 @@ interface RegistrationPayload {
   };
 }
 
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, '');
+export const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, '');
 
 async function getResponseMessage(response: Response): Promise<string> {
   const responseText = await response.text();
@@ -33,6 +34,10 @@ async function getResponseMessage(response: Response): Promise<string> {
       const data = body as Record<string, unknown>;
       for (const key of ['detail', 'message', 'error', 'title']) {
         if (typeof data[key] === 'string') return data[key];
+        if (typeof data[key] === 'object' && data[key] !== null) {
+          const nested = data[key] as Record<string, unknown>;
+          if (typeof nested.message === 'string') return nested.message;
+        }
       }
     }
   } catch {
@@ -42,7 +47,7 @@ async function getResponseMessage(response: Response): Promise<string> {
   return `La solicitud falló (${response.status}).`;
 }
 
-async function requestCsrfToken(): Promise<string> {
+export async function requestCsrfToken(): Promise<string> {
   const response = await fetch(`${apiBaseUrl}/auth/csrf`, {
     credentials: 'include',
     headers: { Accept: 'application/json' },
@@ -64,6 +69,55 @@ async function requestCsrfToken(): Promise<string> {
   }
 
   return body.token;
+}
+
+async function requestSession<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    ...init,
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      ...init?.headers,
+    },
+  });
+  if (!response.ok) throw new Error(await getResponseMessage(response));
+  if (response.status === 204) return undefined as T;
+  return response.json() as Promise<T>;
+}
+
+export async function loginAccount(email: string, password: string): Promise<AuthSession> {
+  if (!navigator.onLine) throw new Error('El inicio de sesión requiere conexión a internet.');
+  const csrfToken = await requestCsrfToken();
+  return requestSession<AuthSession>('/auth/session', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': csrfToken,
+    },
+    body: JSON.stringify({ email: email.trim(), password }),
+  });
+}
+
+export function getCurrentSession(): Promise<AuthSession> {
+  return requestSession<AuthSession>('/auth/session');
+}
+
+export async function renewCurrentSession(): Promise<AuthSession> {
+  if (!navigator.onLine) throw new Error('Conéctate a internet para renovar tu sesión.');
+  const csrfToken = await requestCsrfToken();
+  return requestSession<AuthSession>('/auth/session/renew', {
+    method: 'POST',
+    headers: { 'X-XSRF-TOKEN': csrfToken },
+  });
+}
+
+export async function closeCurrentSession(): Promise<void> {
+  if (!navigator.onLine) throw new Error('Conéctate a internet para cerrar la sesión de forma segura.');
+  const csrfToken = await requestCsrfToken();
+  await requestSession<void>('/auth/session', {
+    method: 'DELETE',
+    headers: { 'X-XSRF-TOKEN': csrfToken },
+  });
 }
 
 export async function registerAccount(

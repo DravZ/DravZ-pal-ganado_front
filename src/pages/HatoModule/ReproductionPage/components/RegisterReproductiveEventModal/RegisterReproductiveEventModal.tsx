@@ -1,34 +1,37 @@
 import React, { useState } from 'react';
 import { X, Check, CloudOff } from 'lucide-react';
 import styles from './RegisterReproductiveEventModal.module.css';
-import type {
-  ReproductiveEvent,
-  ReproductiveEventFormValues,
-} from '../../../../../types/database.types';
+import type { ReproductiveEventFormValues } from '../../../../../types/database.types';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  animals: { id: string; tag: string; name: string; breed: string; sex: string; status: string }[];
+  onSubmit: (values: ReproductiveEventFormValues) => Promise<void>;
 }
 
 export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  animals,
+  onSubmit,
 }) => {
   const [formData, setFormData] = useState<ReproductiveEventFormValues>({
-    femaleAnimalId: 'BR-1042',
+    femaleAnimalId: '',
     eventType: 'Celo',
-    maleAnimalId: 'BR-0721',
-    serviceType: 'Inseminación artificial',
-    eventDate: '2025-06-16',
-    expectedDate: '2026-03-25',
+    maleAnimalId: '',
+    serviceType: '',
+    eventDate: new Date().toISOString().slice(0, 10),
+    expectedDate: '',
     actualDate: '',
     result: 'Pendiente',
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -56,26 +59,21 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) return;
-
-    const payload: ReproductiveEvent = {
-      id: crypto.randomUUID(),
-      female_animal_id: formData.femaleAnimalId,
-      event_type: formData.eventType,
-      male_animal_id: formData.maleAnimalId || undefined,
-      service_type: formData.serviceType || undefined,
-      event_date: formData.eventDate,
-      expected_date: formData.expectedDate || undefined,
-      actual_date: formData.actualDate || undefined,
-      result: formData.result,
-    };
-
-    console.log('[Action Log]: Formulario enviado al backend ->', payload);
-    if (onSuccess) onSuccess();
-    onClose();
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      await onSubmit(formData);
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'No se pudo guardar el evento.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -123,11 +121,16 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                   }`}
                   value={formData.femaleAnimalId}
                   onChange={(e) => handleChange('femaleAnimalId', e.target.value)}
+                  required
                 >
-                  <option value="BR-1042">BR-1042 · Esperanza · Nelore</option>
-                  <option value="BR-1170">BR-1170 · Bonita · Nelore</option>
-                  <option value="BR-0982">BR-0982 · Princesa · Nelore</option>
-                  <option value="BR-1124">BR-1124 · Canela · Braford</option>
+                  <option value="">Selecciona una hembra</option>
+                  {animals.filter((animal) =>
+                    animal.status === 'active' && ['hembra', 'female'].includes(animal.sex.toLowerCase()),
+                  ).map((animal) => (
+                    <option key={animal.id} value={animal.id}>
+                      {animal.tag} · {animal.name} · {animal.breed}
+                    </option>
+                  ))}
                 </select>
                 {errors.femaleAnimalId && (
                   <div className={styles.errorText}>{errors.femaleAnimalId}</div>
@@ -166,24 +169,17 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                   value={formData.maleAnimalId}
                   onChange={(e) => handleChange('maleAnimalId', e.target.value)}
                 >
-                  <option value="BR-0721">BR-0721 · Imperador · Nelore</option>
-                  <option value="BR-0900">BR-0900 · Apolo · Angus</option>
+                  <option value="">Sin padre registrado</option>
+                  {animals.filter((animal) =>
+                    animal.status === 'active' && ['macho', 'male'].includes(animal.sex.toLowerCase()),
+                  ).map((animal) => (
+                    <option key={animal.id} value={animal.id}>
+                      {animal.tag} · {animal.name} · {animal.breed}
+                    </option>
+                  ))}
                 </select>
               </div>
-
-              {/* Tipo de Servicio */}
-              <div className="col-12 col-md-6">
-                <label className={styles.formLabel}>Tipo de servicio</label>
-                <select
-                  className={styles.formControl}
-                  value={formData.serviceType}
-                  onChange={(e) => handleChange('serviceType', e.target.value)}
-                >
-                  <option value="Inseminación artificial">Inseminación artificial</option>
-                  <option value="Monta directa">Monta directa</option>
-                  <option value="Transferencia de embriones">Transferencia de embriones</option>
-                </select>
-              </div>
+              {submitError && <p role="alert" className="text-danger px-3">{submitError}</p>}
 
               {/* Fecha del evento */}
               <div className="col-12 col-md-6">
@@ -210,18 +206,6 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                   className={styles.formControl}
                   value={formData.expectedDate}
                   onChange={(e) => handleChange('expectedDate', e.target.value)}
-                  min={formData.eventDate}
-                />
-              </div>
-
-              {/* Fecha real */}
-              <div className="col-12 col-md-6">
-                <label className={styles.formLabel}>Fecha real</label>
-                <input
-                  type="date"
-                  className={styles.formControl}
-                  value={formData.actualDate}
-                  onChange={(e) => handleChange('actualDate', e.target.value)}
                   min={formData.eventDate}
                 />
               </div>
@@ -266,9 +250,10 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
             <button
               type="submit"
               className={styles.saveButton}
+              disabled={isSubmitting}
             >
               <Check size={18} strokeWidth={2.5} />
-              <span>Guardar registro</span>
+              <span>{isSubmitting ? 'Guardando…' : 'Guardar registro'}</span>
             </button>
           </div>
         </form>

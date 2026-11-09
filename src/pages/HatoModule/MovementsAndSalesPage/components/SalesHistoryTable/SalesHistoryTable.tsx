@@ -1,39 +1,23 @@
 import React, { useState } from 'react';
 import styles from './SalesHistoryTable.module.css';
-import type { Sale } from '../../../../../types/database.types';
-
-type SaleHistoryUI = Sale & {
-  customer_name: string;
-  total_weight: number;
-};
-
-const MOCK_SALES_HISTORY: SaleHistoryUI[] = [
-  {
-    id: 's1',
-    farm_id: 'f9d12345-0000-0000-0000-000000000001',
-    customer_id: 'c1111111-0000-0000-0000-111111111111',
-    sale_number: 'VEN-2025-0047',
-    customer_name: 'Frigorífico Central',
-    sale_date: '12 jun 2025',
-    total_weight: 2840,
-    total: 27832000,
-    payment_status: 'Pagada'
-  },
-  {
-    id: 's2',
-    farm_id: 'f9d12345-0000-0000-0000-000000000001',
-    customer_id: 'c2222222-0000-0000-0000-222222222222',
-    sale_number: 'VEN-2025-0046',
-    customer_name: 'Cooperativa del Valle',
-    sale_date: '03 jun 2025',
-    total_weight: 1920,
-    total: 18624000,
-    payment_status: 'Pendiente'
-  }
-];
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
 
 export const SalesHistoryTable: React.FC = () => {
   const [filterRange, setFilterRange] = useState<string>('30_DAYS');
+  const [now] = useState(() => Date.now());
+  const { scope } = useFarmScope();
+  const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+    'sales_records',
+    '/sales-records',
+    scope,
+  );
+  const cutoff = filterRange === '30_DAYS'
+    ? now - 30 * 86_400_000
+    : filterRange === '60_DAYS'
+      ? now - 60 * 86_400_000
+      : new Date(new Date(now).getFullYear(), 0, 1).getTime();
+  const sales = records.filter((sale) => Date.parse(String(sale.sale_date ?? '')) >= cutoff);
 
   return (
     <div className={styles.tableCard}>
@@ -69,31 +53,45 @@ export const SalesHistoryTable: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {MOCK_SALES_HISTORY.map((item) => (
-              <tr key={item.id}>
-                <td className="fw-bold">{item.sale_number}</td>
-                <td>{item.customer_name}</td>
-                <td>{item.sale_date}</td>
-                <td>{item.total_weight.toLocaleString('es-CO')} kg</td>
-                <td className="fw-bold">${(item.total || 0).toLocaleString('es-CO')}</td>
+            {sales.map((item) => {
+              const lines = Array.isArray(item.lines) ? item.lines : [];
+              const totalWeight = lines.reduce((total, line) =>
+                total + (typeof line === 'object' && line !== null && 'weight' in line
+                  ? Number(line.weight)
+                  : 0), 0);
+              const paymentStatus = String(item.payment_status ?? 'Sin estado');
+              return (
+              <tr key={String(item.id)}>
+                <td className="fw-bold">{String(item.sale_number ?? '—')}</td>
+                <td>{String(item.customer_name ?? '—')}</td>
+                <td>{String(item.sale_date ?? '—')}</td>
+                <td>{totalWeight.toLocaleString('es-CO')} kg</td>
+                <td className="fw-bold">${Number(item.total ?? item.total_amount ?? 0).toLocaleString('es-CO')}</td>
                 <td>
                   <span
                     className={`${styles.statusBadge} ${
-                      item.payment_status === 'Pagada' ? styles.badgePaid : styles.badgePending
+                      paymentStatus.toLocaleLowerCase() === 'pagada'
+                        || paymentStatus.toLocaleLowerCase() === 'paid'
+                        ? styles.badgePaid
+                        : styles.badgePending
                     }`}
                   >
-                    {item.payment_status}
+                    {paymentStatus}
                   </span>
                 </td>
               </tr>
-            ))}
+              );
+            })}
+            {sales.length === 0 && (
+              <tr><td colSpan={6} className="text-center text-secondary">No hay ventas en el periodo seleccionado.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Paginación Responsiva */}
       <div className={styles.paginationFooter}>
-        <span className={styles.paginationInfo}>Mostrando 1–2 de 48 ventas</span>
+        <span className={styles.paginationInfo}>Mostrando {sales.length} ventas</span>
         <div className={styles.paginationControls}>
           <button type="button" className={styles.pageBtn} disabled>
             Anterior
@@ -108,6 +106,8 @@ export const SalesHistoryTable: React.FC = () => {
             Siguiente
           </button>
         </div>
+        {isLoading && <p role="status">Cargando ventas locales…</p>}
+        {error && <p role="alert">{error}</p>}
       </div>
     </div>
   );

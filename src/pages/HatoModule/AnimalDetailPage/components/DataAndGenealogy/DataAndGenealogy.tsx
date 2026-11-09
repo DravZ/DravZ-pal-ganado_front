@@ -5,10 +5,21 @@ import styles from './DataAndGenealogy.module.css';
 
 interface DataAndGenealogyProps {
   animalId: string;
+  animal: Record<string, unknown>;
+  animals: Record<string, unknown>[];
 }
 
-export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) => {
+export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, animal, animals }) => {
   const navigate = useNavigate();
+  const tag = String(animal.identifier_tag ?? animal.tag_number ?? animalId);
+  const name = String(animal.name ?? 'Sin nombre');
+  const fatherId = String(animal.sire_id ?? '');
+  const motherId = String(animal.dam_id ?? '');
+  const father = animals.find((item) => item.id === fatherId);
+  const mother = animals.find((item) => item.id === motherId);
+  const offspring = animals.filter((item) => item.dam_id === animalId || item.sire_id === animalId);
+  const display = (value: unknown, fallback = 'No registrado') =>
+    value === null || value === undefined || value === '' ? fallback : String(value);
 
   // Navegación para editar el animal
   const handleEditAnimal = () => {
@@ -46,41 +57,45 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) 
               <tr>
                 <td>
                   <span className={styles.fieldLabel}>Nombre</span>
-                  <span className={styles.fieldVal}>Esperanza</span>
+                  <span className={styles.fieldVal}>{display(animal.name)}</span>
                 </td>
                 <td>
                   <span className={styles.fieldLabel}>Especie</span>
-                  <span className={styles.fieldVal}>Bovino</span>
+                  <span className={styles.fieldVal}>{display(animal.species)}</span>
                 </td>
               </tr>
               <tr>
                 <td>
                   <span className={styles.fieldLabel}>Sexo</span>
-                  <span className={styles.fieldVal}>Hembra</span>
+                  <span className={styles.fieldVal}>{display(animal.gender ?? animal.sex)}</span>
                 </td>
                 <td>
                   <span className={styles.fieldLabel}>Raza</span>
-                  <span className={styles.fieldVal}>Nelore</span>
+                  <span className={styles.fieldVal}>{display(animal.breed)}</span>
                 </td>
               </tr>
               <tr>
                 <td>
                   <span className={styles.fieldLabel}>Fecha de nacimiento</span>
-                  <span className={styles.fieldVal}>18 ago 2022</span>
+                  <span className={styles.fieldVal}>{display(animal.birth_date)}</span>
                 </td>
                 <td>
                   <span className={styles.fieldLabel}>Peso al nacer</span>
-                  <span className={styles.fieldVal}>34 kg</span>
+                  <span className={styles.fieldVal}>
+                    {animal.weight_at_birth ?? animal.birth_weight
+                      ? `${display(animal.weight_at_birth ?? animal.birth_weight)} kg`
+                      : 'No registrado'}
+                  </span>
                 </td>
               </tr>
               <tr>
                 <td>
                   <span className={styles.fieldLabel}>Lote actual</span>
-                  <span className={styles.fieldVal}>Vacas de cría</span>
+                  <span className={styles.fieldVal}>{display(animal.lot_name)}</span>
                 </td>
                 <td>
                   <span className={styles.fieldLabel}>Potrero actual</span>
-                  <span className={styles.fieldVal}>Potrero Norte</span>
+                  <span className={styles.fieldVal}>{display(animal.paddock_name)}</span>
                 </td>
               </tr>
             </tbody>
@@ -91,22 +106,16 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) 
         <div className={styles.card}>
           <div className="d-flex align-items-center justify-content-between mb-3">
             <span className={styles.kicker}>IDENTIFICADORES</span>
-            <span className={styles.badgePill}>2 activos</span>
+            <span className={styles.badgePill}>{animal.identifier_tag ? '1 activo' : '0 activos'}</span>
           </div>
 
           <div className="d-flex flex-column gap-2">
-            <div className="d-flex align-items-center justify-content-between py-1 border-bottom">
-              <span className={styles.fieldVal}>BR-1042</span>
-              <span className="text-secondary" style={{ fontSize: '0.8rem' }}>
-                Siniga · Oficial
-              </span>
-            </div>
-            <div className="d-flex align-items-center justify-content-between py-1">
-              <span className={styles.fieldVal}>MC-991-84201</span>
-              <span className="text-secondary" style={{ fontSize: '0.8rem' }}>
-                Microchip · Actual
-              </span>
-            </div>
+            {animal.identifier_tag
+              ? <div className="d-flex align-items-center justify-content-between py-1">
+                <span className={styles.fieldVal}>{String(animal.identifier_tag)}</span>
+                <span className="text-secondary" style={{ fontSize: '0.8rem' }}>Identificador actual</span>
+              </div>
+              : <span className="text-secondary">No hay identificadores disponibles.</span>}
           </div>
         </div>
       </div>
@@ -120,7 +129,7 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) 
               <h2 className={styles.title}>Árbol familiar</h2>
             </div>
             <span className="badge bg-light text-dark font-weight-bold p-2" style={{ borderRadius: '20px' }}>
-              3 generaciones
+              Genealogía disponible
             </span>
           </div>
 
@@ -131,10 +140,10 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) 
                 <Beef size={22} />
               </div>
               <div className={styles.fieldVal} style={{ marginTop: '0.35rem' }}>
-                BR-1042
+                {tag}
               </div>
               <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                Esperanza
+                {name}
               </div>
             </div>
 
@@ -144,33 +153,26 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) 
                 <div className={styles.kicker} style={{ marginBottom: '0.35rem' }}>
                   PADRE · SIRE_ID
                 </div>
-                <button
-                  type="button"
-                  className={styles.parentCard}
-                  onClick={() => handleNavigateToAnimal('BR-0721')}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    <span className={`${styles.genderCircle} ${styles.maleCircle}`}>♂</span>
-                    <div>
-                      <div className={styles.fieldVal}>BR-0721</div>
-                      <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                        Imperador · Nelore
+                {fatherId ? (
+                  <button
+                    type="button"
+                    className={styles.parentCard}
+                    onClick={() => handleNavigateToAnimal(fatherId)}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <span className={`${styles.genderCircle} ${styles.maleCircle}`}>♂</span>
+                      <div>
+                        <div className={styles.fieldVal}>
+                          {display(father?.identifier_tag ?? father?.tag_number, fatherId)}
+                        </div>
+                        <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                          {display(father?.name)} · {display(father?.breed)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <ChevronRight size={18} className="text-secondary" />
-                </button>
-
-                <div className={styles.grandparentsRow}>
-                  <div className={styles.grandparentCell}>
-                    <div className={styles.fieldVal}>BR-0318</div>
-                    <div className="text-secondary">Abuelo paterno</div>
-                  </div>
-                  <div className={styles.grandparentCell}>
-                    <div className={styles.fieldVal}>BR-0440</div>
-                    <div className="text-secondary">Abuela paterna</div>
-                  </div>
-                </div>
+                    <ChevronRight size={18} className="text-secondary" />
+                  </button>
+                ) : <div className={styles.parentCard}>Sin padre registrado</div>}
               </div>
 
               {/* Madre */}
@@ -178,33 +180,26 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) 
                 <div className={styles.kicker} style={{ marginBottom: '0.35rem' }}>
                   MADRE · DAM_ID
                 </div>
-                <button
-                  type="button"
-                  className={styles.parentCard}
-                  onClick={() => handleNavigateToAnimal('BR-0546')}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    <span className={`${styles.genderCircle} ${styles.femaleCircle}`}>♀</span>
-                    <div>
-                      <div className={styles.fieldVal}>BR-0546</div>
-                      <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                        Estrella · Nelore
+                {motherId ? (
+                  <button
+                    type="button"
+                    className={styles.parentCard}
+                    onClick={() => handleNavigateToAnimal(motherId)}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <span className={`${styles.genderCircle} ${styles.femaleCircle}`}>♀</span>
+                      <div>
+                        <div className={styles.fieldVal}>
+                          {display(mother?.identifier_tag ?? mother?.tag_number, motherId)}
+                        </div>
+                        <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                          {display(mother?.name)} · {display(mother?.breed)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <ChevronRight size={18} className="text-secondary" />
-                </button>
-
-                <div className={styles.grandparentsRow}>
-                  <div className={styles.grandparentCell}>
-                    <div className={styles.fieldVal}>BR-0229</div>
-                    <div className="text-secondary">Abuelo materno</div>
-                  </div>
-                  <div className={styles.grandparentCell}>
-                    <div className={styles.fieldVal}>BR-0381</div>
-                    <div className="text-secondary">Abuela materna</div>
-                  </div>
-                </div>
+                    <ChevronRight size={18} className="text-secondary" />
+                  </button>
+                ) : <div className={styles.parentCard}>Sin madre registrada</div>}
               </div>
             </div>
           </div>
@@ -213,47 +208,41 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId }) 
           <div className="mt-4">
             <div className={styles.kicker}>DESCENDENCIA</div>
             <div className={styles.title} style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>
-              2 crías registradas
+              {offspring.length} crías registradas
             </div>
 
             <div className="row g-2">
-              <div className="col-12 col-md-6">
-                <button
-                  type="button"
-                  className={styles.offspringCard}
-                  onClick={() => handleNavigateToAnimal('BR-1288')}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    <span className={`${styles.genderCircle} ${styles.femaleCircle}`}>♀</span>
-                    <div>
-                      <div className={styles.fieldVal}>BR-1288</div>
-                      <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                        Lucero · 8 meses
+              {offspring.map((child) => (
+                <div className="col-12 col-md-6" key={String(child.id)}>
+                  <button
+                    type="button"
+                    className={styles.offspringCard}
+                    onClick={() => handleNavigateToAnimal(String(child.id))}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <span className={`${styles.genderCircle} ${
+                        ['Hembra', 'hembra'].includes(String(child.gender ?? child.sex))
+                          ? styles.femaleCircle
+                          : styles.maleCircle
+                      }`}>
+                        {['Hembra', 'hembra'].includes(String(child.gender ?? child.sex)) ? '♀' : '♂'}
+                      </span>
+                      <div>
+                        <div className={styles.fieldVal}>
+                          {display(child.identifier_tag ?? child.tag_number, String(child.id))}
+                        </div>
+                        <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                          {display(child.name)} · {display(child.breed)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <ChevronRight size={18} className="text-secondary" />
-                </button>
-              </div>
-
-              <div className="col-12 col-md-6">
-                <button
-                  type="button"
-                  className={styles.offspringCard}
-                  onClick={() => handleNavigateToAnimal('BR-1310')}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    <span className={`${styles.genderCircle} ${styles.maleCircle}`}>♂</span>
-                    <div>
-                      <div className={styles.fieldVal}>BR-1310</div>
-                      <div className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                        Bravo · 5 meses
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight size={18} className="text-secondary" />
-                </button>
-              </div>
+                    <ChevronRight size={18} className="text-secondary" />
+                  </button>
+                </div>
+              ))}
+              {offspring.length === 0 && (
+                <div className="col-12 text-secondary">No hay descendencia registrada.</div>
+              )}
             </div>
           </div>
         </div>

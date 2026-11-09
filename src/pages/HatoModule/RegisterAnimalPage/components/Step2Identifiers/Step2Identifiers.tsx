@@ -1,10 +1,11 @@
 import React from 'react';
 import { Scan, Plus } from 'lucide-react';
 import styles from './Step2Identifiers.module.css';
+import type { AnimalFormChange, AnimalFormData } from '../../types';
 
 interface Step2Props {
-  formData: any;
-  onChange: (field: string, value: any) => void;
+  formData: AnimalFormData;
+  onChange: AnimalFormChange;
 }
 
 export const Step2Identifiers: React.FC<Step2Props> = ({ formData, onChange }) => {

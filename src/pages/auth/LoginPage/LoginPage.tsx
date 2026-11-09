@@ -1,9 +1,19 @@
 import React from 'react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 import { BrandHeroSection } from '../../../components/auth/login/BrandHeroSection/BrandHeroSection';
 import { LoginForm } from '../../../components/auth/login/LoginForm/LoginForm';
+import { useAuth } from '../../../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
+    const { user, isReady } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isReady && user) navigate('/dashboard', { replace: true });
+    }, [isReady, navigate, user]);
+
     return (
         <div className={styles.pageLayout}>
             <main className={styles.mainWrapper}>

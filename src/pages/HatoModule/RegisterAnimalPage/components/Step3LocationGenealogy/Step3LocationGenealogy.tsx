@@ -1,13 +1,23 @@
 import React from 'react';
 import { Home, Beef } from 'lucide-react';
 import styles from './Step3LocationGenealogy.module.css';
+import type { AnimalFormChange, AnimalFormData } from '../../types';
 
 interface Step3Props {
-  formData: any;
-  onChange: (field: string, value: any) => void;
+  formData: AnimalFormData;
+  onChange: AnimalFormChange;
+  lots: { id: string; name: string }[];
+  paddocks: { id: string; name: string }[];
+  animals: { id: string; tag: string; name: string; sex: string; status: string }[];
 }
 
-export const Step3LocationGenealogy: React.FC<Step3Props> = ({ formData, onChange }) => {
+export const Step3LocationGenealogy: React.FC<Step3Props> = ({
+  formData,
+  onChange,
+  lots,
+  paddocks,
+  animals,
+}) => {
   return (
     <div className={styles.stepContainer}>
       <div className={styles.stepHeaderGroup}>
@@ -39,9 +49,8 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({ formData, onChang
               value={formData.loteId}
               onChange={(e) => onChange('loteId', e.target.value)}
             >
-              <option value="Vacas de cría">Vacas de cría · 58 animales</option>
-              <option value="Novillos levante">Novillos levante · 32 animales</option>
-              <option value="Ceba final">Ceba final · 40 animales</option>
+              <option value="">Sin lote asignado</option>
+              {lots.map((lot) => <option key={lot.id} value={lot.id}>{lot.name}</option>)}
             </select>
           </div>
 
@@ -54,9 +63,10 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({ formData, onChang
               value={formData.potreroId}
               onChange={(e) => onChange('potreroId', e.target.value)}
             >
-              <option value="Potrero Norte">Potrero Norte · 48 ha</option>
-              <option value="La Quebrada">La Quebrada · 35 ha</option>
-              <option value="Loma Alta">Loma Alta · 20 ha</option>
+              <option value="">Sin potrero asignado</option>
+              {paddocks.map((paddock) => (
+                <option key={paddock.id} value={paddock.id}>{paddock.name}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -80,7 +90,13 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({ formData, onChang
               onChange={(e) => onChange('sireId', e.target.value)}
             >
               <option value="">Sin padre registrado</option>
-              <option value="BR-900">BR-900 · Toro Apolo</option>
+              {animals.filter((animal) =>
+                animal.status === 'active' && ['Macho', 'macho'].includes(animal.sex),
+              ).map((animal) => (
+                <option key={animal.id} value={animal.id}>
+                  {animal.tag} · {animal.name}
+                </option>
+              ))}
             </select>
             <div className={styles.fieldHint}>Solo se muestran animales machos activos.</div>
           </div>
@@ -95,7 +111,13 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({ formData, onChang
               onChange={(e) => onChange('damId', e.target.value)}
             >
               <option value="">Sin madre registrada</option>
-              <option value="BR-100">BR-100 · Vaca Luna</option>
+              {animals.filter((animal) =>
+                animal.status === 'active' && ['Hembra', 'hembra'].includes(animal.sex),
+              ).map((animal) => (
+                <option key={animal.id} value={animal.id}>
+                  {animal.tag} · {animal.name}
+                </option>
+              ))}
             </select>
             <div className={styles.fieldHint}>Solo se muestran animales hembras activas.</div>
           </div>

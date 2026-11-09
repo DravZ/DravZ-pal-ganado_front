@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SuperLayout from "../layouts/SuperLayout/SuperLayout";
 import MainLayout from "../layouts/MainLayout/MainLayout";
+import AuthGuard from "../components/shared/AuthGuard/AuthGuard";
+import { AuthProvider } from "../context/AuthContext";
 import {
-  Login,
   NotFound,
   LoginPage,
   ForgotPasswordPage,
@@ -11,6 +12,7 @@ import {
   AnimalsDirectoryPage,
   RegisterAnimalPage,
   AnimalDetailPage,
+  EditAnimalPage,
   WeightTreatmentPage,
   ReproductionPage,
   MovementsAndSalesPage,
@@ -43,15 +45,19 @@ export default function AppRouter() {
   return (
     <NotificationProvider>
       <BrowserRouter>
-        <Routes>
-          <Route element={<SuperLayout />}>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route element={<MainLayout />}>
+        <AuthProvider>
+          <Routes>
+            <Route element={<SuperLayout />}>
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route element={<AuthGuard />}>
+                <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/hato/animales" element={<AnimalsDirectoryPage />} />
               <Route path="/hato/nuevo" element={<RegisterAnimalPage />} />
+              <Route path="/hato/animales/:id/editar" element={<EditAnimalPage />} />
               <Route path="/hato/animales/:id" element={<AnimalDetailPage />} />
               <Route path="/hato/pesajes" element={<WeightTreatmentPage />} />
               <Route path="/hato/reproduccion" element={<ReproductionPage />} />
@@ -78,11 +84,12 @@ export default function AppRouter() {
               <Route path="/admin/sincronizacion" element={<SyncQueuePage />} />
               <Route path="/perfil" element={<ProfilePage />} />
               <Route path="/perfil/editar" element={<EditProfilePage />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </NotificationProvider>
   );

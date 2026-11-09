@@ -1,105 +1,72 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './MovementForm.module.css';
 import { ArrowLeftRight, Plus, Trash2, CheckCircle, Beef } from 'lucide-react';
-import type {
-  Lot,
-  Animal,
-  CreateMovementDTO,
-  SyncQueueEntry
-} from '../../../../../types/database.types';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
+import useNotification from '../../../../../hooks/useNotification';
+
+interface HatoAnimal {
+  id: string;
+  identifier_tag: string;
+  name: string;
+  breed: string;
+  sex: string;
+  current_weight: number;
+  lot_id: string;
+  status: string;
+}
 
 interface AnimalSelectionItem {
-  animal: Animal & { identifier_tag: string };
+  animal: HatoAnimal;
   weight: number;
 }
 
-const MOCK_LOTS: (Lot & { animal_count: number })[] = [
-  {
-    id: '8a11e8a2-23bf-4d80-8772-23fa00100001',
-    farm_id: 'f9d12345-0000-0000-0000-000000000001',
-    name: 'Novillos levante',
-    code: 'LOT-LEV-01',
-    lot_type: 'Levante',
-    purpose: 'Ceba',
-    status: 'active',
-    created_at: '2026-01-01T00:00:00Z',
-    animal_count: 63
-  },
-  {
-    id: '8a11e8a2-23bf-4d80-8772-23fa00100002',
-    farm_id: 'f9d12345-0000-0000-0000-000000000001',
-    name: 'Ceba final',
-    code: 'LOT-CEB-02',
-    lot_type: 'Engorde',
-    purpose: 'Venta',
-    status: 'active',
-    created_at: '2026-01-01T00:00:00Z',
-    animal_count: 24
-  }
-];
-
-const MOCK_AVAILABLE_ANIMALS: (Animal & { identifier_tag: string })[] = [
-  {
-    id: 'a1011111-0000-0000-0000-111111111111',
-    farm_id: 'f9d12345-0000-0000-0000-000000000001',
-    name: 'Esperanza',
-    identifier_tag: 'BR-1042',
-    sex: 'Hembra',
-    species: 'bovino',
-    breed: 'Nelore',
-    current_weight: 482,
-    status: 'active',
-    created_at: '2026-01-01T00:00:00Z'
-  },
-  {
-    id: 'a2022222-0000-0000-0000-222222222222',
-    farm_id: 'f9d12345-0000-0000-0000-000000000001',
-    name: 'Magnate',
-    identifier_tag: 'BR-1088',
-    sex: 'Macho',
-    species: 'bovino',
-    breed: 'Angus',
-    current_weight: 536,
-    status: 'active',
-    created_at: '2026-01-01T00:00:00Z'
-  },
-  {
-    id: 'a3033333-0000-0000-0000-333333333333',
-    farm_id: 'f9d12345-0000-0000-0000-000000000001',
-    name: 'Canela',
-    identifier_tag: 'BR-1124',
-    sex: 'Hembra',
-    species: 'bovino',
-    breed: 'Braford',
-    current_weight: 418,
-    status: 'active',
-    created_at: '2026-01-01T00:00:00Z'
-  }
-];
-
 export const MovementForm: React.FC = () => {
-  const [originLotId, setOriginLotId] = useState<string>(MOCK_LOTS[0].id);
-  const [destinationLotId, setDestinationLotId] = useState<string>(MOCK_LOTS[1].id);
-  const [movementDate, setMovementDate] = useState<string>('2025-06-16');
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const { records: rawLots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
+    'animals',
+    '/animals',
+    scope,
+  );
+  const lots = rawLots.map((lot) => ({
+    id: String(lot.id ?? ''),
+    name: String(lot.name ?? ''),
+  })).filter((lot) => lot.id && lot.name);
+  const animals = useMemo<HatoAnimal[]>(() => rawAnimals.map((animal) => ({
+    id: String(animal.id ?? ''),
+    identifier_tag: String(animal.identifier_tag ?? animal.tag_number ?? ''),
+    name: String(animal.name ?? 'Sin nombre'),
+    breed: String(animal.breed ?? 'Sin raza'),
+    sex: String(animal.gender ?? animal.sex ?? ''),
+    current_weight: Number(animal.current_weight ?? 0),
+    lot_id: String(animal.lot_id ?? ''),
+    status: String(animal.status ?? ''),
+  })), [rawAnimals]);
+  const [originLotId, setOriginLotId] = useState('');
+  const [destinationLotId, setDestinationLotId] = useState('');
+  const originId = originLotId || lots[0]?.id || '';
+  const destinationId = destinationLotId || lots.find((lot) => lot.id !== originId)?.id || '';
+  const availableAnimals = animals.filter((animal) =>
+    animal.status === 'active' && animal.lot_id === originId,
+  );
+  const [movementDate, setMovementDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [movementType, setMovementType] = useState<string>('Transferencia interna');
-  const [reason, setReason] = useState<string>('Cambio de etapa productiva');
-
-  const [selectedAnimals, setSelectedAnimals] = useState<AnimalSelectionItem[]>([
-    { animal: MOCK_AVAILABLE_ANIMALS[0], weight: 482 },
-    { animal: MOCK_AVAILABLE_ANIMALS[1], weight: 536 },
-    { animal: MOCK_AVAILABLE_ANIMALS[2], weight: 418 }
-  ]);
-
+  const [reason, setReason] = useState<string>('');
+  const [selectedAnimals, setSelectedAnimals] = useState<AnimalSelectionItem[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAddAnimal = () => {
-    const unselected = MOCK_AVAILABLE_ANIMALS.find(
-      (item) => !selectedAnimals.some((sa) => sa.animal.id === item.id)
+    const unselected = availableAnimals.find(
+      (item) => !selectedAnimals.some((selected) => selected.animal.id === item.id),
     );
     if (unselected) {
       setSelectedAnimals([
         ...selectedAnimals,
-        { animal: unselected, weight: unselected.current_weight || 0 }
+        { animal: unselected, weight: unselected.current_weight },
       ]);
     }
   };
@@ -116,11 +83,17 @@ export const MovementForm: React.FC = () => {
 
   const totalKg = selectedAnimals.reduce((acc, curr) => acc + (curr.weight || 0), 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
 
-    if (originLotId === destinationLotId) {
+    const activeScope = scope;
+    if (!activeScope) {
+      setErrors({ scope: 'No hay una finca autorizada seleccionada.' });
+      return;
+    }
+    if (!originId || !destinationId) newErrors.destinationLotId = 'Selecciona los lotes de origen y destino.';
+    if (originId === destinationId) {
       newErrors.destinationLotId = 'El lote de destino debe ser diferente al de origen.';
     }
     if (selectedAnimals.length === 0) {
@@ -132,37 +105,42 @@ export const MovementForm: React.FC = () => {
       return;
     }
 
+    if (selectedAnimals.some((selected) => selected.animal.lot_id !== originId)) {
+      setErrors({ animals: 'Todos los animales deben pertenecer al lote de origen.' });
+      return;
+    }
+
     setErrors({});
-
-    const farmId = 'f9d12345-0000-0000-0000-000000000001';
-    const movementId = crypto.randomUUID();
-
-    const movementPayload: CreateMovementDTO = {
-      farm_id: farmId,
-      origin_lot_id: originLotId,
-      destination_lot_id: destinationLotId,
-      movement_date: new Date(movementDate).toISOString(),
-      movement_type: movementType,
-      reason: reason,
-      animals: selectedAnimals.map((sa) => ({
-        animal_id: sa.animal.id,
-        weight: sa.weight
-      }))
-    };
-
-    const syncQueueEntry: SyncQueueEntry<CreateMovementDTO> = {
-      id: crypto.randomUUID(),
-      entity_name: 'movements',
-      entity_id: movementId,
-      operation_type: 'CREATE',
-      payload: movementPayload,
-      status: 'PENDING',
-      retry_count: 0,
-      created_at: new Date().toISOString()
-    };
-
-    console.log('[Action Log]: Registrando Movimiento de Ganado:', movementPayload);
-    console.log('[Sync Queue Payload]:', syncQueueEntry);
+    setIsSaving(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(activeScope, 'movements', 'CREATE', {
+        farm_id: activeScope.farmId,
+        origin_lot_id: originId,
+        destination_lot_id: destinationId,
+        movement_date: `${movementDate}T00:00:00`,
+        movement_type: movementType,
+        reason: reason || undefined,
+        animals: selectedAnimals.map(({ animal, weight }) => ({
+          animal_id: animal.id,
+          weight,
+        })),
+      });
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Movimiento pendiente de sincronización' : 'Movimiento registrado',
+        message: result.lastError ?? (result.pending
+          ? 'El movimiento quedó guardado en la cola local.'
+          : 'El movimiento y el cambio de lote se confirmaron en el servidor.'),
+      });
+      setSelectedAnimals([]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo registrar el movimiento.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo registrar el movimiento', message });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -178,13 +156,17 @@ export const MovementForm: React.FC = () => {
           <label className={styles.label}>Lote de origen</label>
           <select
             className={styles.select}
-            value={originLotId}
-            onChange={(e) => setOriginLotId(e.target.value)}
+            value={originId}
+            onChange={(e) => {
+              setOriginLotId(e.target.value);
+              setSelectedAnimals([]);
+            }}
             required
           >
-            {MOCK_LOTS.map((lot) => (
+            <option value="">Selecciona lote de origen</option>
+            {lots.map((lot) => (
               <option key={lot.id} value={lot.id}>
-                {lot.name} · {lot.animal_count} animales
+                {lot.name} · {animals.filter((animal) => animal.lot_id === lot.id).length} animales
               </option>
             ))}
           </select>
@@ -200,13 +182,14 @@ export const MovementForm: React.FC = () => {
           <label className={styles.label}>Lote de destino</label>
           <select
             className={`${styles.select} ${errors.destinationLotId ? styles.inputError : ''}`}
-            value={destinationLotId}
+            value={destinationId}
             onChange={(e) => setDestinationLotId(e.target.value)}
             required
           >
-            {MOCK_LOTS.map((lot) => (
+            <option value="">Selecciona lote de destino</option>
+            {lots.map((lot) => (
               <option key={lot.id} value={lot.id}>
-                {lot.name} · {lot.animal_count} animales
+                {lot.name}
               </option>
             ))}
           </select>
@@ -261,7 +244,14 @@ export const MovementForm: React.FC = () => {
           <span className={styles.dbLabel}>MOVEMENT_ANIMALS</span>
           <h2 className={styles.sectionTitleNoMargin}>Animales seleccionados</h2>
         </div>
-        <button type="button" className={styles.addAnimalBtn} onClick={handleAddAnimal}>
+        <button
+          type="button"
+          className={styles.addAnimalBtn}
+          onClick={handleAddAnimal}
+          disabled={availableAnimals.every((animal) =>
+            selectedAnimals.some((selected) => selected.animal.id === animal.id),
+          )}
+        >
           <Plus size={18} />
           <span>Agregar animales</span>
         </button>
@@ -278,9 +268,7 @@ export const MovementForm: React.FC = () => {
                 <Beef size={20} color="#1e4b27" />
               </div>
               <div className="text-truncate">
-                <div className={styles.animalTitle}>
-                  {animal.identifier_tag} · {animal.name}
-                </div>
+                <div className={styles.animalTitle}>{animal.identifier_tag} · {animal.name}</div>
                 <div className={styles.animalSubtitle}>
                   {animal.breed} · {animal.sex}
                 </div>
@@ -328,11 +316,16 @@ export const MovementForm: React.FC = () => {
           <div className={styles.summaryTotal}>{totalKg.toLocaleString('es-CO')} kg totales</div>
         </div>
 
-        <button type="submit" className={styles.saveBtn}>
+        <button type="submit" className={styles.saveBtn} disabled={isSaving}>
           <CheckCircle size={18} />
-          <span>Guardar movimiento</span>
+          <span>{isSaving ? 'Guardando…' : 'Guardar movimiento'}</span>
         </button>
       </div>
+      {(errors.scope || submitError) && (
+        <p role="alert" className="text-danger">
+          {errors.scope ?? submitError}
+        </p>
+      )}
     </form>
   );
 };

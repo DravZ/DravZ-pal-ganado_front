@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import styles from './WeightHistory.module.css';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
 
 interface WeightHistoryProps {
   animalId: string;
@@ -9,7 +11,36 @@ interface WeightHistoryProps {
 
 export const WeightHistory: React.FC<WeightHistoryProps> = ({ animalId }) => {
   const navigate = useNavigate();
+  const { scope } = useFarmScope();
+  const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+    'weight_records',
+    `/weight-records?animal_id=${encodeURIComponent(animalId)}`,
+    scope,
+  );
   const [timeFilter, setTimeFilter] = useState<'6M' | '1A' | 'Todo'>('1A');
+  const weights = [...records].sort((left, right) =>
+    String(right.weigh_date ?? right.measured_at ?? '').localeCompare(
+      String(left.weigh_date ?? left.measured_at ?? ''),
+    ),
+  );
+  const weightValue = (record: Record<string, unknown>) =>
+    Number(record.weight_kg ?? record.weight ?? 0);
+  const latestWeight = weights[0] ? weightValue(weights[0]) : 0;
+  const oldestWeight = weights.length ? weightValue(weights[weights.length - 1]) : 0;
+  const elapsedDays = weights.length > 1
+    ? Math.max(1, (Date.parse(String(weights[0].weigh_date ?? weights[0].measured_at))
+      - Date.parse(String(weights[weights.length - 1].weigh_date ?? weights[weights.length - 1].measured_at)))
+      / 86_400_000)
+    : 0;
+  const averageDailyGain = elapsedDays ? (latestWeight - oldestWeight) / elapsedDays : 0;
+  const chartRecords = [...weights].reverse().slice(-8);
+  const chartRange = Math.max(1, ...chartRecords.map(weightValue)) - Math.min(0, ...chartRecords.map(weightValue));
+  const points = chartRecords.map((record, index) => {
+    const minWeight = Math.min(...chartRecords.map(weightValue));
+    const x = chartRecords.length === 1 ? 250 : 30 + index * 440 / (chartRecords.length - 1);
+    const y = 110 - ((weightValue(record) - minWeight) / chartRange) * 85;
+    return `${x},${y}`;
+  }).join(' ');
 
   const handleRegisterWeight = () => {
     console.log(`[Router Log]: Redirigiendo a registro de peso para animal ${animalId}`);
@@ -54,15 +85,17 @@ export const WeightHistory: React.FC<WeightHistoryProps> = ({ animalId }) => {
         {/* Métricas rápidas */}
         <div className="row g-3 mb-2">
           <div className="col-4 col-md-3 border-end">
-            <div className={styles.metricValue}>482 kg</div>
+            <div className={styles.metricValue}>{latestWeight.toLocaleString('es-CO')} kg</div>
             <div className={styles.metricSub}>Peso actual</div>
           </div>
           <div className="col-4 col-md-3 border-end">
-            <div className={styles.metricValue}>+67 kg</div>
+            <div className={styles.metricValue}>
+              {weights.length > 1 ? `${(latestWeight - oldestWeight).toLocaleString('es-CO')} kg` : '—'}
+            </div>
             <div className={styles.metricSub}>Ganancia en el periodo</div>
           </div>
           <div className="col-4 col-md-3">
-            <div className={styles.metricValue}>0.73 kg/día</div>
+            <div className={styles.metricValue}>{averageDailyGain.toFixed(2)} kg/día</div>
             <div className={styles.metricSub}>Ganancia diaria promedio</div>
           </div>
         </div>
@@ -89,36 +122,24 @@ export const WeightHistory: React.FC<WeightHistoryProps> = ({ animalId }) => {
             <line x1="20" y1="110" x2="480" y2="110" stroke="#f1f5f9" strokeDasharray="3" />
             <text x="0" y="114" fill="#94a3b8" fontSize="10">350 kg</text>
 
-            <polygon
-              points="30,95 180,75 330,55 470,25 470,115 30,115"
-              fill="url(#weightGrad)"
-            />
-
-            <polyline
-              fill="none"
-              stroke="#1e4b27"
-              strokeWidth="3"
-              strokeLinecap="round"
-              points="30,95 180,75 330,55 470,25"
-            />
-
-            <circle cx="30" cy="95" r="5" fill="#ffffff" stroke="#1e4b27" strokeWidth="3" />
-            <circle cx="180" cy="75" r="5" fill="#ffffff" stroke="#1e4b27" strokeWidth="3" />
-            <circle cx="330" cy="55" r="5" fill="#ffffff" stroke="#1e4b27" strokeWidth="3" />
-            <circle cx="470" cy="25" r="5" fill="#ffffff" stroke="#1e4b27" strokeWidth="3" />
-
-            <text x="30" y="128" fill="#64748b" fontSize="10" fontWeight="700" textAnchor="middle">
-              SEP 2024
-            </text>
-            <text x="180" y="128" fill="#64748b" fontSize="10" fontWeight="700" textAnchor="middle">
-              DIC 2024
-            </text>
-            <text x="330" y="128" fill="#64748b" fontSize="10" fontWeight="700" textAnchor="middle">
-              MAR 2025
-            </text>
-            <text x="470" y="128" fill="#64748b" fontSize="10" fontWeight="700" textAnchor="middle">
-              JUN 2025
-            </text>
+            {chartRecords.length > 1 && (
+              <>
+                <polygon points={`${points} 470,115 30,115`} fill="url(#weightGrad)" />
+                <polyline
+                  fill="none"
+                  stroke="#1e4b27"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  points={points}
+                />
+              </>
+            )}
+            {chartRecords.map((record, index) => {
+              const x = chartRecords.length === 1 ? 250 : 30 + index * 440 / (chartRecords.length - 1);
+              const minWeight = Math.min(...chartRecords.map(weightValue));
+              const y = 110 - ((weightValue(record) - minWeight) / chartRange) * 85;
+              return <circle key={String(record.id)} cx={x} cy={y} r="5" fill="#ffffff" stroke="#1e4b27" strokeWidth="3" />;
+            })}
           </svg>
         </div>
       </div>
@@ -152,37 +173,26 @@ export const WeightHistory: React.FC<WeightHistoryProps> = ({ animalId }) => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>12 jun 2025</td>
-                <td className="font-weight-bold">482 kg</td>
-                <td className={styles.variationPositive}>+14 kg</td>
-                <td>Báscula digital</td>
-                <td>Rafael Mendes</td>
-              </tr>
-              <tr>
-                <td>14 mar 2025</td>
-                <td className="font-weight-bold">468 kg</td>
-                <td className={styles.variationPositive}>+21 kg</td>
-                <td>Báscula digital</td>
-                <td>Laura Gómez</td>
-              </tr>
-              <tr>
-                <td>11 dic 2024</td>
-                <td className="font-weight-bold">447 kg</td>
-                <td className={styles.variationPositive}>+32 kg</td>
-                <td>Cinta métrica</td>
-                <td>Rafael Mendes</td>
-              </tr>
-              <tr>
-                <td>08 sep 2024</td>
-                <td className="font-weight-bold">415 kg</td>
-                <td className="text-secondary">—</td>
-                <td>Báscula digital</td>
-                <td>Rafael Mendes</td>
-              </tr>
+              {weights.map((record, index) => {
+                const current = weightValue(record);
+                const previous = weights[index + 1] ? weightValue(weights[index + 1]) : null;
+                return (
+                  <tr key={String(record.id)}>
+                    <td>{String(record.weigh_date ?? record.measured_at ?? 'Sin fecha')}</td>
+                    <td className="font-weight-bold">{current.toLocaleString('es-CO')} kg</td>
+                    <td className={styles.variationPositive}>
+                      {previous === null ? '—' : `${current - previous > 0 ? '+' : ''}${current - previous} kg`}
+                    </td>
+                    <td>{String(record.method ?? 'No especificado')}</td>
+                    <td>{String(record.user_name ?? '—')}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
+        {isLoading && <p role="status">Cargando historial local…</p>}
+        {error && <p role="alert">{error}</p>}
       </div>
     </div>
   );

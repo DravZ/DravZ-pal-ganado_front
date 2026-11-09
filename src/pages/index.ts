@@ -7,6 +7,7 @@ export { default as Dashboard } from "./dashboard/DashboardPage";
 export { default as AnimalsDirectoryPage } from "./HatoModule/AnimalsDirectory/AnimalsDirectoryPage";
 export { default as RegisterAnimalPage } from "./HatoModule/RegisterAnimalPage/RegisterAnimalPage";
 export { default as AnimalDetailPage } from "./HatoModule/AnimalDetailPage/AnimalDetailPage";
+export { default as EditAnimalPage } from "./HatoModule/EditAnimalPage/EditAnimalPage";
 export { default as WeightTreatmentPage } from "./HatoModule/WeightTreatmentPage/WeightTreatmentPage";
 export { default as ReproductionPage } from "./HatoModule/ReproductionPage/ReproductionPage";
 export { default as MovementsAndSalesPage } from "./HatoModule/MovementsAndSalesPage/MovementsAndSalesPage";

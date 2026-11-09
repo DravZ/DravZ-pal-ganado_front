@@ -1,10 +1,11 @@
 import React from 'react';
 import { Scale, WifiOff } from 'lucide-react';
 import styles from './Step4InitialWeight.module.css';
+import type { AnimalFormChange, AnimalFormData } from '../../types';
 
 interface Step4Props {
-  formData: any;
-  onChange: (field: string, value: any) => void;
+  formData: AnimalFormData;
+  onChange: AnimalFormChange;
 }
 
 export const Step4InitialWeight: React.FC<Step4Props> = ({ formData, onChange }) => {

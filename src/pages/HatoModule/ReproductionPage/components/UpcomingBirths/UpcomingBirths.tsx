@@ -13,55 +13,14 @@ interface FemalePregnant {
   progressPercent: number;
 }
 
-const PREGNANT_FEMALES: FemalePregnant[] = [
-  {
-    id: 'BR-1042',
-    tag: 'BR-1042',
-    name: 'Esperanza',
-    sire: 'Toro BR-0721',
-    daysRemaining: 3,
-    expectedDate: '19 jun',
-    progressPercent: 98,
-  },
-  {
-    id: 'BR-1170',
-    tag: 'BR-1170',
-    name: 'Bonita',
-    sire: 'Toro BR-0721',
-    daysRemaining: 6,
-    expectedDate: '22 jun',
-    progressPercent: 95,
-  },
-  {
-    id: 'BR-0982',
-    tag: 'BR-0982',
-    name: 'Princesa',
-    sire: 'Toro BR-0721',
-    daysRemaining: 12,
-    expectedDate: '28 jun',
-    progressPercent: 88,
-  },
-  {
-    id: 'BR-1124',
-    tag: 'BR-1124',
-    name: 'Canela',
-    sire: 'Toro BR-0721',
-    daysRemaining: 18,
-    expectedDate: '04 jul',
-    progressPercent: 80,
-  },
-];
-
-export const UpcomingBirths: React.FC = () => {
+export const UpcomingBirths: React.FC<{ births: FemalePregnant[] }> = ({ births }) => {
   const navigate = useNavigate();
 
   const handleNavigateDetail = (animalId: string) => {
-    console.log(`[Router Log]: Navegando al detalle del animal gestante ${animalId}`);
     navigate(`/hato/animales/${animalId}`);
   };
 
   const handleViewAll = () => {
-    console.log('[Router Log]: Redirigiendo a lista completa de gestantes...');
     navigate('/reproduccion/gestantes');
   };
 
@@ -78,7 +37,7 @@ export const UpcomingBirths: React.FC = () => {
       </div>
 
       <div className={styles.birthList}>
-        {PREGNANT_FEMALES.map((animal) => (
+        {births.map((animal) => (
           <div
             key={animal.id}
             className={styles.birthCard}
@@ -113,10 +72,18 @@ export const UpcomingBirths: React.FC = () => {
                 <span className={styles.daysCount}>{animal.daysRemaining} días</span>
                 <ChevronRight size={16} className="text-secondary" />
               </div>
-              <div className={styles.dateSub}>{animal.expectedDate}</div>
+              <div className={styles.dateSub}>
+                {new Date(`${animal.expectedDate}T00:00:00`).toLocaleDateString('es-CO', {
+                  day: '2-digit',
+                  month: 'short',
+                })}
+              </div>
             </div>
           </div>
         ))}
+        {births.length === 0 && (
+          <p className="text-secondary mb-0">No hay partos próximos registrados.</p>
+        )}
       </div>
     </div>
   );

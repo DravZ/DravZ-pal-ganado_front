@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './GestationCalendar.module.css';
 
 interface GestationCalendarProps {
   onOpenModal: () => void;
+  events: { expectedDate: string }[];
 }
 
-export const GestationCalendar: React.FC<GestationCalendarProps> = ({ onOpenModal }) => {
-  const days = Array.from({ length: 30 }, (_, i) => i + 1);
+export const GestationCalendar: React.FC<GestationCalendarProps> = ({ onOpenModal, events }) => {
+  const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const firstDay = (month.getDay() + 6) % 7;
+  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const cells = Array.from(
+    { length: Math.ceil((firstDay + daysInMonth) / 7) * 7 },
+    (_, index) => {
+      const day = index - firstDay + 1;
+      return day > 0 && day <= daysInMonth ? day : null;
+    },
+  );
+  const birthsByDay = new Map<number, number>();
+  for (const event of events) {
+    const date = new Date(`${event.expectedDate}T00:00:00`);
+    if (date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth()) {
+      birthsByDay.set(date.getDate(), (birthsByDay.get(date.getDate()) ?? 0) + 1);
+    }
+  }
 
   return (
     <div className={styles.cardCalendar}>
@@ -18,11 +35,23 @@ export const GestationCalendar: React.FC<GestationCalendarProps> = ({ onOpenModa
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <button type="button" className={styles.monthNavBtn} aria-label="Mes anterior">
+          <button
+            type="button"
+            className={styles.monthNavBtn}
+            aria-label="Mes anterior"
+            onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+          >
             <ChevronLeft size={18} />
           </button>
-          <span className={styles.monthTitle}>Junio 2025</span>
-          <button type="button" className={styles.monthNavBtn} aria-label="Mes siguiente">
+          <span className={styles.monthTitle}>
+            {month.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' })}
+          </span>
+          <button
+            type="button"
+            className={styles.monthNavBtn}
+            aria-label="Mes siguiente"
+            onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+          >
             <ChevronRight size={18} />
           </button>
         </div>
@@ -35,35 +64,12 @@ export const GestationCalendar: React.FC<GestationCalendarProps> = ({ onOpenModa
           </div>
         ))}
 
-        {[27, 28, 29, 30, 31].map((d) => (
-          <div key={`prev-${d}`} className={styles.dayCell} style={{ opacity: 0.4 }}>
-            <span className={styles.dayNumber}>{d}</span>
-          </div>
-        ))}
-
-        {days.map((day) => (
-          <div key={day} className={styles.dayCell}>
-            <span className={styles.dayNumber}>{day}</span>
-
-            {day === 4 && (
-              <div className={`${styles.eventBadge} ${styles.badgeOrange}`}>
-                2 partos
-              </div>
-            )}
-            {day === 11 && (
-              <div
-                className={styles.eventBadge}
-                style={{ backgroundColor: '#1e4b27', height: '100%', minHeight: '22px' }}
-              />
-            )}
-            {day === 14 && (
+        {cells.map((day, index) => (
+          <div key={`${month.getFullYear()}-${month.getMonth()}-${index}`} className={styles.dayCell}>
+            {day && <span className={styles.dayNumber}>{day}</span>}
+            {day && birthsByDay.has(day) && (
               <div className={`${styles.eventBadge} ${styles.badgeDarkGreen}`}>
-                1 parto
-              </div>
-            )}
-            {day === 21 && (
-              <div className={`${styles.eventBadge} ${styles.badgeBlue}`}>
-                3 partos
+                {birthsByDay.get(day)} {birthsByDay.get(day) === 1 ? 'parto' : 'partos'}
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronRight, Check } from 'lucide-react';
 import { StepBar } from './components/StepBar/StepBar';
@@ -6,43 +6,62 @@ import { Step1SelectAnimal } from './components/Step1SelectAnimal/Step1SelectAni
 import { Step2WeightKeypad } from './components/Step2WeightKeypad/Step2WeightKeypad';
 import { Step3TreatmentDetails } from './components/Step3TreatmentDetails/Step3TreatmentDetails';
 import styles from './WeightTreatmentPage.module.css';
+import { useFarmScope } from '../../../context/FarmScopeContext';
+import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
+import type { AnimalOption } from './components/Step1SelectAnimal/Step1SelectAnimal';
+import useNotification from '../../../hooks/useNotification';
 
 export const WeightTreatmentPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
-  // Permite iniciar directo en el animal indicado por URL si proviene del detalle
-  const initialAnimalId = searchParams.get('animalId') || 'BR-1042';
+  const { scope } = useFarmScope();
+  const { showNotification } = useNotification();
+  const initialAnimalId = searchParams.get('animalId') ?? '';
+  const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
+    'animals',
+    '/animals',
+    scope,
+  );
+  const { records: rawMedications } = useHatoCollection<Record<string, unknown>>(
+    'medications',
+    '/medications',
+    scope,
+  );
+  const animals = useMemo<AnimalOption[]>(() => rawAnimals.map((animal) => ({
+    id: String(animal.id ?? ''),
+    tag: String(animal.identifier_tag ?? animal.tag_number ?? ''),
+    name: String(animal.name ?? 'Sin nombre'),
+    breed: String(animal.breed ?? 'Sin raza'),
+    sex: String(animal.gender ?? animal.sex ?? ''),
+    lote: String(animal.lot_name ?? 'Sin lote'),
+    status: String(animal.status ?? ''),
+  })), [rawAnimals]);
+  const medications = rawMedications
+    .filter((medication) => medication.status !== 'inactive')
+    .map((medication) => ({
+      id: String(medication.id ?? ''),
+      name: String(medication.name ?? ''),
+    }))
+    .filter((medication) => medication.id && medication.name);
 
   const [currentStep, setCurrentStep] = useState<number>(1);
-
-  // Estados del Formulario
-  const [selectedAnimal, setSelectedAnimal] = useState({
-    id: initialAnimalId,
-    tag: initialAnimalId,
-    name: 'Esperanza',
-    breed: 'Nelore',
-    sex: 'Hembra',
-    lote: 'Vacas de cría',
-    status: 'Activo',
-  });
-
-  const [weightValue, setWeightValue] = useState<string>('482');
-  const [weightDate, setWeightDate] = useState<string>('2025-06-16T10:42');
+  const [selectedAnimalId, setSelectedAnimalId] = useState(initialAnimalId);
+  const selectedAnimal = animals.find((animal) => animal.id === selectedAnimalId) ?? null;
+  const [weightValue, setWeightValue] = useState<string>('');
+  const [weightDate, setWeightDate] = useState<string>(new Date().toISOString().slice(0, 16));
   const [measurementMethod, setMeasurementMethod] = useState<string>('Báscula digital');
-
-  const [medication, setMedication] = useState<string>('Ivermectina 1%');
-  const [dose, setDose] = useState<string>('10');
+  const [medication, setMedication] = useState<string>('');
+  const [dose, setDose] = useState<string>('');
   const [doseUnit, setDoseUnit] = useState<string>('mL');
   const [treatmentRoute, setTreatmentRoute] = useState<string>('Subcutánea');
-
-  // Estado de Errores de Validación
-  const [errors, setErrors] = useState<{ animal?: string; weight?: string }>({});
+  const [errors, setErrors] = useState<{ animal?: string; weight?: string; treatment?: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const validateStep = () => {
-    const newErrors: { animal?: string; weight?: string } = {};
+    const newErrors: { animal?: string; weight?: string; treatment?: string } = {};
 
-    if (currentStep === 1 && !selectedAnimal.id) {
+    if (currentStep === 1 && !selectedAnimalId) {
       newErrors.animal = 'Debes seleccionar un animal para continuar.';
     }
 
@@ -52,37 +71,68 @@ export const WeightTreatmentPage: React.FC = () => {
         newErrors.weight = 'Ingresa un peso válido mayor a 0 kg.';
       }
     }
+    if (currentStep === 3 && medication && (!Number.isFinite(Number(dose)) || Number(dose) <= 0)) {
+      newErrors.treatment = 'Ingresa una dosis mayor a cero o selecciona “Sin tratamiento adicional”.';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep()) return;
 
     if (currentStep < 3) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // Envío Final y Simulación para Backend
-      const payload = {
-        animal_id: selectedAnimal.id,
-        weight_record: {
-          weight_kg: parseFloat(weightValue),
-          date: weightDate,
+      if (!scope || !selectedAnimal) {
+        setSubmitError('Selecciona un animal de la finca activa.');
+        return;
+      }
+      setIsSaving(true);
+      setSubmitError(null);
+      try {
+        let pending = false;
+        let lastError: string | undefined;
+        const weightResult = await queueHatoWrite(scope, 'weight_records', 'CREATE', {
+          animal_id: selectedAnimal.id,
+          weigh_date: weightDate.slice(0, 10),
+          measured_at: weightDate,
+          weight_kg: Number(weightValue),
           method: measurementMethod,
-        },
-        treatment_record: medication
-          ? {
-              medication,
-              dose: parseFloat(dose) || 0,
-              dose_unit: doseUnit,
-              route: treatmentRoute,
-            }
-          : null,
-      };
+        });
+        pending = weightResult.pending;
+        lastError = weightResult.lastError;
 
-      console.log('[Action Log]: JSON preparado para el backend ->', payload);
-      navigate(`/hato/animales/${selectedAnimal.id}`);
+        if (medication) {
+          const treatmentResult = await queueHatoWrite(scope, 'treatments', 'CREATE', {
+            animal_id: selectedAnimal.id,
+            medication_id: medication,
+            start_date: weightDate,
+            dose: Number(dose),
+            dose_unit: doseUnit,
+            route: treatmentRoute,
+            status: 'ACTIVO',
+          });
+          pending ||= treatmentResult.pending;
+          lastError = treatmentResult.lastError ?? lastError;
+        }
+
+        showNotification({
+          type: pending ? 'alert' : 'success',
+          title: pending ? 'Cambios pendientes de sincronización' : 'Registro guardado',
+          message: pending
+            ? lastError ?? 'El peso y el tratamiento quedaron en la cola de sincronización.'
+            : 'El peso y el tratamiento se guardaron correctamente.',
+        });
+        navigate(`/hato/animales/${selectedAnimal.id}`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'No se pudo guardar el registro.';
+        setSubmitError(message);
+        showNotification({ type: 'error', title: 'No se pudo guardar el registro', message });
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -113,17 +163,18 @@ export const WeightTreatmentPage: React.FC = () => {
         <div className={styles.formContentArea}>
           {currentStep === 1 && (
             <Step1SelectAnimal
-              selectedAnimalId={selectedAnimal.id}
-              onSelectAnimal={setSelectedAnimal}
+              selectedAnimalId={selectedAnimalId}
+              onSelectAnimal={(animal) => setSelectedAnimalId(animal.id)}
+              animals={animals}
               error={errors.animal}
             />
           )}
 
           {currentStep === 2 && (
             <Step2WeightKeypad
-              animalTag={selectedAnimal.tag}
-              animalName={selectedAnimal.name}
-              animalBreed={selectedAnimal.breed}
+              animalTag={selectedAnimal?.tag ?? ''}
+              animalName={selectedAnimal?.name ?? ''}
+              animalBreed={selectedAnimal?.breed ?? ''}
               weightValue={weightValue}
               onWeightChange={setWeightValue}
               weightDate={weightDate}
@@ -139,6 +190,7 @@ export const WeightTreatmentPage: React.FC = () => {
             <Step3TreatmentDetails
               medication={medication}
               onMedicationChange={setMedication}
+              medications={medications}
               dose={dose}
               onDoseChange={setDose}
               doseUnit={doseUnit}
@@ -148,6 +200,10 @@ export const WeightTreatmentPage: React.FC = () => {
             />
           )}
         </div>
+        {errors.treatment && currentStep === 3 && (
+          <p role="alert" className="text-danger px-4">{errors.treatment}</p>
+        )}
+        {submitError && <p role="alert" className="text-danger px-4">{submitError}</p>}
 
         {/* Pie de Página */}
         <div className={styles.bottomBarFooter}>
@@ -155,9 +211,9 @@ export const WeightTreatmentPage: React.FC = () => {
             {currentStep === 1 ? 'Cancelar' : 'Atrás'}
           </button>
 
-          <button type="button" className={styles.btnPrimary} onClick={handleNext}>
+          <button type="button" className={styles.btnPrimary} onClick={() => void handleNext()} disabled={isSaving}>
             <span>
-              {currentStep === 3 ? 'Guardar localmente' : 'Continuar'}
+              {isSaving ? 'Guardando…' : currentStep === 3 ? 'Guardar registro' : 'Continuar'}
             </span>
             {currentStep === 3 ? (
               <Check size={18} strokeWidth={2.5} />

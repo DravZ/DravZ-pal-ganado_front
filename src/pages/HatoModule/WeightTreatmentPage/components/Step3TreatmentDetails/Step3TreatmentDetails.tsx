@@ -5,6 +5,7 @@ import styles from './Step3TreatmentDetails.module.css';
 interface Step3Props {
   medication: string;
   onMedicationChange: (val: string) => void;
+  medications: { id: string; name: string }[];
   dose: string;
   onDoseChange: (val: string) => void;
   doseUnit: string;
@@ -16,6 +17,7 @@ interface Step3Props {
 export const Step3TreatmentDetails: React.FC<Step3Props> = ({
   medication,
   onMedicationChange,
+  medications,
   dose,
   onDoseChange,
   doseUnit,
@@ -48,10 +50,9 @@ export const Step3TreatmentDetails: React.FC<Step3Props> = ({
           onChange={(e) => onMedicationChange(e.target.value)}
         >
           <option value="">Sin tratamiento adicional</option>
-          <option value="Ivermectina 1%">Ivermectina 1%</option>
-          <option value="Vitamina ADE">Vitamina ADE</option>
-          <option value="Vacuna Aftosa">Vacuna Aftosa</option>
-          <option value="Oxitetraciclina">Oxitetraciclina</option>
+          {medications.map((item) => (
+            <option key={item.id} value={item.id}>{item.name}</option>
+          ))}
         </select>
       </div>
 
