@@ -1,5 +1,6 @@
 import type { FarmFormValues, RegistrationFormValues } from '../types/database.types';
 import type { AuthSession } from './offlineSyncService';
+import { apiFetch } from './apiClient';
 
 interface RegistrationPayload {
   user_name: string;
@@ -21,8 +22,6 @@ interface RegistrationPayload {
     hectares: number;
   };
 }
-
-export const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, '');
 
 async function getResponseMessage(response: Response): Promise<string> {
   const responseText = await response.text();
@@ -48,7 +47,7 @@ async function getResponseMessage(response: Response): Promise<string> {
 }
 
 export async function requestCsrfToken(): Promise<string> {
-  const response = await fetch(`${apiBaseUrl}/auth/csrf`, {
+  const response = await apiFetch('/auth/csrf', {
     credentials: 'include',
     headers: { Accept: 'application/json' },
   });
@@ -72,7 +71,7 @@ export async function requestCsrfToken(): Promise<string> {
 }
 
 async function requestSession<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await apiFetch(path, {
     ...init,
     credentials: 'include',
     headers: {
@@ -151,7 +150,7 @@ export async function registerAccount(
   };
 
   const csrfToken = await requestCsrfToken();
-  const response = await fetch(`${apiBaseUrl}/registrations`, {
+  const response = await apiFetch('/registrations', {
     method: 'POST',
     credentials: 'include',
     headers: {

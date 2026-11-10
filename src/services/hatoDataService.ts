@@ -5,7 +5,8 @@ import {
   type CachedRecord,
   type SyncQueueOperation,
 } from './offlineDatabase';
-import { apiBaseUrl, requestCsrfToken } from './authService';
+import { apiFetch, apiUrl } from './apiClient';
+import { requestCsrfToken } from './authService';
 
 export type HatoResource =
   | 'animals'
@@ -228,7 +229,7 @@ export function useHatoCollection<T extends Record<string, unknown>>(
 
   const refresh = useCallback(async () => {
     if (!scope || !endpoint || !navigator.onLine) return;
-    const url = new URL(`${apiBaseUrl}${endpoint}`, window.location.origin);
+    const url = new URL(apiUrl(endpoint), window.location.origin);
     const animalIds = scopedAnimalIdsKey ? scopedAnimalIdsKey.split('|') : [];
     if (
       animalScopedResources.has(resource)
@@ -276,10 +277,7 @@ export function useHatoCollection<T extends Record<string, unknown>>(
       })
       : [url.toString()];
     const body = (await Promise.all(urls.map(async (requestUrl) => {
-      const response = await fetch(requestUrl, {
-        credentials: 'include',
-        headers: { Accept: 'application/json' },
-      });
+      const response = await apiFetch(new URL(requestUrl));
       if (!response.ok) {
         throw new Error(`No se pudieron actualizar los datos (${response.status}).`);
       }
@@ -343,10 +341,7 @@ export function useHatoRecord<T extends Record<string, unknown>>(
 
   useEffect(() => {
     if (!scope || !recordId || recordId.startsWith('local:') || !navigator.onLine) return;
-    void fetch(`${apiBaseUrl}${endpoint}`, {
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    })
+    void apiFetch(endpoint)
       .then(async (response) => {
         if (!response.ok) throw new Error(`No se pudo actualizar el registro (${response.status}).`);
         const payload: unknown = await response.json();
@@ -607,7 +602,7 @@ async function requestQueuedOperation(
       ? ['alerts', 'organizations'].includes(operation.resourceType) ? 'PATCH' : 'PUT'
       : 'DELETE';
   const csrfToken = await requestCsrfToken();
-  const response = await fetch(`${apiBaseUrl}${endpoint}${method === 'POST' ? '' : `/${recordId}`}`, {
+  const response = await apiFetch(`${endpoint}${method === 'POST' ? '' : `/${recordId}`}`, {
     method,
     credentials: 'include',
     headers: {

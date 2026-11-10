@@ -3,6 +3,7 @@ import {
   type CachedProfile,
   type CachedRecord,
 } from './offlineDatabase';
+import { apiFetch } from './apiClient';
 
 export interface SyncUser {
   id: string;
@@ -44,14 +45,10 @@ interface ChangePage {
   changes: ServerChange[];
 }
 
-const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, '');
 const PAGE_SIZE = 100;
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  });
+async function fetchJson<T>(path: string): Promise<T> {
+  const response = await apiFetch(path);
   if (!response.ok) throw new Error(`La sincronización falló (${response.status}).`);
   return response.json() as Promise<T>;
 }
@@ -107,7 +104,7 @@ export async function initializeOrSyncOfflineData(session: AuthSession): Promise
   let profile = await cacheSessionProfile(session);
 
   if (!profile.initialized) {
-    const bootstrap = await fetchJson<BootstrapResponse>(`${apiBaseUrl}/sync/bootstrap`);
+    const bootstrap = await fetchJson<BootstrapResponse>('/sync/bootstrap');
     if (bootstrap.user_id !== profile.userId || bootstrap.organization_id !== profile.organizationId) {
       throw new Error('El servidor devolvió datos de una cuenta distinta a la sesión actual.');
     }
@@ -202,7 +199,7 @@ async function applyIncrementalChanges(profile: CachedProfile): Promise<void> {
     });
     if (upperBound !== undefined) query.set('upperBound', String(upperBound));
 
-    const page = await fetchJson<ChangePage>(`${apiBaseUrl}/sync/changes?${query}`);
+    const page = await fetchJson<ChangePage>(`/sync/changes?${query}`);
     if (
       page.user_id !== profile.userId
       || page.cursor !== requestCursor

@@ -6,7 +6,7 @@ El frontend aún no tiene un cliente HTTP general y la mayoría de las pantallas
 
 Se recomienda prefijar la API con `/api/v1`, usar JSON (`Content-Type: application/json`), UUID para identificadores y fechas ISO 8601. Los `POST` deben omitir `id`, `created_at` y otros campos generados por el servidor, salvo que el contrato de negocio indique lo contrario.
 
-En desarrollo, Vite reenvía `/api` a `http://localhost:8080`; se puede cambiar el destino con `VITE_BACKEND_PROXY_TARGET`. Para despliegues, `VITE_API_BASE_URL` define la URL base de la API y debe apuntar a un backend accesible desde el navegador. El registro obtiene primero el token CSRF y lo envía junto con la cookie de sesión.
+En desarrollo, el cliente HTTP común usa `/api/v1` y Vite reenvía `/api` a `http://localhost:8080`. En producción, `VITE_BACKEND_PROXY_TARGET` debe contener el origen accesible del backend (por ejemplo, `https://<tunel>.trycloudflare.com`); el cliente agrega `/api/v1`. `VITE_API_BASE_URL` se conserva como alternativa de producción si no se configura el destino del backend. Todas las solicitudes usan credenciales e incluyen el token CSRF cuando corresponde. Para despliegues entre dominios, el backend debe permitir el origen exacto del frontend en CORS y configurar las cookies para el contexto cross-site.
 
 ## Mapa de pantallas a recursos
 

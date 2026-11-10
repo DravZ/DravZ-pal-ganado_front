@@ -1,4 +1,5 @@
-import { apiBaseUrl, requestCsrfToken } from './authService';
+import { apiFetch } from './apiClient';
+import { requestCsrfToken } from './authService';
 
 type AdminMethod = 'POST' | 'PATCH';
 
@@ -12,7 +13,7 @@ export async function requestOnlineAdministrationWrite<T extends Record<string, 
   }
 
   const csrfToken = await requestCsrfToken();
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await apiFetch(path, {
     method,
     credentials: 'include',
     headers: {
