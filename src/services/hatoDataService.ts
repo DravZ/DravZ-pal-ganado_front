@@ -159,6 +159,49 @@ function responseId(payload: Record<string, unknown>): string | null {
   return typeof value === 'string' ? value : null;
 }
 
+function normalizedIdentifier(value: unknown): string {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+async function assertLocalAnimalIdentifierAvailable(
+  scope: HatoScope,
+  payload: Record<string, unknown>,
+  excludedAnimalId: string,
+): Promise<void> {
+  const identifiers = new Set([
+    normalizedIdentifier(payload.tag_number ?? payload.identifier_tag),
+    normalizedIdentifier(payload.identifier_code),
+  ].filter(Boolean));
+  if (!identifiers.size) return;
+
+  const [animals, animalIdentifiers] = await Promise.all([
+    offlineDatabase.records
+      .where('[userId+resourceType]')
+      .equals([scope.userId, 'animals'])
+      .toArray(),
+    offlineDatabase.records
+      .where('[userId+resourceType]')
+      .equals([scope.userId, 'animal_identifiers'])
+      .toArray(),
+  ]);
+  const duplicateAnimal = animals.some((record) =>
+    record.organizationId === scope.organizationId
+    && record.recordId !== excludedAnimalId
+    && identifiers.has(normalizedIdentifier(
+      record.payload.tag_number ?? record.payload.identifier_tag,
+    )),
+  );
+  const duplicateIdentifier = animalIdentifiers.some((record) =>
+    record.organizationId === scope.organizationId
+    && record.payload.animal_id !== excludedAnimalId
+    && record.payload.animalId !== excludedAnimalId
+    && identifiers.has(normalizedIdentifier(record.payload.identifier)),
+  );
+  if (duplicateAnimal || duplicateIdentifier) {
+    throw new Error('Ese identificador ya está registrado en otro animal de la organización.');
+  }
+}
+
 function normalizeAdministrationPayload(payload: Record<string, unknown>): Record<string, unknown> {
   const normalized = { ...payload };
   const aliases: Record<string, string> = {
@@ -553,6 +596,11 @@ export async function queueHatoWrite(
     offlineDatabase.records,
     offlineDatabase.syncQueue,
     async () => {
+      if (resource === 'animals' && operation !== 'DELETE') {
+        const nextPayload = mergeLocalPayload(localId, operation, payload, previous?.payload);
+        await assertLocalAnimalIdentifierAvailable(scope, nextPayload, localId);
+      }
+
       const duplicate = await offlineDatabase.syncQueue
         .where('idempotencyKey')
         .equals(key)
@@ -645,8 +693,22 @@ async function requestQueuedOperation(
   });
   if (!response.ok) {
     const text = await response.text();
+    let message = text || `La operación falló (${response.status}).`;
+    try {
+      const body: unknown = JSON.parse(text);
+      if (isObject(body)) {
+        for (const key of ['detail', 'message', 'error', 'title']) {
+          if (typeof body[key] === 'string') {
+            message = body[key] as string;
+            break;
+          }
+        }
+      }
+    } catch {
+      message = text || message;
+    }
     throw Object.assign(
-      new Error(text || `La operación falló (${response.status}).`),
+      new Error(message),
       { status: response.status },
     );
   }
