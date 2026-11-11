@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../RegisterAnimalPage/RegisterAnimalPage.module.css';
+import basicStyles from '../RegisterAnimalPage/components/Step1BasicData/Step1BasicData.module.css';
+import locationStyles from '../RegisterAnimalPage/components/Step3LocationGenealogy/Step3LocationGenealogy.module.css';
+import { breedsBySpecies } from '../RegisterAnimalPage/animalOptions';
+import FarmLocationFields from '../RegisterAnimalPage/components/FarmLocationFields/FarmLocationFields';
 import { useFarmScope } from '../../../context/FarmScopeContext';
 import {
   queueHatoWrite,
@@ -16,6 +20,8 @@ interface AnimalDraft {
   species: string;
   breed: string;
   birthDate: string;
+  lotId: string;
+  paddockId: string;
   sireId: string;
   damId: string;
   notes: string;
@@ -27,6 +33,23 @@ function text(value: unknown): string {
 
 function dateValue(value: unknown): string {
   return typeof value === 'string' ? value.slice(0, 10) : '';
+}
+
+function normalized(value: unknown): string {
+  return text(value).trim().toLocaleLowerCase();
+}
+
+function speciesKey(value: string): string {
+  const species = normalized(value);
+  if (['bovino', 'bovina', 'bovine', 'cattle'].includes(species)) return 'bovino';
+  if (['bubalino', 'bufalino', 'bufalo', 'búfalo', 'buffalo'].includes(species)) return 'bubalino';
+  if (['ovino', 'ovina', 'sheep'].includes(species)) return 'ovino';
+  return species;
+}
+
+function isActiveAnimal(animal: Record<string, unknown>): boolean {
+  return !['inactive', 'inactivo', 'baja', 'sold', 'vendido', 'deceased', 'muerto', 'eliminado']
+    .includes(normalized(animal.status));
 }
 
 export default function EditAnimalPage() {
@@ -45,6 +68,8 @@ export default function EditAnimalPage() {
     '/animals',
     scope,
   );
+  const lots = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const paddocks = useHatoCollection<Record<string, unknown>>('paddocks', '/paddocks', scope);
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [draft, setDraft] = useState<AnimalDraft | null>(null);
@@ -70,6 +95,8 @@ export default function EditAnimalPage() {
     species: text(record.species),
     breed: text(record.breed),
     birthDate: dateValue(record.birth_date),
+    lotId: text(record.lot_id),
+    paddockId: text(record.paddock_id),
     sireId: text(record.sire_id),
     damId: text(record.dam_id),
     notes: text(record.notes),
@@ -78,7 +105,16 @@ export default function EditAnimalPage() {
   const setField = (field: keyof AnimalDraft, value: string) => {
     setDraft((current) => ({ ...(current ?? initialDraft), [field]: value }));
   };
-  const selectableAnimals = animals.filter((animal) => animal.id !== id);
+  const selectableAnimals = animals.filter((animal) => animal.id !== id && isActiveAnimal(animal));
+  const sires = selectableAnimals.filter((animal) =>
+    ['macho', 'male'].includes(normalized(animal.gender ?? animal.sex)),
+  );
+  const dams = selectableAnimals.filter((animal) =>
+    ['hembra', 'female'].includes(normalized(animal.gender ?? animal.sex)),
+  );
+  const currentSpeciesKey = speciesKey(values.species);
+  const breeds = breedsBySpecies[currentSpeciesKey] ?? [];
+  const existingBreedIsCustom = values.breed.length > 0 && !breeds.includes(values.breed);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -94,6 +130,8 @@ export default function EditAnimalPage() {
         species: values.species || undefined,
         breed: values.breed || undefined,
         birth_date: values.birthDate || undefined,
+        lot_id: values.lotId || undefined,
+        paddock_id: values.paddockId || undefined,
         sire_id: values.sireId || undefined,
         dam_id: values.damId || undefined,
         notes: values.notes || undefined,
@@ -128,66 +166,118 @@ export default function EditAnimalPage() {
         <div className={styles.formContentArea}>
           <div className="row g-3">
             <div className="col-12 col-md-6">
-              <label className="form-label" htmlFor="animal-tag">Identificador</label>
-              <input id="animal-tag" className="form-control" value={values.tagNumber}
+              <label className={basicStyles.formLabel} htmlFor="animal-tag">Identificador</label>
+              <input id="animal-tag" className={basicStyles.formControl} value={values.tagNumber}
                 onChange={(event) => setField('tagNumber', event.target.value)} />
             </div>
             <div className="col-12 col-md-6">
-              <label className="form-label" htmlFor="animal-name">Nombre</label>
-              <input id="animal-name" className="form-control" value={values.name}
+              <label className={basicStyles.formLabel} htmlFor="animal-name">Nombre</label>
+              <input id="animal-name" className={basicStyles.formControl} value={values.name}
                 onChange={(event) => setField('name', event.target.value)} />
             </div>
             <div className="col-12 col-md-4">
-              <label className="form-label" htmlFor="animal-gender">Sexo</label>
-              <select id="animal-gender" className="form-select" value={values.gender}
-                onChange={(event) => setField('gender', event.target.value)} required>
-                <option value="">Selecciona el sexo</option>
-                <option value="Hembra">Hembra</option>
-                <option value="Macho">Macho</option>
+              <label className={basicStyles.formLabel} htmlFor="animal-gender">Sexo</label>
+              <div className={basicStyles.sexToggleGroup}>
+                <button
+                  type="button"
+                  className={`${basicStyles.sexToggleBtn} ${
+                    values.gender.toLocaleLowerCase() === 'hembra' ? basicStyles.sexToggleActiveHembra : ''
+                  }`}
+                  onClick={() => setField('gender', 'Hembra')}
+                >
+                  ♀ Hembra
+                </button>
+                <button
+                  type="button"
+                  className={`${basicStyles.sexToggleBtn} ${
+                    values.gender.toLocaleLowerCase() === 'macho' ? basicStyles.sexToggleActiveMacho : ''
+                  }`}
+                  onClick={() => setField('gender', 'Macho')}
+                >
+                  ♂ Macho
+                </button>
+              </div>
+            </div>
+            <div className="col-12 col-md-4">
+              <label className={basicStyles.formLabel} htmlFor="animal-species">Especie</label>
+              <select
+                id="animal-species"
+                className={basicStyles.formControl}
+                value={values.species}
+                onChange={(event) => {
+                  setField('species', event.target.value);
+                  setField('breed', '');
+                }}
+              >
+                {!['bovino', 'bubalino', 'ovino'].includes(currentSpeciesKey) && values.species && (
+                  <option value={values.species}>{values.species}</option>
+                )}
+                <option value="Bovino">Bovino</option>
+                <option value="Bubalino">Bubalino</option>
+                <option value="Ovino">Ovino</option>
               </select>
             </div>
             <div className="col-12 col-md-4">
-              <label className="form-label" htmlFor="animal-species">Especie</label>
-              <input id="animal-species" className="form-control" value={values.species}
-                onChange={(event) => setField('species', event.target.value)} />
+              <label className={basicStyles.formLabel} htmlFor="animal-breed">Raza</label>
+              <select id="animal-breed" className={basicStyles.formControl} value={values.breed}
+                onChange={(event) => setField('breed', event.target.value)}>
+                <option value="">Selecciona una raza</option>
+                {existingBreedIsCustom && <option value={values.breed}>{values.breed}</option>}
+                {breeds.map((breed) => <option key={breed} value={breed}>{breed}</option>)}
+              </select>
             </div>
             <div className="col-12 col-md-4">
-              <label className="form-label" htmlFor="animal-breed">Raza</label>
-              <input id="animal-breed" className="form-control" value={values.breed}
-                onChange={(event) => setField('breed', event.target.value)} />
-            </div>
-            <div className="col-12 col-md-4">
-              <label className="form-label" htmlFor="animal-birth-date">Fecha de nacimiento</label>
-              <input id="animal-birth-date" type="date" className="form-control" value={values.birthDate}
+              <label className={basicStyles.formLabel} htmlFor="animal-birth-date">Fecha de nacimiento</label>
+              <input id="animal-birth-date" type="date" className={basicStyles.formControl} value={values.birthDate}
                 onChange={(event) => setField('birthDate', event.target.value)} />
             </div>
             <div className="col-12 col-md-6">
-              <label className="form-label" htmlFor="animal-sire">Padre</label>
-              <select id="animal-sire" className="form-select" value={values.sireId}
+              <label className={locationStyles.formLabel} htmlFor="animal-sire">Padre</label>
+              <select id="animal-sire" className={locationStyles.formControl} value={values.sireId}
                 onChange={(event) => setField('sireId', event.target.value)}>
-                <option value="">Sin cambio</option>
-                {selectableAnimals.map((animal) => (
+                <option value="">Sin padre registrado</option>
+                {sires.map((animal) => (
                   <option key={String(animal.id)} value={String(animal.id)}>
                     {String(animal.tag_number ?? animal.identifier_tag ?? animal.name ?? animal.id)}
                   </option>
                 ))}
               </select>
+              <div className={locationStyles.fieldHint}>Solo se muestran animales machos activos.</div>
             </div>
             <div className="col-12 col-md-6">
-              <label className="form-label" htmlFor="animal-dam">Madre</label>
-              <select id="animal-dam" className="form-select" value={values.damId}
+              <label className={locationStyles.formLabel} htmlFor="animal-dam">Madre</label>
+              <select id="animal-dam" className={locationStyles.formControl} value={values.damId}
                 onChange={(event) => setField('damId', event.target.value)}>
-                <option value="">Sin cambio</option>
-                {selectableAnimals.map((animal) => (
+                <option value="">Sin madre registrada</option>
+                {dams.map((animal) => (
                   <option key={String(animal.id)} value={String(animal.id)}>
                     {String(animal.tag_number ?? animal.identifier_tag ?? animal.name ?? animal.id)}
                   </option>
                 ))}
               </select>
+              <div className={locationStyles.fieldHint}>Solo se muestran animales hembras activas.</div>
             </div>
+            <FarmLocationFields
+              lotId={values.lotId}
+              paddockId={values.paddockId}
+              onLotChange={(lotId) => setField('lotId', lotId)}
+              onPaddockChange={(paddockId) => setField('paddockId', paddockId)}
+              lots={lots.records.map((lot) => ({
+                id: String(lot.id ?? ''),
+                name: String(lot.name ?? ''),
+              }))}
+              lotsLoading={lots.isLoading}
+              lotsError={lots.error}
+              paddocks={paddocks.records.map((paddock) => ({
+                id: String(paddock.id ?? ''),
+                name: String(paddock.name ?? ''),
+              }))}
+              paddocksLoading={paddocks.isLoading}
+              paddocksError={paddocks.error}
+            />
             <div className="col-12">
-              <label className="form-label" htmlFor="animal-notes">Notas</label>
-              <textarea id="animal-notes" className="form-control" rows={3} value={values.notes}
+              <label className={basicStyles.formLabel} htmlFor="animal-notes">Notas</label>
+              <textarea id="animal-notes" className={basicStyles.formControl} rows={3} value={values.notes}
                 onChange={(event) => setField('notes', event.target.value)} />
             </div>
           </div>

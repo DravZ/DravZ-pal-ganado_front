@@ -2,6 +2,7 @@ import React from 'react';
 import { Beef } from 'lucide-react';
 import styles from './Step1BasicData.module.css';
 import type { AnimalFormChange, AnimalFormData } from '../../types';
+import { breedsBySpecies } from '../../animalOptions';
 
 interface Step1Props {
   formData: AnimalFormData;
@@ -9,6 +10,8 @@ interface Step1Props {
 }
 
 export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => {
+  const breeds = breedsBySpecies[formData.species.toLocaleLowerCase()] ?? [];
+
   return (
     <div className={styles.stepContainer}>
       <div className={styles.stepHeaderGroup}>
@@ -74,7 +77,10 @@ export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => 
           <select
             className={styles.formControl}
             value={formData.species}
-            onChange={(e) => onChange('species', e.target.value)}
+            onChange={(e) => {
+              onChange('species', e.target.value);
+              onChange('breed', '');
+            }}
           >
             <option value="Bovino">Bovino</option>
             <option value="Bubalino">Bubalino</option>
@@ -92,11 +98,8 @@ export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => 
             value={formData.breed}
             onChange={(e) => onChange('breed', e.target.value)}
           >
-            <option value="Nelore">Nelore</option>
-            <option value="Angus">Angus</option>
-            <option value="Brahman">Brahman</option>
-            <option value="Gyr">Gyr</option>
-            <option value="Braford">Braford</option>
+            <option value="">Selecciona una raza</option>
+            {breeds.map((breed) => <option key={breed} value={breed}>{breed}</option>)}
           </select>
         </div>
 

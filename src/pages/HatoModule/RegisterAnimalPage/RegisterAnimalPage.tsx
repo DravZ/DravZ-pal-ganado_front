@@ -19,8 +19,8 @@ export const RegisterAnimalPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const { records: rawLots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
-  const { records: rawPaddocks } = useHatoCollection<Record<string, unknown>>(
+  const lots = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
+  const paddocks = useHatoCollection<Record<string, unknown>>(
     'paddocks',
     '/paddocks',
     scope,
@@ -35,7 +35,7 @@ export const RegisterAnimalPage: React.FC = () => {
   const [formData, setFormData] = useState<AnimalFormData>({
     name: '',
     sex: 'Hembra',
-    species: 'bovino',
+    species: 'Bovino',
     breed: '',
     birthDate: '',
     birthWeight: '',
@@ -200,11 +200,15 @@ export const RegisterAnimalPage: React.FC = () => {
             <Step3LocationGenealogy
               formData={formData}
               onChange={handleFieldChange}
-              lots={rawLots.map((lot) => ({ id: text(lot.id), name: text(lot.name) }))}
-              paddocks={rawPaddocks.map((paddock) => ({
+              lots={lots.records.map((lot) => ({ id: text(lot.id), name: text(lot.name) }))}
+              lotsLoading={lots.isLoading}
+              lotsError={lots.error}
+              paddocks={paddocks.records.map((paddock) => ({
                 id: text(paddock.id),
                 name: text(paddock.name),
               }))}
+              paddocksLoading={paddocks.isLoading}
+              paddocksError={paddocks.error}
               animals={rawAnimals.map((animal) => ({
                 id: text(animal.id),
                 tag: text(animal.identifier_tag) || text(animal.tag_number),

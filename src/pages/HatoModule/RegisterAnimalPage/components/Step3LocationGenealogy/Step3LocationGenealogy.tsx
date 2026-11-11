@@ -2,12 +2,17 @@ import React from 'react';
 import { Home, Beef } from 'lucide-react';
 import styles from './Step3LocationGenealogy.module.css';
 import type { AnimalFormChange, AnimalFormData } from '../../types';
+import FarmLocationFields from '../FarmLocationFields/FarmLocationFields';
 
 interface Step3Props {
   formData: AnimalFormData;
   onChange: AnimalFormChange;
   lots: { id: string; name: string }[];
+  lotsLoading: boolean;
+  lotsError: string | null;
   paddocks: { id: string; name: string }[];
+  paddocksLoading: boolean;
+  paddocksError: string | null;
   animals: { id: string; tag: string; name: string; sex: string; status: string }[];
 }
 
@@ -15,7 +20,11 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({
   formData,
   onChange,
   lots,
+  lotsLoading,
+  lotsError,
   paddocks,
+  paddocksLoading,
+  paddocksError,
   animals,
 }) => {
   return (
@@ -36,39 +45,22 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({
       <div className={styles.cardSection}>
         <div className={styles.sectionHeaderFlex}>
           <span className={styles.sectionKicker}>UBICACIÓN ACTUAL</span>
-          <span className={styles.badgeRequired}>Requerido</span>
+          <span className={styles.badgeOptional}>Opcional</span>
         </div>
 
         <div className="row g-3">
-          <div className="col-12 col-md-6">
-            <label className={styles.formLabel}>
-              Lote <span className={styles.fieldTag}>(current_lot_id)</span>
-            </label>
-            <select
-              className={styles.formControl}
-              value={formData.loteId}
-              onChange={(e) => onChange('loteId', e.target.value)}
-            >
-              <option value="">Sin lote asignado</option>
-              {lots.map((lot) => <option key={lot.id} value={lot.id}>{lot.name}</option>)}
-            </select>
-          </div>
-
-          <div className="col-12 col-md-6">
-            <label className={styles.formLabel}>
-              Potrero <span className={styles.fieldTag}>(current_paddock_id)</span>
-            </label>
-            <select
-              className={styles.formControl}
-              value={formData.potreroId}
-              onChange={(e) => onChange('potreroId', e.target.value)}
-            >
-              <option value="">Sin potrero asignado</option>
-              {paddocks.map((paddock) => (
-                <option key={paddock.id} value={paddock.id}>{paddock.name}</option>
-              ))}
-            </select>
-          </div>
+          <FarmLocationFields
+            lotId={formData.loteId}
+            paddockId={formData.potreroId}
+            onLotChange={(id) => onChange('loteId', id)}
+            onPaddockChange={(id) => onChange('potreroId', id)}
+            lots={lots}
+            lotsLoading={lotsLoading}
+            lotsError={lotsError}
+            paddocks={paddocks}
+            paddocksLoading={paddocksLoading}
+            paddocksError={paddocksError}
+          />
         </div>
       </div>
 
@@ -91,7 +83,8 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({
             >
               <option value="">Sin padre registrado</option>
               {animals.filter((animal) =>
-                animal.status === 'active' && ['Macho', 'macho'].includes(animal.sex),
+                animal.status.toLowerCase() === 'active'
+                && ['macho', 'male'].includes(animal.sex.trim().toLowerCase()),
               ).map((animal) => (
                 <option key={animal.id} value={animal.id}>
                   {animal.tag} · {animal.name}
@@ -112,7 +105,8 @@ export const Step3LocationGenealogy: React.FC<Step3Props> = ({
             >
               <option value="">Sin madre registrada</option>
               {animals.filter((animal) =>
-                animal.status === 'active' && ['Hembra', 'hembra'].includes(animal.sex),
+                animal.status.toLowerCase() === 'active'
+                && ['hembra', 'female'].includes(animal.sex.trim().toLowerCase()),
               ).map((animal) => (
                 <option key={animal.id} value={animal.id}>
                   {animal.tag} · {animal.name}
