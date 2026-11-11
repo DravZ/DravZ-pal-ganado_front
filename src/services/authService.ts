@@ -23,6 +23,8 @@ interface RegistrationPayload {
   };
 }
 
+let currentSessionRequest: Promise<AuthSession | null> | null = null;
+
 async function getResponseMessage(response: Response): Promise<string> {
   const responseText = await response.text();
   if (!responseText) return `La solicitud falló (${response.status}).`;
@@ -97,8 +99,15 @@ export async function loginAccount(email: string, password: string): Promise<Aut
   });
 }
 
-export function getCurrentSession(): Promise<AuthSession> {
-  return requestSession<AuthSession>('/auth/session');
+export function getCurrentSession(): Promise<AuthSession | null> {
+  if (!currentSessionRequest) {
+    currentSessionRequest = requestSession<AuthSession>('/auth/session')
+      .then((session) => session ?? null)
+      .finally(() => {
+        currentSessionRequest = null;
+      });
+  }
+  return currentSessionRequest;
 }
 
 export async function renewCurrentSession(): Promise<AuthSession> {

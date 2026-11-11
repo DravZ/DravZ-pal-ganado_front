@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SyncUser | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const previousOnlineState = useRef(navigator.onLine);
   const [hasServerSession, setHasServerSession] = useState(false);
   const [offlineReady, setOfflineReady] = useState(false);
 
@@ -146,10 +147,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      let session: AuthSession;
+      let session: AuthSession | null;
       try {
         session = await getCurrentSession();
       } catch {
+        if (cachedProfile?.initialized) {
+          setUser(userFromProfile(cachedProfile));
+          setHasServerSession(false);
+          setOfflineReady(true);
+          showRenewalWarning(cachedProfile.expiresAt, true);
+        }
+        if (active) setIsReady(true);
+        return;
+      }
+
+      if (!session) {
         if (cachedProfile?.initialized) {
           setUser(userFromProfile(cachedProfile));
           setHasServerSession(false);
@@ -192,11 +204,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [showRenewalWarning]);
 
   useEffect(() => {
-    if (!isReady || !isOnline || hasServerSession) return;
+    if (!isReady) return;
+    const reconnected = !previousOnlineState.current && isOnline;
+    previousOnlineState.current = isOnline;
+    if (!reconnected || hasServerSession) return;
     let active = true;
 
     void getCurrentSession()
       .then(async (session) => {
+        if (!session) return;
         const profile = await initializeOrSyncOfflineData(session);
         if (!active) return;
         setUser(session.user);
