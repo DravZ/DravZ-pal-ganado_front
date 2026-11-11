@@ -2,52 +2,45 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ActiveAlerts.module.css';
 
-interface AlertData {
+export interface DashboardAlert {
   id: string;
-  type: 'retiro' | 'vacunacion' | 'stock';
-  pillText: string;
-  pillVariant: 'red' | 'yellow';
+  category: string;
+  severity: string;
   title: string;
-  subtitle: string;
-  timeText: string;
+  message: string;
+  detectedAt: string;
+  dueDate?: string;
 }
 
-const ALERTS_LIST: AlertData[] = [
-  {
-    id: '1',
-    type: 'retiro',
-    pillText: 'Periodo de retiro',
-    pillVariant: 'red',
-    title: 'BR-1088 · Restringir venta de carne',
-    subtitle: 'Tratamiento con ivermectina',
-    timeText: 'Faltan 8 días',
-  },
-  {
-    id: '2',
-    type: 'vacunacion',
-    pillText: 'Vacunación pendiente',
-    pillVariant: 'yellow',
-    title: 'Vacas de cría · Vacunar 12 animales',
-    subtitle: 'Jornada sanitaria programada',
-    timeText: 'Hoy',
-  },
-  {
-    id: '3',
-    type: 'stock',
-    pillText: 'Stock bajo',
-    pillVariant: 'yellow',
-    title: 'Sal mineralizada · Solicitar reposición',
-    subtitle: 'Quedan 18 bultos disponibles',
-    timeText: 'Hoy',
-  },
-];
+interface ActiveAlertsProps {
+  alerts: DashboardAlert[];
+  isLoading: boolean;
+}
 
-export const ActiveAlerts: React.FC = () => {
+function timeLabel(alert: DashboardAlert): string {
+  const value = alert.dueDate ?? alert.detectedAt;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Fecha no disponible';
+  const today = new Date();
+  const dayDifference = Math.round((
+    new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+    - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+  ) / 86_400_000);
+  if (dayDifference === 0) return 'Hoy';
+  if (dayDifference === 1) return 'Mañana';
+  if (dayDifference === -1) return 'Ayer';
+  return date.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+}
+
+function isUrgent(severity: string): boolean {
+  return ['ALTA', 'CRÍTICA', 'CRITICA'].includes(severity.toUpperCase());
+}
+
+export const ActiveAlerts: React.FC<ActiveAlertsProps> = ({ alerts, isLoading }) => {
   const navigate = useNavigate();
 
   return (
     <div className={styles.alertsCard}>
-      {/* Encabezado del Bloque */}
       <div className="d-flex align-items-start justify-content-between mb-2">
         <div>
           <div className={styles.sectionKicker}>ATENCIÓN REQUERIDA</div>
@@ -62,31 +55,25 @@ export const ActiveAlerts: React.FC = () => {
         </button>
       </div>
 
-      {/* Listado de Alertas Responsivo */}
       <div className="d-flex flex-column">
-        {ALERTS_LIST.map((alert) => (
-          <div key={alert.id} className={styles.alertItem}>
-            <div className={styles.alertContentGroup}>
-              {/* Etiqueta / Pill */}
-              <span
-                className={`${styles.alertPill} ${
-                  alert.pillVariant === 'red' ? styles.pillRed : styles.pillYellow
-                }`}
-              >
-                {alert.pillText}
-              </span>
-
-              {/* Título y Subtítulo */}
-              <div className={styles.alertTextWrapper}>
-                <h4 className={styles.alertTitle}>{alert.title}</h4>
-                <p className={styles.alertSubtitle}>{alert.subtitle}</p>
+        {isLoading ? <p role="status">Cargando alertas…</p> : alerts.length ? (
+          alerts.map((alert) => (
+            <div key={alert.id} className={styles.alertItem}>
+              <div className={styles.alertContentGroup}>
+                <span className={`${styles.alertPill} ${
+                  isUrgent(alert.severity) ? styles.pillRed : styles.pillYellow
+                }`}>
+                  {alert.category}
+                </span>
+                <div className={styles.alertTextWrapper}>
+                  <h4 className={styles.alertTitle}>{alert.title}</h4>
+                  {alert.message && <p className={styles.alertSubtitle}>{alert.message}</p>}
+                </div>
               </div>
+              <span className={styles.alertTime}>{timeLabel(alert)}</span>
             </div>
-
-            {/* Tiempo restante */}
-            <span className={styles.alertTime}>{alert.timeText}</span>
-          </div>
-        ))}
+          ))
+        ) : <p>No hay alertas pendientes para esta finca.</p>}
       </div>
     </div>
   );

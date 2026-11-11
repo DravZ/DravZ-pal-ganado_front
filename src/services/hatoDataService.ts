@@ -21,6 +21,7 @@ export type HatoResource =
   | 'paddocks'
   | 'customers'
   | 'medications'
+  | 'inventories'
   | 'animal_identifiers'
   | 'feeding_records'
   | 'production_records'
@@ -68,6 +69,7 @@ const endpointByResource: Record<HatoResource, string> = {
   paddocks: '/paddocks',
   customers: '/customers',
   medications: '/medications',
+  inventories: '/inventories',
   animal_identifiers: '/animal-identifiers',
   feeding_records: '/feeding-records',
   production_records: '/production-records',
@@ -95,6 +97,7 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   paddocks: ['CREATE', 'UPDATE', 'DELETE'],
   customers: [],
   medications: [],
+  inventories: [],
   animal_identifiers: [],
   feeding_records: ['CREATE'],
   production_records: ['CREATE'],
@@ -257,6 +260,7 @@ export function useHatoCollection<T extends Record<string, unknown>>(
         'sales_records',
         'feeding_records',
         'production_records',
+        'inventories',
         'purchase_records',
         'expenses',
         'cost_allocations',
