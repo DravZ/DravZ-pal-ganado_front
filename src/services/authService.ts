@@ -1,6 +1,7 @@
 import type { FarmFormValues, RegistrationFormValues } from '../types/database.types';
 import type { AuthSession } from './offlineSyncService';
 import { apiFetch } from './apiClient';
+import { passwordPolicyError } from '../utils/passwordPolicy';
 
 interface RegistrationPayload {
   user_name: string;
@@ -132,6 +133,9 @@ export async function registerAccount(
   userAndOrganization: RegistrationFormValues,
   farm: FarmFormValues,
 ): Promise<void> {
+  const passwordError = passwordPolicyError(userAndOrganization.userPass);
+  if (passwordError) throw new Error(passwordError);
+
   const hectares = Number(farm.hectares);
   if (!Number.isFinite(hectares)) {
     throw new Error('Indica una superficie válida para la finca.');

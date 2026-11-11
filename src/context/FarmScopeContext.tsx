@@ -1,6 +1,14 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { offlineDatabase, type CachedRecord } from '../services/offlineDatabase';
+import { refreshOrganizationFarms } from '../services/hatoDataService';
 import { useAuth } from './AuthContext';
 
 export interface ActiveFarm {
@@ -11,6 +19,7 @@ export interface ActiveFarm {
 interface FarmScopeValue {
   farms: ActiveFarm[];
   activeFarm: ActiveFarm | null;
+  farmsError: string | null;
   setActiveFarmId: (farmId: string) => void;
   scope: { userId: string; organizationId: string; farmId: string } | null;
 }
@@ -20,19 +29,55 @@ const FarmScopeContext = createContext<FarmScopeValue | null>(null);
 export function FarmScopeProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [selectedFarmId, setSelectedFarmId] = useState<string | null>(null);
+  const [farmLoadState, setFarmLoadState] = useState<{
+    userId: string;
+    organizationId: string;
+    error: string | null;
+  } | null>(null);
+  const userId = user?.id;
+  const organizationId = user?.organization_id;
+
+  useEffect(() => {
+    if (!userId || !organizationId) return undefined;
+
+    let active = true;
+    const synchronizeFarms = async () => {
+      if (!navigator.onLine) return;
+      try {
+        await refreshOrganizationFarms(userId, organizationId);
+        if (active) setFarmLoadState({ userId, organizationId, error: null });
+      } catch (error: unknown) {
+        if (active) {
+          setFarmLoadState({
+            userId,
+            organizationId,
+            error: error instanceof Error ? error.message : 'No se pudieron cargar las fincas.',
+          });
+        }
+      }
+    };
+
+    void synchronizeFarms();
+    window.addEventListener('online', synchronizeFarms);
+    return () => {
+      active = false;
+      window.removeEventListener('online', synchronizeFarms);
+    };
+  }, [organizationId, userId]);
+
   const cachedFarms = useLiveQuery<CachedRecord[]>(
-    () => user
+    () => userId
       ? Promise.resolve(
         offlineDatabase.records
           .where('[userId+resourceType]')
-          .equals([user.id, 'farms'])
+          .equals([userId, 'farms'])
           .toArray(),
       )
       : Promise.resolve([]),
-    [user?.id],
-  ) ?? [];
+    [userId],
+  );
 
-  const farms = useMemo(() => cachedFarms
+  const farms = useMemo(() => (cachedFarms ?? [])
     .map((record) => ({
       id: record.recordId,
       name: String(record.payload.name ?? '').trim(),
@@ -42,19 +87,25 @@ export function FarmScopeProvider({ children }: { children: ReactNode }) {
   [cachedFarms]);
 
   const activeFarm = farms.find((farm) => farm.id === selectedFarmId) ?? farms[0] ?? null;
-  const scope = useMemo(() => user && activeFarm
+  const farmsError = farmLoadState
+    && farmLoadState.userId === userId
+    && farmLoadState.organizationId === organizationId
+    ? farmLoadState.error
+    : null;
+  const scope = useMemo(() => userId && organizationId && activeFarm
     ? {
-      userId: user.id,
-      organizationId: user.organization_id,
+      userId,
+      organizationId,
       farmId: activeFarm.id,
     }
-    : null, [activeFarm, user?.id, user?.organization_id]);
+    : null, [activeFarm, organizationId, userId]);
   const value = useMemo<FarmScopeValue>(() => ({
     farms,
     activeFarm,
+    farmsError,
     setActiveFarmId: setSelectedFarmId,
     scope,
-  }), [activeFarm, farms, scope]);
+  }), [activeFarm, farms, farmsError, scope]);
 
   return <FarmScopeContext.Provider value={value}>{children}</FarmScopeContext.Provider>;
 }

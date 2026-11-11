@@ -5,6 +5,7 @@ import { FarmConfigModal } from '../FarmConfigModal/FarmConfigModal';
 import styles from './RegisterForm.module.css';
 import useNotification from '../../../../hooks/useNotification';
 import { registerAccount } from '../../../../services/authService';
+import { passwordPolicyError } from '../../../../utils/passwordPolicy';
 import type {
   FarmFormValues,
   RegistrationFormValues,
@@ -70,10 +71,9 @@ export const RegisterForm: React.FC = () => {
 
     if (!formData.userPass) {
       newErrors.userPass = 'La contraseña es obligatoria.';
-    } else if (formData.userPass.length < 8) {
-      newErrors.userPass = 'La contraseña debe tener mínimo 8 caracteres.';
-    } else if (formData.userPass.length > 100) {
-      newErrors.userPass = 'La contraseña no puede superar 100 caracteres.';
+    } else {
+      const passwordError = passwordPolicyError(formData.userPass);
+      if (passwordError) newErrors.userPass = passwordError;
     }
 
     // 2. Datos de organización
@@ -249,15 +249,18 @@ export const RegisterForm: React.FC = () => {
               name="userPass"
               type="password"
               className={`${styles.inputControl} ${errors.userPass ? styles.inputError : ''}`}
-              placeholder="Mínimo 8 caracteres"
+              placeholder="Más de 8 caracteres"
               value={formData.userPass}
               onChange={handleChange}
-              minLength={8}
-              maxLength={100}
+              minLength={9}
+              maxLength={72}
               autoComplete="new-password"
               required
             />
             {errors.userPass && <div className={styles.errorMessage}>{errors.userPass}</div>}
+            <div className={styles.termsText}>
+              Usa más de 8 caracteres, con mayúscula, minúscula, número y símbolo, sin espacios.
+            </div>
           </div>
         </div>
 

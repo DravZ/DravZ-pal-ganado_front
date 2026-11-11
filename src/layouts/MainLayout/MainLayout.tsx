@@ -14,7 +14,7 @@ const MainLayoutContent: React.FC = () => {
   const { user, logout } = useAuth();
   const userId = user?.id;
   const { showNotification } = useNotification();
-  const { farms, activeFarm, setActiveFarmId, scope } = useFarmScope();
+  const { farms, activeFarm, farmsError, setActiveFarmId, scope } = useFarmScope();
   const { records: alerts } = useHatoCollection<Record<string, unknown>>('alerts', '/alerts', scope);
   const pendingSyncCount = useLiveQuery(
     () => user
@@ -27,6 +27,15 @@ const MainLayoutContent: React.FC = () => {
     [user?.id],
   ) ?? 0;
   const alertCount = alerts.filter((alert) => String(alert.status ?? '').toLowerCase() === 'open').length;
+
+  useEffect(() => {
+    if (!farmsError) return;
+    showNotification({
+      type: 'error',
+      title: 'No se pudieron actualizar las fincas',
+      message: `${farmsError} Se conservan las fincas guardadas en este dispositivo.`,
+    });
+  }, [farmsError, showNotification]);
 
   useEffect(() => {
     if (!userId) return undefined;

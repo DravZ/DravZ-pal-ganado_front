@@ -470,6 +470,32 @@ export async function cacheAdministrationRecord(
   );
 }
 
+export async function refreshOrganizationFarms(
+  userId: string,
+  organizationId: string,
+): Promise<void> {
+  if (!navigator.onLine) return;
+
+  const url = new URL(apiUrl(endpointByResource.farms), window.location.origin);
+  url.searchParams.set('organization_id', organizationId);
+  const response = await apiFetch(url);
+  if (!response.ok) {
+    throw new Error(`No se pudieron cargar las fincas (${response.status}).`);
+  }
+
+  const payload: unknown = await response.json();
+  if (!Array.isArray(payload) || !payload.every(isObject)) {
+    throw new Error('El servidor devolvió una lista de fincas inválida.');
+  }
+
+  await mergeRemoteRecords(
+    { userId, organizationId, farmId: '' },
+    'farms',
+    payload.map(normalizeAdministrationPayload),
+    true,
+  );
+}
+
 function mergeLocalPayload(
   recordId: string,
   operation: WriteOperation,
