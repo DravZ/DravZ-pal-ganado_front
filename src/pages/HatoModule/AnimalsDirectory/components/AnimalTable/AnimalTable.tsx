@@ -1,5 +1,6 @@
 import React from 'react';
 import { Beef, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { animalPhotoSource } from '../../../RegisterAnimalPage/components/AnimalPhotoField/animalPhotoUtils';
 import styles from './AnimalTable.module.css';
 
 export interface AnimalItem {
@@ -15,6 +16,7 @@ export interface AnimalItem {
   status: string;
   lotId: string;
   paddockId: string;
+  photoBase64?: string;
 }
 
 interface AnimalTableProps {
@@ -73,7 +75,17 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, onSelectAnima
                 <td>
                   <div className={styles.identityGroup}>
                     <div className={styles.iconBadge}>
-                      <Beef size={20} strokeWidth={2.2} />
+                      {item.photoBase64
+                        ? (
+                          <img
+                            className={styles.animalPhoto}
+                            src={animalPhotoSource(item.photoBase64)}
+                            alt={`Foto de ${item.name || item.tag}`}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        )
+                        : <Beef size={24} strokeWidth={2.2} />}
                     </div>
                     <div>
                       <div className={styles.tagId}>{item.tag}</div>
@@ -133,7 +145,17 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, onSelectAnima
           >
             <div className={styles.identityGroup}>
               <div className={styles.iconBadge}>
-                <Beef size={20} strokeWidth={2.2} />
+                {item.photoBase64
+                  ? (
+                    <img
+                      className={styles.animalPhoto}
+                      src={animalPhotoSource(item.photoBase64)}
+                      alt={`Foto de ${item.name || item.tag}`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )
+                  : <Beef size={24} strokeWidth={2.2} />}
               </div>
               <div>
                 <div className={styles.tagId}>{item.tag}</div>

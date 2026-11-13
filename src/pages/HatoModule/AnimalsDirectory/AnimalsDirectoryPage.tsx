@@ -18,7 +18,7 @@ export const AnimalsDirectoryPage: React.FC = () => {
   const { scope } = useFarmScope();
   const { records: rawAnimals, isLoading, error } = useHatoCollection<HatoRecord>(
     'animals',
-    '/animals',
+    '/animals?include_photo=true',
     scope,
   );
   const { records: lots } = useHatoCollection<HatoRecord>('lots', '/lots', scope);
@@ -38,6 +38,7 @@ export const AnimalsDirectoryPage: React.FC = () => {
     status: text(animal.status) === 'active' ? 'Activo' : text(animal.status, 'Inactivo'),
     lotId: text(animal.lot_id),
     paddockId: text(animal.paddock_id),
+    photoBase64: text(animal.photo_base64, text(animal.photoBase64)),
   }));
 
   // Estados de Filtros

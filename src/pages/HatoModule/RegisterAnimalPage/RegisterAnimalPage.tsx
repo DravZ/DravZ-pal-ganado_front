@@ -5,6 +5,7 @@ import { StepBar } from './components/StepBar/StepBar';
 import { Step1BasicData } from './components/Step1BasicData/Step1BasicData';
 import { Step2Identifiers } from './components/Step2Identifiers/Step2Identifiers';
 import { Step3LocationGenealogy } from './components/Step3LocationGenealogy/Step3LocationGenealogy';
+import { Step4AnimalPhoto } from './components/Step4AnimalPhoto/Step4AnimalPhoto';
 import { Step4InitialWeight } from './components/Step4InitialWeight/Step4InitialWeight';
 import styles from './RegisterAnimalPage.module.css';
 import { useFarmScope } from '../../../context/FarmScopeContext';
@@ -54,6 +55,8 @@ export const RegisterAnimalPage: React.FC = () => {
     currentWeight: '0',
     currentWeightDate: new Date().toISOString().slice(0, 10),
     measurementMethod: 'Báscula digital',
+    notes: '',
+    photoBase64: '',
   });
 
   const handleFieldChange = <K extends keyof AnimalFormData>(
@@ -73,10 +76,15 @@ export const RegisterAnimalPage: React.FC = () => {
       setSubmitError('El identificador del animal es obligatorio.');
       return;
     }
+    if (!formData.photoBase64.trim()) {
+      setCurrentStep(4);
+      setSubmitError('La fotografía del animal es obligatoria.');
+      return;
+    }
 
     const weight = Number(formData.currentWeight);
     if (!Number.isFinite(weight) || weight < 0) {
-      setCurrentStep(4);
+      setCurrentStep(5);
       setSubmitError('El peso debe ser un número mayor o igual a cero.');
       return;
     }
@@ -106,6 +114,8 @@ export const RegisterAnimalPage: React.FC = () => {
         acquisition_cost: formData.acquisitionCost ? Number(formData.acquisitionCost) : undefined,
         current_weight: weight || undefined,
         current_weight_date: weight ? formData.currentWeightDate : undefined,
+        notes: formData.notes.trim() || undefined,
+        photo_base64: formData.photoBase64,
       };
       const result = await queueHatoWrite(scope, 'animals', 'CREATE', payload);
       let pending = result.pending;
@@ -141,9 +151,13 @@ export const RegisterAnimalPage: React.FC = () => {
 
   const handleNext = () => {
     setSubmitError(null);
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       if (currentStep === 2 && !formData.identifierCode.trim()) {
         setSubmitError('El identificador del animal es obligatorio.');
+        return;
+      }
+      if (currentStep === 4 && !formData.photoBase64.trim()) {
+        setSubmitError('La fotografía del animal es obligatoria.');
         return;
       }
       setCurrentStep((prev) => prev + 1);
@@ -169,6 +183,8 @@ export const RegisterAnimalPage: React.FC = () => {
       case 3:
         return 'Ubicación y genealogía';
       case 4:
+        return 'Fotografía del animal';
+      case 5:
         return 'Peso inicial';
       default:
         return '';
@@ -228,6 +244,14 @@ export const RegisterAnimalPage: React.FC = () => {
             </div>
           )}
           {currentStep === 4 && (
+            <div data-draft-step="animal-photo">
+              <Step4AnimalPhoto
+                value={formData.photoBase64}
+                onChange={(photoBase64) => handleFieldChange('photoBase64', photoBase64)}
+              />
+            </div>
+          )}
+          {currentStep === 5 && (
             <div data-draft-step="initial-weight">
               <Step4InitialWeight formData={formData} onChange={handleFieldChange} />
             </div>
@@ -238,7 +262,7 @@ export const RegisterAnimalPage: React.FC = () => {
         {/* Pie de Navegación de la Página */}
         <div className={styles.bottomBarFooter}>
           <div className={styles.stepCounterText}>
-            PASO {currentStep} DE 4
+            PASO {currentStep} DE 5
             <div className={styles.stepNameBold}>{getStepTitle()}</div>
           </div>
 
@@ -257,8 +281,8 @@ export const RegisterAnimalPage: React.FC = () => {
               onClick={handleNext}
               disabled={isSaving}
             >
-              <span>{isSaving ? 'Guardando…' : currentStep === 4 ? 'Guardar animal' : 'Continuar'}</span>
-              {currentStep === 4 ? (
+              <span>{isSaving ? 'Guardando…' : currentStep === 5 ? 'Guardar animal' : 'Continuar'}</span>
+              {currentStep === 5 ? (
                 <Check size={18} strokeWidth={2.5} />
               ) : (
                 <ChevronRight size={18} strokeWidth={2.5} />

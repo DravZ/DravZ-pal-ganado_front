@@ -10,7 +10,8 @@ const STEPS = [
   { number: 1, label: 'PASO 1', title: 'Datos básicos' },
   { number: 2, label: 'PASO 2', title: 'Identificadores' },
   { number: 3, label: 'PASO 3', title: 'Ubicación y genealogía' },
-  { number: 4, label: 'PASO 4', title: 'Peso inicial' },
+  { number: 4, label: 'PASO 4', title: 'Fotografía' },
+  { number: 5, label: 'PASO 5', title: 'Peso inicial' },
 ];
 
 export const StepBar: React.FC<StepBarProps> = ({ currentStep }) => {

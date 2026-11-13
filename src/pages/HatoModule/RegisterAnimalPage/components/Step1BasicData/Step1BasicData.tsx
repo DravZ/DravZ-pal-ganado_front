@@ -178,6 +178,18 @@ export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => 
           </div>
         </div>
       </div>
+
+      <div>
+        <label className={styles.formLabel} htmlFor="animal-notes">Notas (opcional)</label>
+        <textarea
+          id="animal-notes"
+          className={styles.formControlTextarea}
+          rows={3}
+          placeholder="Describe condiciones de nacimiento, discapacidades u otras observaciones."
+          value={formData.notes}
+          onChange={(event) => onChange('notes', event.target.value)}
+        />
+      </div>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Beef, ChevronRight } from 'lucide-react';
+import { animalPhotoSource } from '../../../RegisterAnimalPage/components/AnimalPhotoField/animalPhotoUtils';
 import styles from './DataAndGenealogy.module.css';
 
 interface DataAndGenealogyProps {
@@ -13,6 +14,7 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
   const navigate = useNavigate();
   const tag = String(animal.identifier_tag ?? animal.tag_number ?? animalId);
   const name = String(animal.name ?? 'Sin nombre');
+  const photoBase64 = String(animal.photo_base64 ?? animal.photoBase64 ?? '');
   const fatherId = String(animal.sire_id ?? '');
   const motherId = String(animal.dam_id ?? '');
   const father = animals.find((item) => item.id === fatherId);
@@ -96,6 +98,26 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
                 <td>
                   <span className={styles.fieldLabel}>Potrero actual</span>
                   <span className={styles.fieldVal}>{display(animal.paddock_name)}</span>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={2}>
+                  <span className={styles.fieldLabel}>Notas</span>
+                  <span className={styles.fieldVal}>{display(animal.notes)}</span>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={2}>
+                  <span className={styles.fieldLabel}>Fotografía</span>
+                  {photoBase64 ? (
+                    <img
+                      className={styles.animalPhoto}
+                      src={animalPhotoSource(photoBase64)}
+                      alt={`Fotografía de ${tag}`}
+                    />
+                  ) : (
+                    <span className={styles.fieldVal}>No hay fotografía registrada.</span>
+                  )}
                 </td>
               </tr>
             </tbody>

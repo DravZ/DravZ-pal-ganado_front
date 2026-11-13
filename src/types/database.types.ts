@@ -105,6 +105,7 @@ export interface Animal {
   current_weight_date?: string; // date
   acquisition_date?: string; // date
   acquisition_cost?: number; // decimal(14,2)
+  photo_base64?: string; // text
   notes?: string; // text
   created_at: string; // timestamp
   updated_at?: string; // timestamp

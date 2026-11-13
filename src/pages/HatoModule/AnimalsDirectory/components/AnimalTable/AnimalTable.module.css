@@ -55,15 +55,23 @@
 }
 
 .iconBadge {
-  width: 38px;
-  height: 38px;
+  width: 54px;
+  height: 54px;
   background-color: #eaf3ed;
   color: #1e4b27;
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.animalPhoto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .tagId {
@@ -214,4 +222,11 @@
   color: #64748b;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+@media (max-width: 575px) {
+  .iconBadge {
+    width: 48px;
+    height: 48px;
+  }
 }

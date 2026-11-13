@@ -101,6 +101,25 @@
   box-shadow: 0 0 0 3px rgba(30, 75, 39, 0.1);
 }
 
+.formControlTextarea {
+  width: 100%;
+  min-height: 96px;
+  border: 1px solid #dce3db;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  resize: vertical;
+}
+
+.formControlTextarea:focus {
+  outline: none;
+  border-color: #1e4b27;
+  box-shadow: 0 0 0 3px rgba(30, 75, 39, 0.1);
+}
+
 /* Bloque Opcional de Adquisición */
 .optionalCard {
   background-color: #ffffff;

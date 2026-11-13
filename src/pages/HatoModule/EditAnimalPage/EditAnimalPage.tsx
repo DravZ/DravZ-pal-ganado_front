@@ -5,6 +5,7 @@ import basicStyles from '../RegisterAnimalPage/components/Step1BasicData/Step1Ba
 import locationStyles from '../RegisterAnimalPage/components/Step3LocationGenealogy/Step3LocationGenealogy.module.css';
 import { breedsBySpecies } from '../RegisterAnimalPage/animalOptions';
 import FarmLocationFields from '../RegisterAnimalPage/components/FarmLocationFields/FarmLocationFields';
+import { AnimalPhotoField } from '../RegisterAnimalPage/components/AnimalPhotoField/AnimalPhotoField';
 import { useFarmScope } from '../../../context/FarmScopeContext';
 import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import {
@@ -26,6 +27,7 @@ interface AnimalDraft {
   sireId: string;
   damId: string;
   notes: string;
+  photoBase64: string;
 }
 
 function text(value: unknown): string {
@@ -102,6 +104,7 @@ export default function EditAnimalPage() {
     sireId: text(record.sire_id),
     damId: text(record.dam_id),
     notes: text(record.notes),
+    photoBase64: text(record.photo_base64 ?? record.photoBase64),
   };
   const values = draft ?? initialDraft;
   const setField = (field: keyof AnimalDraft, value: string) => {
@@ -137,7 +140,10 @@ export default function EditAnimalPage() {
         paddock_id: values.paddockId || undefined,
         sire_id: values.sireId || undefined,
         dam_id: values.damId || undefined,
-        notes: values.notes || undefined,
+        notes: values.notes,
+        ...(values.photoBase64 !== initialDraft.photoBase64
+          ? { photo_base64: values.photoBase64 }
+          : {}),
       }, id);
 
       markCurrentFormsSaved(formElement);
@@ -279,6 +285,13 @@ export default function EditAnimalPage() {
               paddocksLoading={paddocks.isLoading}
               paddocksError={paddocks.error}
             />
+            <div className="col-12">
+              <label className={basicStyles.formLabel}>Fotografía del animal (opcional)</label>
+              <AnimalPhotoField
+                value={values.photoBase64}
+                onChange={(photoBase64) => setField('photoBase64', photoBase64)}
+              />
+            </div>
             <div className="col-12">
               <label className={basicStyles.formLabel} htmlFor="animal-notes">Notas</label>
               <textarea id="animal-notes" className={basicStyles.formControl} rows={3} value={values.notes}

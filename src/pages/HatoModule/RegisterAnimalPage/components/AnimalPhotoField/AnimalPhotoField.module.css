@@ -1,0 +1,90 @@
+.photoField {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.previewFrame,
+.emptyPreview {
+  width: min(100%, 420px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid #dce3db;
+  border-radius: 16px;
+  background: #f8faf7;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.emptyPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #64748b;
+}
+
+.photoActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.photoButton,
+.uploadButton {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid #1e4b27;
+  border-radius: 10px;
+  background: #1e4b27;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.uploadButton {
+  background: #ffffff;
+  color: #1e4b27;
+}
+
+.photoButton:disabled,
+.uploadButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.helpText {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.errorText {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.fileInput,
+.draftValue {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

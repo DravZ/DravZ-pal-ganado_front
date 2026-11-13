@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Beef, Scale, ArrowRightLeft, Syringe } from 'lucide-react';
+import { animalPhotoSource } from '../../../RegisterAnimalPage/components/AnimalPhotoField/animalPhotoUtils';
 import styles from './AnimalHeader.module.css';
 
 interface AnimalHeaderProps {
@@ -15,6 +16,7 @@ export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId, animal }) 
   const breed = String(animal.breed ?? 'Sin raza');
   const sex = String(animal.gender ?? animal.sex ?? 'Sin sexo');
   const status = String(animal.status ?? 'Sin estado');
+  const photoBase64 = String(animal.photo_base64 ?? animal.photoBase64 ?? '');
   const weight = Number(animal.current_weight ?? 0);
   const weightDate = String(animal.current_weight_date ?? '');
 
@@ -47,7 +49,9 @@ export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId, animal }) 
           <div className="d-flex align-items-center">
             <div className={styles.leftInfoGroup}>
               <div className={styles.avatarBadge}>
-                <Beef size={26} strokeWidth={2.2} />
+                {photoBase64
+                  ? <img className={styles.avatarPhoto} src={animalPhotoSource(photoBase64)} alt={`Foto de ${name}`} />
+                  : <Beef size={26} strokeWidth={2.2} />}
               </div>
               <div>
                 <div className={styles.kickerTag}>IDENTIFICACIÓN</div>

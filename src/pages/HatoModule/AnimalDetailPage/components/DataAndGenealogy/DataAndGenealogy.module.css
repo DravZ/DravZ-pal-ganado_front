@@ -81,6 +81,16 @@
   color: #0f172a;
 }
 
+.animalPhoto {
+  display: block;
+  width: min(100%, 420px);
+  max-height: 320px;
+  margin-top: 0.5rem;
+  border: 1px solid #e5ebe3;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
 .badgePill {
   font-size: 0.725rem;
   font-weight: 700;

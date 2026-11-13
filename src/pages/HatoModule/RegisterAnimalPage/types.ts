@@ -18,6 +18,8 @@ export interface AnimalFormData {
   currentWeight: string;
   currentWeightDate: string;
   measurementMethod: string;
+  notes: string;
+  photoBase64: string;
 }
 
 export type AnimalFormChange = <K extends keyof AnimalFormData>(
