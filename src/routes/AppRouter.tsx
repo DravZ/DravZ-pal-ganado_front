@@ -1,10 +1,18 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Navigate,
+  Outlet,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
 import SuperLayout from "../layouts/SuperLayout/SuperLayout";
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import AuthGuard from "../components/shared/AuthGuard/AuthGuard";
 import { AuthProvider } from "../context/AuthContext";
 import { NotificationProvider } from "../context/NotificationContext";
+import { FormExitGuardProvider } from "../context/FormExitGuardContext";
 
 const NotFound = lazy(() => import("../pages/NotFound"));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage/LoginPage"));
@@ -41,58 +49,68 @@ const SyncQueuePage = lazy(() => import("../pages/AdministrationModule/SyncQueue
 const ProfilePage = lazy(() => import("../pages/ProfileModule/ProfilePage/ProfilePage"));
 const EditProfilePage = lazy(() => import("../pages/ProfileModule/EditProfilePage/EditProfilePage"));
 
+function AppRoot() {
+  return (
+    <FormExitGuardProvider>
+      <Suspense fallback={<div role="status" aria-live="polite">Cargando pantalla…</div>}>
+        <Outlet />
+      </Suspense>
+    </FormExitGuardProvider>
+  );
+}
+
+const router = createBrowserRouter(createRoutesFromElements(
+  <Route element={<AppRoot />}>
+    <Route element={<SuperLayout />}>
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<Navigate to="/" replace />} />
+      <Route element={<AuthGuard />}>
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/hato/animales" element={<AnimalsDirectoryPage />} />
+          <Route path="/hato/nuevo" element={<RegisterAnimalPage />} />
+          <Route path="/hato/animales/:id/editar" element={<EditAnimalPage />} />
+          <Route path="/hato/animales/:id" element={<AnimalDetailPage />} />
+          <Route path="/hato/pesajes" element={<WeightTreatmentPage />} />
+          <Route path="/hato/reproduccion" element={<ReproductionPage />} />
+          <Route path="/hato/traslados" element={<MovementsAndSalesPage />} />
+          <Route path="/salud/eventos" element={<HealthAndTreatmentsPage />} />
+          <Route path="/salud/tratamientos" element={<HealthEventAndTreatmentPage />} />
+          <Route path="/salud/vacunacion" element={<RegisterVaccinationPage />} />
+          <Route path="/alimentacion/diaria" element={<FeedingAndProductionPage />} />
+          <Route path="/alimentacion/inventario" element={<InventoryAndPurchasesPage />} />
+          <Route path="/finanzas/gastos" element={<ExpensesAndCostAllocationsPage />} />
+          <Route path="/admin/estructura" element={<PaddocksPage />} />
+          <Route path="/admin/configuracion" element={<OrganizationConfigPage />} />
+          <Route path="/organizacion/informacion" element={<OrganizationInfoPage />} />
+          <Route path="/organizacion/editar" element={<EditOrganizationInfoPage />} />
+          <Route path="/admin/usuarios" element={<UsersManagementPage />} />
+          <Route path="/usuarios/nuevo" element={<CreateUserPage />} />
+          <Route path="/usuarios/:id" element={<UserInfoPage />} />
+          <Route path="/usuarios/editar/:id" element={<EditUserPage />} />
+          <Route path="/admin/fincas" element={<FarmsManagementPage />} />
+          <Route path="/fincas/:id" element={<FarmInfoPage />} />
+          <Route path="/fincas/nueva" element={<CreateFarmPage />} />
+          <Route path="/fincas/editar/:id" element={<EditFarmPage />} />
+          <Route path="/admin/alertas" element={<AlertsPage />} />
+          <Route path="/admin/sincronizacion" element={<SyncQueuePage />} />
+          <Route path="/perfil" element={<ProfilePage />} />
+          <Route path="/perfil/editar" element={<EditProfilePage />} />
+        </Route>
+      </Route>
+    </Route>
+    <Route path="*" element={<NotFound />} />
+  </Route>,
+));
+
 export default function AppRouter() {
   return (
     <NotificationProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <Suspense fallback={<div role="status" aria-live="polite">Cargando pantalla…</div>}>
-            <Routes>
-              <Route element={<SuperLayout />}>
-                <Route path="/" element={<LoginPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/login" element={<Navigate to="/" replace />} />
-                <Route element={<AuthGuard />}>
-                  <Route element={<MainLayout />}>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/hato/animales" element={<AnimalsDirectoryPage />} />
-                    <Route path="/hato/nuevo" element={<RegisterAnimalPage />} />
-                    <Route path="/hato/animales/:id/editar" element={<EditAnimalPage />} />
-                    <Route path="/hato/animales/:id" element={<AnimalDetailPage />} />
-                    <Route path="/hato/pesajes" element={<WeightTreatmentPage />} />
-                    <Route path="/hato/reproduccion" element={<ReproductionPage />} />
-                    <Route path="/hato/traslados" element={<MovementsAndSalesPage />} />
-                    <Route path="/salud/eventos" element={<HealthAndTreatmentsPage />} />
-                    <Route path="/salud/tratamientos" element={<HealthEventAndTreatmentPage />} />
-                    <Route path="/salud/vacunacion" element={<RegisterVaccinationPage />} />
-                    <Route path="/alimentacion/diaria" element={<FeedingAndProductionPage />} />
-                    <Route path="/alimentacion/inventario" element={<InventoryAndPurchasesPage />} />
-                    <Route path="/finanzas/gastos" element={<ExpensesAndCostAllocationsPage />} />
-                    <Route path="/admin/estructura" element={<PaddocksPage />} />
-                    <Route path="/admin/configuracion" element={<OrganizationConfigPage />} />
-                    <Route path="/organizacion/informacion" element={<OrganizationInfoPage />} />
-                    <Route path="/organizacion/editar" element={<EditOrganizationInfoPage />} />
-                    <Route path="/admin/usuarios" element={<UsersManagementPage />} />
-                    <Route path="/usuarios/nuevo" element={<CreateUserPage />} />
-                    <Route path="/usuarios/:id" element={<UserInfoPage />} />
-                    <Route path="/usuarios/editar/:id" element={<EditUserPage />} />
-                    <Route path="/admin/fincas" element={<FarmsManagementPage />} />
-                    <Route path="/fincas/:id" element={<FarmInfoPage />} />
-                    <Route path="/fincas/nueva" element={<CreateFarmPage />} />
-                    <Route path="/fincas/editar/:id" element={<EditFarmPage />} />
-                    <Route path="/admin/alertas" element={<AlertsPage />} />
-                    <Route path="/admin/sincronizacion" element={<SyncQueuePage />} />
-                    <Route path="/perfil" element={<ProfilePage />} />
-                    <Route path="/perfil/editar" element={<EditProfilePage />} />
-                  </Route>
-                </Route>
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </AuthProvider>
-      </BrowserRouter>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </NotificationProvider>
   );
 }

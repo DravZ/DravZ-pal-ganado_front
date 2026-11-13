@@ -4,6 +4,7 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './EditFarmPage.module.css';
 import { useAuth } from '../../../context/AuthContext';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
 import { cacheAdministrationRecord, useHatoCollection } from '../../../services/hatoDataService';
@@ -13,6 +14,7 @@ export const EditFarmPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, isOffline } = useAuth();
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>('farms', '/farms', scope);
   const farm = useMemo(() => records.find((record) => record.id === id), [id, records]);
@@ -21,6 +23,7 @@ export const EditFarmPage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (!id) return;
     setIsSubmitting(true);
     setSubmissionError(null);
@@ -37,6 +40,7 @@ export const EditFarmPage: React.FC = () => {
         address: field('address') || undefined,
       });
       await cacheAdministrationRecord(user.id, user.organization_id, 'farms', savedFarm);
+      markCurrentFormsSaved(formElement);
       showNotification({ type: 'success', title: 'Finca actualizada', message: 'Los cambios se guardaron en el backend.' });
       navigate('/admin/fincas');
     } catch (cause: unknown) {

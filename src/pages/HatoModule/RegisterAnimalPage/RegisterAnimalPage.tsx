@@ -8,6 +8,7 @@ import { Step3LocationGenealogy } from './components/Step3LocationGenealogy/Step
 import { Step4InitialWeight } from './components/Step4InitialWeight/Step4InitialWeight';
 import styles from './RegisterAnimalPage.module.css';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
 import useNotification from '../../../hooks/useNotification';
 import type { AnimalFormData } from './types';
@@ -15,6 +16,7 @@ import type { AnimalFormData } from './types';
 export const RegisterAnimalPage: React.FC = () => {
   const navigate = useNavigate();
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSaving, setIsSaving] = useState(false);
@@ -119,6 +121,7 @@ export const RegisterAnimalPage: React.FC = () => {
         lastError = weightResult.lastError ?? lastError;
       }
 
+      markCurrentFormsSaved();
       showNotification({
         type: pending ? 'alert' : 'success',
         title: pending ? 'Cambios pendientes de sincronización' : 'Animal registrado',
@@ -184,42 +187,50 @@ export const RegisterAnimalPage: React.FC = () => {
       </div>
 
       {/* Tarjeta Principal de la Página */}
-      <div className={styles.mainCardContainer}>
+      <div className={styles.mainCardContainer} data-unsaved-form="animal-registration">
         {/* Barra del Stepper Wizard */}
         <StepBar currentStep={currentStep} />
 
         {/* Contenido Dinámico según el paso */}
         <div className={styles.formContentArea}>
           {currentStep === 1 && (
-            <Step1BasicData formData={formData} onChange={handleFieldChange} />
+            <div data-draft-step="basic">
+              <Step1BasicData formData={formData} onChange={handleFieldChange} />
+            </div>
           )}
           {currentStep === 2 && (
-            <Step2Identifiers formData={formData} onChange={handleFieldChange} />
+            <div data-draft-step="identifiers">
+              <Step2Identifiers formData={formData} onChange={handleFieldChange} />
+            </div>
           )}
           {currentStep === 3 && (
-            <Step3LocationGenealogy
-              formData={formData}
-              onChange={handleFieldChange}
-              lots={lots.records.map((lot) => ({ id: text(lot.id), name: text(lot.name) }))}
-              lotsLoading={lots.isLoading}
-              lotsError={lots.error}
-              paddocks={paddocks.records.map((paddock) => ({
-                id: text(paddock.id),
-                name: text(paddock.name),
-              }))}
-              paddocksLoading={paddocks.isLoading}
-              paddocksError={paddocks.error}
-              animals={rawAnimals.map((animal) => ({
-                id: text(animal.id),
-                tag: text(animal.identifier_tag) || text(animal.tag_number),
-                name: text(animal.name) || 'Sin nombre',
-                sex: text(animal.gender) || text(animal.sex),
-                status: text(animal.status),
-              }))}
-            />
+            <div data-draft-step="location-genealogy">
+              <Step3LocationGenealogy
+                formData={formData}
+                onChange={handleFieldChange}
+                lots={lots.records.map((lot) => ({ id: text(lot.id), name: text(lot.name) }))}
+                lotsLoading={lots.isLoading}
+                lotsError={lots.error}
+                paddocks={paddocks.records.map((paddock) => ({
+                  id: text(paddock.id),
+                  name: text(paddock.name),
+                }))}
+                paddocksLoading={paddocks.isLoading}
+                paddocksError={paddocks.error}
+                animals={rawAnimals.map((animal) => ({
+                  id: text(animal.id),
+                  tag: text(animal.identifier_tag) || text(animal.tag_number),
+                  name: text(animal.name) || 'Sin nombre',
+                  sex: text(animal.gender) || text(animal.sex),
+                  status: text(animal.status),
+                }))}
+              />
+            </div>
           )}
           {currentStep === 4 && (
-            <Step4InitialWeight formData={formData} onChange={handleFieldChange} />
+            <div data-draft-step="initial-weight">
+              <Step4InitialWeight formData={formData} onChange={handleFieldChange} />
+            </div>
           )}
         </div>
         {submitError && <p role="alert" className="text-danger px-4">{submitError}</p>}

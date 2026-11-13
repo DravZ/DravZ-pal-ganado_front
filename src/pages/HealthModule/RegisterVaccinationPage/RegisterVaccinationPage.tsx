@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './RegisterVaccinationPage.module.css';
 import { ArrowLeft, CheckCircle, WifiOff } from 'lucide-react';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
 import useNotification from '../../../hooks/useNotification';
 
@@ -10,6 +11,7 @@ export const RegisterVaccinationPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
     'animals',
@@ -36,6 +38,7 @@ export const RegisterVaccinationPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
     const newErrors: { [key: string]: string } = {};
     if (!scope) newErrors.scope = 'No hay una finca autorizada seleccionada.';
     if (!animalId) newErrors.animal = 'Selecciona un animal.';
@@ -65,6 +68,7 @@ export const RegisterVaccinationPage: React.FC = () => {
         dose_unit: doseUnit,
         veterinarian_name: veterinarian.trim() || undefined,
       });
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: result.pending ? 'alert' : 'success',
         title: result.pending ? 'Vacunación pendiente de sincronización' : 'Vacunación registrada',

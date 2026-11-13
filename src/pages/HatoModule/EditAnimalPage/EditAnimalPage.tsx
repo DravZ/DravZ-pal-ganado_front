@@ -6,6 +6,7 @@ import locationStyles from '../RegisterAnimalPage/components/Step3LocationGeneal
 import { breedsBySpecies } from '../RegisterAnimalPage/animalOptions';
 import FarmLocationFields from '../RegisterAnimalPage/components/FarmLocationFields/FarmLocationFields';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import {
   queueHatoWrite,
   useHatoCollection,
@@ -56,6 +57,7 @@ export default function EditAnimalPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { record, isLoading, error } = useHatoRecord<Record<string, unknown>>(
     'animals',
@@ -118,6 +120,7 @@ export default function EditAnimalPage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (!scope) return;
     setIsSaving(true);
     setSubmitError(null);
@@ -137,6 +140,7 @@ export default function EditAnimalPage() {
         notes: values.notes || undefined,
       }, id);
 
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: result.pending ? 'alert' : 'success',
         title: result.pending ? 'Edición pendiente de sincronización' : 'Animal actualizado',

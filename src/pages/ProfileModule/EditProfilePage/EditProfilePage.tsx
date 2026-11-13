@@ -4,6 +4,7 @@ import { ArrowLeft, AlertTriangle, Check } from 'lucide-react';
 import styles from './EditProfilePage.module.css';
 import { useAuth } from '../../../context/AuthContext';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
 import { cacheAdministrationRecord, useHatoRecord } from '../../../services/hatoDataService';
@@ -12,6 +13,7 @@ import { offlineDatabase } from '../../../services/offlineDatabase';
 export const EditProfilePage: React.FC = () => {
   const { user, isOffline, updateUserDetails } = useAuth();
   const { scope, activeFarm } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const userScope = user ? {
@@ -33,6 +35,7 @@ export const EditProfilePage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (!user) {
       setSubmissionError('No se pudo determinar la cuenta de la sesión.');
       return;
@@ -63,6 +66,7 @@ export const EditProfilePage: React.FC = () => {
         email: updatedEmail,
       });
       updateUserDetails(updatedName, updatedEmail);
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: 'success',
         title: 'Perfil actualizado',

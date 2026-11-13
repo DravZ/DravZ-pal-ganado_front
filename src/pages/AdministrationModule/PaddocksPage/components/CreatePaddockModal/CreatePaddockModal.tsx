@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './CreatePaddockModal.module.css';
 import { X, Check, WifiOff } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import useNotification from '../../../../../hooks/useNotification';
 import { queueHatoWrite } from '../../../../../services/hatoDataService';
 
@@ -17,6 +18,7 @@ export const CreatePaddockModal: React.FC<CreatePaddockModalProps> = ({
   onSuccess
 }) => {
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const [name, setName] = useState('');
   const [code, setCode] = useState('POT-05');
@@ -30,6 +32,7 @@ export const CreatePaddockModal: React.FC<CreatePaddockModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
     if (!scope) {
       setError('Selecciona una finca autorizada antes de registrar un potrero.');
       return;
@@ -47,6 +50,7 @@ export const CreatePaddockModal: React.FC<CreatePaddockModalProps> = ({
         forage_type: forageType,
         status: 'available',
       });
+      markCurrentFormsSaved(formElement);
       if (result.pending) {
         showNotification({
           type: 'success',

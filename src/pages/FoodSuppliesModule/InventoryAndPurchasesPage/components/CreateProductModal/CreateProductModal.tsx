@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './CreateProductModal.module.css';
 import { X, WifiOff } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
 
@@ -17,6 +18,7 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
   onSuccess
 }) => {
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
@@ -34,6 +36,7 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
     if (!scope) {
       setSubmitError('No hay una finca autorizada seleccionada.');
       return;
@@ -54,6 +57,7 @@ export const CreateProductModal: React.FC<CreateProductModalProps> = ({
         average_cost: Number(averageCost),
         status: 'active',
       });
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: result.pending ? 'alert' : 'success',
         title: result.pending ? 'Producto pendiente de sincronización' : 'Producto registrado',

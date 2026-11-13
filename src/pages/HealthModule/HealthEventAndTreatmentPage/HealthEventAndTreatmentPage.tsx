@@ -4,6 +4,7 @@ import styles from './HealthEventAndTreatmentPage.module.css';
 import DoseKeypad from './components/DoseKeypad/DoseKeypad';
 import { ArrowLeft, Bell, CheckCircle } from 'lucide-react';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
 import useNotification from '../../../hooks/useNotification';
 
@@ -22,6 +23,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
     'animals',
@@ -76,6 +78,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
     if (!scope) {
       setSubmitError('No hay una finca autorizada seleccionada.');
       return;
@@ -122,6 +125,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
         ?? (pending
           ? 'El evento y el tratamiento quedaron en la cola local.'
           : 'El evento de salud y su tratamiento se guardaron correctamente.');
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: pending ? 'alert' : 'success',
         title: pending ? 'Cambios pendientes de sincronización' : 'Evento y tratamiento guardados',

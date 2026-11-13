@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Check, CloudOff } from 'lucide-react';
 import styles from './RegisterReproductiveEventModal.module.css';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import type { ReproductiveEventFormValues } from '../../../../../types/database.types';
 
 interface ModalProps {
@@ -18,6 +19,7 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
   animals,
   onSubmit,
 }) => {
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const [formData, setFormData] = useState<ReproductiveEventFormValues>({
     femaleAnimalId: '',
     eventType: 'Celo',
@@ -61,12 +63,14 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
 
     if (!validateForm()) return;
     setIsSubmitting(true);
     setSubmitError(null);
     try {
       await onSubmit(formData);
+      markCurrentFormsSaved(formElement);
       onSuccess?.();
       onClose();
     } catch (error) {

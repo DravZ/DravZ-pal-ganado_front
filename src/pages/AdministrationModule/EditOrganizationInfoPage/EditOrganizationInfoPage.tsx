@@ -4,6 +4,7 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './EditOrganizationInfoPage.module.css';
 import { useAuth } from '../../../context/AuthContext';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { queueHatoWrite, useHatoRecord } from '../../../services/hatoDataService';
 
@@ -11,6 +12,7 @@ export const EditOrganizationInfoPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { record, isLoading, error } = useHatoRecord<Record<string, unknown>>(
     'organizations',
@@ -23,6 +25,7 @@ export const EditOrganizationInfoPage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const formElement = event.currentTarget;
     if (!scope || !user) {
       setSubmissionError('No se pudo determinar el alcance de la organización.');
       return;
@@ -38,6 +41,7 @@ export const EditOrganizationInfoPage: React.FC = () => {
         email: field('email') || undefined,
         phone: field('phone') || undefined,
       }, user.organization_id);
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: 'success',
         title: result.pending ? 'Cambios guardados sin conexión' : 'Organización actualizada',

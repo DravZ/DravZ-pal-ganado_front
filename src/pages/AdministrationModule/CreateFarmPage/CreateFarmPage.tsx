@@ -4,6 +4,7 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import styles from './CreateFarmPage.module.css';
 import type { FarmFormValues } from '../../../types/database.types';
 import { useAuth } from '../../../context/AuthContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
 import { cacheAdministrationRecord } from '../../../services/hatoDataService';
@@ -11,6 +12,7 @@ import { cacheAdministrationRecord } from '../../../services/hatoDataService';
 export const CreateFarmPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isOffline } = useAuth();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const [formData, setFormData] = useState<FarmFormValues>({
     name: '',
@@ -31,6 +33,7 @@ export const CreateFarmPage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setIsSubmitting(true);
     setSubmissionError(null);
     try {
@@ -47,6 +50,7 @@ export const CreateFarmPage: React.FC = () => {
         status: 'active',
       });
       await cacheAdministrationRecord(user.id, user.organization_id, 'farms', savedFarm);
+      markCurrentFormsSaved(formElement);
       showNotification({ type: 'success', title: 'Finca registrada', message: 'La finca se guardó correctamente en el backend.' });
       navigate('/admin/fincas');
     } catch (cause: unknown) {

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import styles from './MovementForm.module.css';
 import { ArrowLeftRight, Plus, Trash2, CheckCircle, Beef } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
 
@@ -23,6 +24,7 @@ interface AnimalSelectionItem {
 
 export const MovementForm: React.FC = () => {
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { records: rawLots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
   const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
@@ -85,6 +87,7 @@ export const MovementForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
     const newErrors: { [key: string]: string } = {};
 
     const activeScope = scope;
@@ -126,6 +129,7 @@ export const MovementForm: React.FC = () => {
           weight,
         })),
       });
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: result.pending ? 'alert' : 'success',
         title: result.pending ? 'Movimiento pendiente de sincronización' : 'Movimiento registrado',

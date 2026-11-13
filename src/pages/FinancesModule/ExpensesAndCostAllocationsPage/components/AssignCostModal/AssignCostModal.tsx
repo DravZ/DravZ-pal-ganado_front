@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './AssignCostModal.module.css';
 import { X, Check, WifiOff } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
 
@@ -17,6 +18,7 @@ export const AssignCostModal: React.FC<AssignCostModalProps> = ({
   onSuccess
 }) => {
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { records: expenses } = useHatoCollection<Record<string, unknown>>('expenses', '/expenses', scope);
   const { records: allocations } = useHatoCollection<Record<string, unknown>>(
@@ -48,6 +50,7 @@ export const AssignCostModal: React.FC<AssignCostModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
     if (!scope) {
       setSubmitError('No hay una finca autorizada seleccionada.');
       return;
@@ -72,6 +75,7 @@ export const AssignCostModal: React.FC<AssignCostModalProps> = ({
         amount: Number(amount),
         allocation_date: allocationDate,
       });
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: result.pending ? 'alert' : 'success',
         title: result.pending ? 'Asignación pendiente de sincronización' : 'Costo asignado',

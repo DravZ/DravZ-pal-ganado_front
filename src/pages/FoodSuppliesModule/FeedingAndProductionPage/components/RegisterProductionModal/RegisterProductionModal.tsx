@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from '../RegisterFeedingModal/RegisterFeedingModal.module.css';
 import { X, CheckCircle, WifiOff, Users, User } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
 
@@ -17,6 +18,7 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
     onSuccess
 }) => {
     const { scope } = useFarmScope();
+    const { markCurrentFormsSaved } = useFormExitGuard();
     const { showNotification } = useNotification();
     const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
     const { records: lots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
@@ -40,6 +42,7 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const formElement = e.currentTarget;
         if (!scope) {
             setSubmitError('No hay una finca autorizada seleccionada.');
             return;
@@ -62,6 +65,7 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
                 price_per_unit: Number(unitPrice),
                 revenue: calculatedRevenue,
             });
+            markCurrentFormsSaved(formElement);
             showNotification({
                 type: result.pending ? 'alert' : 'success',
                 title: result.pending ? 'Producción pendiente de sincronización' : 'Producción registrada',

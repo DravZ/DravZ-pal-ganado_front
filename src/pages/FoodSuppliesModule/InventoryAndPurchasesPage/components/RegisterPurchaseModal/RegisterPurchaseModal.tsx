@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from '../CreateProductModal/CreateProductModal.module.css';
 import { X, Plus, RefreshCw, WifiOff } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
 
@@ -23,6 +24,7 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
   onSuccess
 }) => {
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { records: suppliers } = useHatoCollection<Record<string, unknown>>('suppliers', '/suppliers', scope);
   const { records: products } = useHatoCollection<Record<string, unknown>>('products', '/products', scope);
@@ -67,6 +69,7 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
     if (!scope) {
       setSubmitError('No hay una finca autorizada seleccionada.');
       return;
@@ -99,6 +102,7 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
           subtotal: line.quantity * line.unit_price,
         })),
       });
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: result.pending ? 'alert' : 'success',
         title: result.pending ? 'Compra pendiente de sincronización' : 'Compra registrada',

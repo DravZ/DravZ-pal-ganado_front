@@ -5,6 +5,7 @@ import styles from './CreateUserPage.module.css';
 import type { CreateUserFormValues } from '../../../types/database.types';
 import { useAuth } from '../../../context/AuthContext';
 import { useFarmScope } from '../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
 import { cacheAdministrationRecord } from '../../../services/hatoDataService';
@@ -13,6 +14,7 @@ export const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isOffline } = useAuth();
   const { farms, activeFarm } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const [formData, setFormData] = useState<CreateUserFormValues>({
     first_name: '',
@@ -33,6 +35,7 @@ export const CreateUserPage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setIsSubmitting(true);
     setSubmissionError(null);
     try {
@@ -46,6 +49,7 @@ export const CreateUserPage: React.FC = () => {
         farm_id: formData.farm_id || null,
       });
       await cacheAdministrationRecord(user.id, user.organization_id, 'users', savedUser);
+      markCurrentFormsSaved(formElement);
       showNotification({ type: 'success', title: 'Usuario creado', message: 'El usuario se registró en el backend.' });
       navigate('/admin/usuarios');
     } catch (cause: unknown) {

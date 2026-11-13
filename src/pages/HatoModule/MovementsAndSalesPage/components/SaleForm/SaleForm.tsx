@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import styles from './SaleForm.module.css';
 import { Plus, Trash2, CheckCircle, WifiOff } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
 
@@ -17,6 +18,7 @@ interface UIItemLine {
 
 export const SaleForm: React.FC = () => {
   const { scope } = useFarmScope();
+  const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
   const { records: customers } = useHatoCollection<Record<string, unknown>>(
     'customers',
@@ -112,6 +114,7 @@ export const SaleForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.currentTarget;
 
     if (!scope) {
       setSubmitError('No hay una finca autorizada seleccionada.');
@@ -153,6 +156,7 @@ export const SaleForm: React.FC = () => {
           subtotal: line.weight * line.unit_price,
         })),
       });
+      markCurrentFormsSaved(formElement);
       showNotification({
         type: result.pending ? 'alert' : 'success',
         title: result.pending ? 'Venta pendiente de sincronización' : 'Venta registrada',
