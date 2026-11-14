@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './CreateMedicationModal.module.css';
-import { X, WifiOff } from 'lucide-react';
+import { X, WifiOff, Check, Trash2 } from 'lucide-react';
 import { useFormExitGuard } from '../../../../../../context/FormExitGuardContext';
 import { requestOnlineAdministrationWrite } from '../../../../../../services/administrationService';
 import useNotification from '../../../../../../hooks/useNotification';
@@ -9,26 +9,41 @@ interface CreateMedicationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  /** Si se informa, el modal edita el medicamento en lugar de crear uno nuevo. */
+  medication?: Record<string, unknown> | null;
+}
+
+function textValue(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+function numberText(value: unknown): string {
+  return value === null || value === undefined ? '' : String(value);
 }
 
 export const CreateMedicationModal: React.FC<CreateMedicationModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  medication,
 }) => {
   const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
-  const [name, setName] = useState('');
-  const [activeIngredient, setActiveIngredient] = useState('');
-  const [category, setCategory] = useState('');
-  const [presentation, setPresentation] = useState('');
-  const [concentration, setConcentration] = useState('');
-  const [route, setRoute] = useState('Intramuscular');
-  const [defaultUnit, setDefaultUnit] = useState('mL');
-  const [withdrawalDaysMeat, setWithdrawalDaysMeat] = useState('');
-  const [withdrawalDaysMilk, setWithdrawalDaysMilk] = useState('');
-  const [defaultDosage, setDefaultDosage] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+  const isEdit = Boolean(medication?.id);
+  const [name, setName] = useState(textValue(medication?.name));
+  const [activeIngredient, setActiveIngredient] = useState(textValue(medication?.active_ingredient));
+  const [category, setCategory] = useState(textValue(medication?.category));
+  const [presentation, setPresentation] = useState(textValue(medication?.presentation));
+  const [concentration, setConcentration] = useState(textValue(medication?.concentration));
+  const [route, setRoute] = useState(textValue(medication?.route) || 'Intramuscular');
+  const [defaultUnit, setDefaultUnit] = useState(textValue(medication?.default_unit) || 'mL');
+  const [withdrawalDaysMeat, setWithdrawalDaysMeat] = useState(numberText(medication?.withdrawal_days_meat));
+  const [withdrawalDaysMilk, setWithdrawalDaysMilk] = useState(numberText(medication?.withdrawal_days_milk));
+  const [defaultDosage, setDefaultDosage] = useState(numberText(medication?.default_dosage));
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -55,32 +70,64 @@ export const CreateMedicationModal: React.FC<CreateMedicationModalProps> = ({
     setIsSaving(true);
     setSubmitError(null);
     try {
-      await requestOnlineAdministrationWrite('/medications', 'POST', {
+      const payload = {
         name: name.trim(),
-        active_ingredient: activeIngredient.trim() || undefined,
-        category: category.trim() || undefined,
-        presentation: presentation.trim() || undefined,
-        concentration: concentration.trim() || undefined,
+        active_ingredient: activeIngredient.trim(),
+        category: category.trim(),
+        presentation: presentation.trim(),
+        concentration: concentration.trim(),
         route: route || undefined,
         default_unit: defaultUnit || undefined,
         withdrawal_days_meat: withdrawalDaysMeat === '' ? undefined : Number(withdrawalDaysMeat),
         withdrawal_days_milk: withdrawalDaysMilk === '' ? undefined : Number(withdrawalDaysMilk),
         default_dosage: defaultDosage === '' ? undefined : Number(defaultDosage),
-      });
+      };
+      await requestOnlineAdministrationWrite(
+        isEdit ? `/medications/${String(medication?.id)}` : '/medications',
+        isEdit ? 'PUT' : 'POST',
+        payload,
+      );
       markCurrentFormsSaved(formElement);
       showNotification({
         type: 'success',
-        title: 'Medicamento registrado',
-        message: 'El medicamento se agregó al catálogo y ya está disponible para los tratamientos.',
+        title: isEdit ? 'Medicamento actualizado' : 'Medicamento registrado',
+        message: isEdit
+          ? 'Los cambios se guardaron correctamente en el catálogo.'
+          : 'El medicamento se agregó al catálogo y ya está disponible para los tratamientos.',
       });
       onSuccess?.();
       onClose();
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'No se pudo registrar el medicamento.';
+      const message = cause instanceof Error
+        ? cause.message
+        : `No se pudo ${isEdit ? 'actualizar' : 'registrar'} el medicamento.`;
       setSubmitError(message);
       showNotification({ type: 'error', title: 'No se pudo guardar', message });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!medication?.id) return;
+    setIsDeleting(true);
+    setSubmitError(null);
+    try {
+      await requestOnlineAdministrationWrite(`/medications/${String(medication.id)}`, 'DELETE', {});
+      markCurrentFormsSaved(formRef.current ?? undefined);
+      showNotification({
+        type: 'success',
+        title: 'Medicamento eliminado',
+        message: 'El medicamento se quitó del catálogo.',
+      });
+      onSuccess?.();
+      onClose();
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo eliminar el medicamento.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo eliminar', message });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -90,9 +137,11 @@ export const CreateMedicationModal: React.FC<CreateMedicationModalProps> = ({
         <div className={styles.header}>
           <div>
             <span className={styles.dbLabel}>MEDICATIONS · CATÁLOGO</span>
-            <h2 className={styles.title}>Nuevo medicamento</h2>
+            <h2 className={styles.title}>{isEdit ? 'Editar medicamento' : 'Nuevo medicamento'}</h2>
             <p className={styles.subtitle}>
-              Registra el producto para poder prescribirlo en los tratamientos.
+              {isEdit
+                ? 'Actualiza los datos del medicamento del catálogo.'
+                : 'Registra el producto para poder prescribirlo en los tratamientos.'}
             </p>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose}>
@@ -100,7 +149,7 @@ export const CreateMedicationModal: React.FC<CreateMedicationModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.body}>
+        <form ref={formRef} onSubmit={handleSubmit} className={styles.body}>
           <div className="row g-3">
             <div className="col-12 col-md-6">
               <label className={styles.label}>Nombre</label>
@@ -236,15 +285,63 @@ export const CreateMedicationModal: React.FC<CreateMedicationModalProps> = ({
             </div>
           </div>
 
+          {confirmDelete && (
+            <div className={styles.deleteWarning}>
+              <Trash2 size={18} className={styles.deleteWarningIcon} />
+              <div>
+                <div className={styles.deleteWarningTitle}>¿Eliminar este medicamento?</div>
+                <div className={styles.deleteWarningSubtitle}>
+                  Se quitará del catálogo. Esta acción no se puede deshacer.
+                </div>
+              </div>
+            </div>
+          )}
+
           {submitError && <p role="alert" className="text-danger">{submitError}</p>}
 
           <div className={styles.footer}>
-            <button type="button" className={styles.cancelBtn} onClick={onClose}>
-              Cancelar
-            </button>
-            <button type="submit" className={styles.saveBtn} disabled={isSaving || !isOnline}>
-              {isSaving ? 'Guardando…' : 'Guardar medicamento'}
-            </button>
+            <div>
+              {isEdit && (confirmDelete ? (
+                <div className="d-flex gap-2">
+                  <button
+                    type="button"
+                    className={styles.cancelBtn}
+                    onClick={() => setConfirmDelete(false)}
+                    disabled={isDeleting}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.dangerBtn}
+                    onClick={handleDelete}
+                    disabled={isDeleting || !isOnline}
+                  >
+                    <Trash2 size={16} />
+                    <span>{isDeleting ? 'Eliminando…' : 'Sí, eliminar'}</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.dangerOutlineBtn}
+                  onClick={() => setConfirmDelete(true)}
+                  disabled={isSaving || !isOnline}
+                >
+                  <Trash2 size={16} />
+                  <span>Eliminar</span>
+                </button>
+              ))}
+            </div>
+            <div className="d-flex gap-2">
+              <button type="button" className={styles.cancelBtn} onClick={onClose}>
+                Cerrar
+              </button>
+              <button type="submit" className={styles.saveBtn} disabled={isSaving || isDeleting || !isOnline}>
+                {isEdit && <Check size={18} />}
+                <span>{isSaving ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Guardar medicamento'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

@@ -1,7 +1,7 @@
 import { apiFetch } from './apiClient';
 import { requestCsrfToken } from './authService';
 
-type AdminMethod = 'POST' | 'PATCH';
+type AdminMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export async function requestOnlineAdministrationWrite<T extends Record<string, unknown>>(
   path: string,
@@ -45,6 +45,9 @@ export async function requestOnlineAdministrationWrite<T extends Record<string, 
   }
 
   if (!responseText) {
+    if (method === 'DELETE') {
+      return {} as T;
+    }
     throw new Error('El servidor no devolvió el registro guardado.');
   }
 

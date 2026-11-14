@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './MedicationsTab.module.css';
-import { Search, Syringe, Plus } from 'lucide-react';
+import { Search, Syringe, Plus, Pencil } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../../../services/hatoDataService';
 import { CreateMedicationModal } from './CreateMedicationModal/CreateMedicationModal';
@@ -9,6 +9,7 @@ export const MedicationsTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [routeFilter, setRouteFilter] = useState('ALL');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingMedication, setEditingMedication] = useState<Record<string, unknown> | null>(null);
   const { scope } = useFarmScope();
   const { records, isLoading, error, refresh } = useHatoCollection<Record<string, unknown>>(
     'medications',
@@ -106,6 +107,15 @@ export const MedicationsTab: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              <button
+                type="button"
+                className={styles.editBtn}
+                onClick={() => setEditingMedication(med)}
+              >
+                <Pencil size={16} />
+                <span>Editar</span>
+              </button>
             </div>
           </div>
         ))}
@@ -121,8 +131,13 @@ export const MedicationsTab: React.FC = () => {
       )}
 
       <CreateMedicationModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
+        key={editingMedication ? String(editingMedication.id) : 'new'}
+        isOpen={isCreateOpen || editingMedication !== null}
+        medication={editingMedication}
+        onClose={() => {
+          setIsCreateOpen(false);
+          setEditingMedication(null);
+        }}
         onSuccess={() => { void refresh(); }}
       />
     </div>
