@@ -7,6 +7,7 @@ import { useHatoCollection } from '../../../services/hatoDataService';
 import PaddockCard from './components/PaddockCard/PaddockCard';
 import PaddocksTable from './components/PaddocksTable/PaddocksTable';
 import CreatePaddockModal from './components/CreatePaddockModal/CreatePaddockModal';
+import EditPaddockModal from './components/EditPaddockModal/EditPaddockModal';
 
 export type PaddockUI = Paddock & {
   current_animals: number;
@@ -23,6 +24,7 @@ export const PaddocksPage: React.FC = () => {
   const { scope } = useFarmScope();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPaddock, setEditingPaddock] = useState<PaddockUI | null>(null);
   const { records: rawPaddocks, isLoading, error } = useHatoCollection<Record<string, unknown>>(
     'paddocks',
     '/paddocks',
@@ -110,11 +112,17 @@ export const PaddocksPage: React.FC = () => {
         <p>No hay potreros registrados para esta finca.</p>
       ) : viewMode === 'grid' ? (
         <div className="row g-4">
-          {paddocks.map((paddock) => <div key={paddock.id} className="col-12 col-md-6"><PaddockCard paddock={paddock} /></div>)}
+          {paddocks.map((paddock) => <div key={paddock.id} className="col-12 col-md-6"><PaddockCard paddock={paddock} onEdit={setEditingPaddock} /></div>)}
         </div>
-      ) : <PaddocksTable paddocks={paddocks} />}
+      ) : <PaddocksTable paddocks={paddocks} onEdit={setEditingPaddock} />}
 
       <CreatePaddockModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {editingPaddock && (
+        <EditPaddockModal
+          paddock={editingPaddock}
+          onClose={() => setEditingPaddock(null)}
+        />
+      )}
     </div>
   );
 };

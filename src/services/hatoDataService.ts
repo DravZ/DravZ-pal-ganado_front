@@ -103,7 +103,7 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   production_records: ['CREATE'],
   products: ['CREATE', 'UPDATE', 'DELETE'],
   purchase_records: ['CREATE', 'UPDATE', 'DELETE'],
-  suppliers: [],
+  suppliers: ['CREATE'],
   expenses: ['CREATE'],
   cost_allocations: ['CREATE'],
   users: [],

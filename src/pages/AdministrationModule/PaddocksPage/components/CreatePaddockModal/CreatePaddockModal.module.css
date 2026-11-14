@@ -164,3 +164,56 @@
   font-size: 0.875rem;
   cursor: pointer;
 }
+
+.dangerOutlineBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  background-color: #ffffff;
+  color: #b91c1c;
+  border: 1px solid #fecdd3;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.dangerOutlineBtn:hover {
+  background-color: #fef2f2;
+}
+
+.dangerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  background-color: #b91c1c;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.dangerBtn:disabled,
+.dangerOutlineBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteWarning {
+  background-color: #fef2f2;
+  border: 1px solid #fecdd3;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.deleteWarningIcon { color: #b91c1c; flex-shrink: 0; }
+.deleteWarningTitle { font-weight: 700; font-size: 0.85rem; color: #991b1b; }
+.deleteWarningSubtitle { font-size: 0.775rem; color: #b91c1c; }

@@ -4,8 +4,9 @@ import InventoryTabSelector from './components/InventoryTabSelector/InventoryTab
 import ProductsTab from './components/ProductsTab/ProductsTab';
 import PurchasesTab from './components/PurchasesTab/PurchasesTab';
 import CreateProductModal from './components/CreateProductModal/CreateProductModal';
+import CreateSupplierModal from './components/CreateSupplierModal/CreateSupplierModal';
 import RegisterPurchaseModal from './components/RegisterPurchaseModal/RegisterPurchaseModal';
-import { Plus } from 'lucide-react';
+import { Plus, Truck } from 'lucide-react';
 
 export type InventoryTabType = 'PRODUCTS' | 'PURCHASES';
 
@@ -13,6 +14,7 @@ export const InventoryAndPurchasesPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<InventoryTabType>('PRODUCTS');
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
 
   return (
     <div className={`container-fluid ${styles.pageContainer}`}>
@@ -28,20 +30,31 @@ export const InventoryAndPurchasesPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          className={styles.primaryBtn}
-          onClick={() => {
-            if (activeTab === 'PRODUCTS') {
-              setIsProductModalOpen(true);
-            } else {
-              setIsPurchaseModalOpen(true);
-            }
-          }}
-        >
-          <Plus size={18} />
-          <span>{activeTab === 'PRODUCTS' ? 'Nuevo producto' : 'Registrar compra'}</span>
-        </button>
+        <div className={styles.headerActions}>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => setIsSupplierModalOpen(true)}
+          >
+            <Truck size={18} />
+            <span>Nuevo proveedor</span>
+          </button>
+
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            onClick={() => {
+              if (activeTab === 'PRODUCTS') {
+                setIsProductModalOpen(true);
+              } else {
+                setIsPurchaseModalOpen(true);
+              }
+            }}
+          >
+            <Plus size={18} />
+            <span>{activeTab === 'PRODUCTS' ? 'Nuevo producto' : 'Registrar compra'}</span>
+          </button>
+        </div>
       </header>
 
       {/* SELECTOR DE PESTAÑAS */}
@@ -66,6 +79,11 @@ export const InventoryAndPurchasesPage: React.FC = () => {
       <CreateProductModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
+      />
+
+      <CreateSupplierModal
+        isOpen={isSupplierModalOpen}
+        onClose={() => setIsSupplierModalOpen(false)}
       />
 
       <RegisterPurchaseModal
