@@ -36,8 +36,8 @@ export const WeightTreatmentPage: React.FC = () => {
     lote: String(animal.lot_name ?? 'Sin lote'),
     status: String(animal.status ?? ''),
   })), [rawAnimals]);
+  // El catálogo de medicamentos no maneja estado; se listan todos los registros.
   const medications = rawMedications
-    .filter((medication) => medication.status !== 'inactive')
     .map((medication) => ({
       id: String(medication.id ?? ''),
       name: String(medication.name ?? ''),
