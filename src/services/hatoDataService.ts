@@ -786,8 +786,21 @@ async function applyConfirmedAnimalChanges(
     }
     if (Array.isArray(response.lines)) {
       for (const line of response.lines) {
-        if (isObject(line) && typeof line.animal_id === 'string') {
+        if (!isObject(line)) continue;
+        if (typeof line.animal_id === 'string') {
           updates.set(line.animal_id, { status: 'sold' });
+        } else if (typeof line.lot_id === 'string') {
+          // La venta de un lote marca como vendidos a todos sus animales activos.
+          const lotAnimals = await offlineDatabase.records
+            .where('[userId+resourceType]')
+            .equals([operation.userId, 'animals'])
+            .toArray();
+          for (const record of lotAnimals) {
+            if (record.farmId !== operation.farmId) continue;
+            if (String(record.payload.lot_id ?? '') !== line.lot_id) continue;
+            if (String(record.payload.status ?? 'active') !== 'active') continue;
+            updates.set(record.recordId, { status: 'sold' });
+          }
         }
       }
     }

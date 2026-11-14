@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import styles from './SaleForm.module.css';
-import { Plus, Trash2, CheckCircle, WifiOff } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, WifiOff, AlertTriangle } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
@@ -49,17 +49,19 @@ export const SaleForm: React.FC = () => {
       quantity: 1,
       weight: animal.weight,
     })),
-    ...lots.map((lot) => {
-      const members = animals.filter((animal) => animal.lotId === lot.id && animal.status === 'active');
-      return {
-        value: `LOT:${lot.id}`,
-        label: `Lote ${lot.name}`,
-        type: 'LOT' as const,
-        id: lot.id,
-        quantity: members.length,
-        weight: members.reduce((total, animal) => total + animal.weight, 0),
-      };
-    }),
+    ...lots
+      .filter((lot) => animals.some((animal) => animal.lotId === lot.id && animal.status === 'active'))
+      .map((lot) => {
+        const members = animals.filter((animal) => animal.lotId === lot.id && animal.status === 'active');
+        return {
+          value: `LOT:${lot.id}`,
+          label: `Lote ${lot.name} · ${members.length} ${members.length === 1 ? 'animal activo' : 'animales activos'}`,
+          type: 'LOT' as const,
+          id: lot.id,
+          quantity: members.length,
+          weight: members.reduce((total, animal) => total + animal.weight, 0),
+        };
+      }),
   ];
   const [customerId, setCustomerId] = useState('');
   const [saleDate, setSaleDate] = useState(new Date().toISOString().slice(0, 10));
@@ -340,6 +342,18 @@ export const SaleForm: React.FC = () => {
           );
         })}
       </div>
+
+      {lines.some((line) => line.item_type === 'LOT') && (
+        <div className={`${styles.offlineBanner} mt-3`}>
+          <AlertTriangle size={20} className={styles.offlineIcon} />
+          <div>
+            <div className={styles.offlineTitle}>Venta de lote completo</div>
+            <div className={styles.offlineSubtitle}>
+              Al registrar la venta, todos los animales activos del lote se marcarán como vendidos.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* BANNER OFFLINE Y FOOTER TOTALES */}
       <div className="row align-items-center mt-4 g-3">
