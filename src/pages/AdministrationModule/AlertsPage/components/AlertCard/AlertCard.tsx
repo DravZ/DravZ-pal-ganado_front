@@ -5,7 +5,7 @@ import type { AlertUIItem } from '../../AlertsPage';
 
 interface AlertCardProps {
   alert: AlertUIItem;
-  onDetail: () => void;
+  onDetail?: () => void;
   onResolve: () => void;
 }
 
@@ -64,7 +64,13 @@ export const AlertCard: React.FC<AlertCardProps> = ({
       </div>
 
       <div className={styles.actionsFlex}>
-        <button type="button" className={styles.detailBtn} onClick={onDetail}>
+        <button
+          type="button"
+          className={styles.detailBtn}
+          onClick={onDetail}
+          disabled={!onDetail}
+          title={onDetail ? undefined : 'Detalle no disponible por el momento'}
+        >
           Ver detalle
         </button>
         <button type="button" className={styles.resolveBtn} onClick={onResolve}>

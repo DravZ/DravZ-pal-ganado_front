@@ -21,7 +21,7 @@ export const UpcomingBirths: React.FC<{ births: FemalePregnant[] }> = ({ births 
   };
 
   const handleViewAll = () => {
-    navigate('/reproduccion/gestantes');
+    navigate('/hato/reproduccion');
   };
 
   return (

@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styles from './AlertsPage.module.css';
 import type { Alert } from '../../../types/database.types';
 import { useFarmScope } from '../../../context/FarmScopeContext';
@@ -31,7 +30,6 @@ function timeLabel(dueDate: unknown, detectedAt: string): string {
 }
 
 export const AlertsPage: React.FC = () => {
-  const navigate = useNavigate();
   const { scope } = useFarmScope();
   const { showNotification } = useNotification();
   const [activeTab, setActiveTab] = useState<AlertFilterType>('ALL');
@@ -112,7 +110,6 @@ export const AlertsPage: React.FC = () => {
             <AlertCard
               key={alert.id}
               alert={alert}
-              onDetail={() => navigate(`/alertas/${alert.id}`)}
               onResolve={() => void handleResolve(alert.id)}
             />
           ))

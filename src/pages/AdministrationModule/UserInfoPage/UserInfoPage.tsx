@@ -51,7 +51,7 @@ export const UserInfoPage: React.FC = () => {
     <div className={`container-fluid ${styles.pageContainer}`}>
       <UserInfoHeader
         userName={userData.name}
-        onBack={() => navigate('/usuarios')}
+        onBack={() => navigate('/admin/usuarios')}
         onEdit={() => navigate(`/usuarios/editar/${userData.id}`)}
       />
       {error && <p role="alert">{error}. Se muestran los datos locales guardados.</p>}
