@@ -20,7 +20,6 @@ export const useOrganizationConfig = (
   const [associatedFarmsCount, setAssociatedFarmsCount] = useState<number>(0);
 
   const fetchData = useCallback(async () => {
-    setViewState('LOADING');
     try {
       // -------------------------------------------------------------
       // Sustituir este bloque por tu cliente HTTP (ej. fetch / axios / supabase)
@@ -53,7 +52,11 @@ export const useOrganizationConfig = (
   }, [initialOrganizationId]);
 
   useEffect(() => {
-    fetchData();
+    // Se difiere la carga a una función asíncrona para no llamar setState de forma síncrona en el efecto.
+    const synchronize = async () => {
+      await fetchData();
+    };
+    void synchronize();
   }, [fetchData]);
 
   return {

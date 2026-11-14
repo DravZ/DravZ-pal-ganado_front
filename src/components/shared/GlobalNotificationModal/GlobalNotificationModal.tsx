@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Check, AlertTriangle, XCircle, X } from 'lucide-react';
 import styles from './GlobalNotificationModal.module.css';
-import type { NotificationType } from '../../../context/NotificationContext';
+import type { NotificationType } from '../../../context/notificationContextDefinition';
 
 interface GlobalNotificationModalProps {
   type: NotificationType;

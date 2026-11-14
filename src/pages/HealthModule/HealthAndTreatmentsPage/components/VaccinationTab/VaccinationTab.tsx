@@ -21,8 +21,6 @@ export const VaccinationTab: React.FC = () => {
   const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
   const { records: lots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
   const [now] = useState(() => new Date());
-  const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
-  const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
   const monthLabel = selectedMonth.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
   const today = useMemo(
     () => new Date(now.getFullYear(), now.getMonth(), now.getDate()),
@@ -48,6 +46,8 @@ export const VaccinationTab: React.FC = () => {
   }).sort((left, right) => left.date.getTime() - right.date.getTime()), [animals, lots, today, vaccinations]);
 
   const calendarDays = useMemo(() => {
+    const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+    const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
     const offset = (monthStart.getDay() + 6) % 7;
     const daysInMonth = monthEnd.getDate();
     const total = Math.ceil((offset + daysInMonth) / 7) * 7;
@@ -62,7 +62,7 @@ export const VaccinationTab: React.FC = () => {
       );
       return { day, hasDueVaccination };
     });
-  }, [monthEnd, monthStart, selectedMonth, upcoming]);
+  }, [selectedMonth, upcoming]);
   const monthOptions = Array.from({ length: 6 }, (_, index) => {
     const date = new Date(now.getFullYear(), now.getMonth() + index, 1);
     return {

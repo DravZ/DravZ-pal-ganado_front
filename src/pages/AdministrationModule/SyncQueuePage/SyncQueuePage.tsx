@@ -40,12 +40,13 @@ export const SyncQueuePage: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const isOnline = !isOffline && navigator.onLine;
 
-  const operations = useLiveQuery(
+  const liveOperations = useLiveQuery(
     () => user
       ? offlineDatabase.syncQueue.where('userId').equals(user.id).sortBy('id')
       : Promise.resolve([] as SyncQueueOperation[]),
     [user?.id],
-  ) ?? [];
+  );
+  const operations = useMemo(() => liveOperations ?? [], [liveOperations]);
   const queueItems = useMemo(() => operations.map(toQueueRow), [operations]);
   const metrics = useMemo(() => ({
     total: queueItems.length,
