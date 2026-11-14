@@ -5,6 +5,7 @@ import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
+import { todayLocalDate } from '../../../../../utils/dates';
 
 interface RegisterFeedingModalProps {
   isOpen: boolean;
@@ -48,6 +49,10 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
     }
     if (targetType === 'LOT' ? !lotId : !animalId) {
       setSubmitError(targetType === 'LOT' ? 'Selecciona un lote.' : 'Selecciona un animal.');
+      return;
+    }
+    if (feedingDate > todayLocalDate()) {
+      setSubmitError('La fecha de alimentación no puede ser futura.');
       return;
     }
     setIsSaving(true);
@@ -171,6 +176,7 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
                 type="date"
                 className={styles.input}
                 value={feedingDate}
+                max={todayLocalDate()}
                 onChange={(e) => setFeedingDate(e.target.value)}
                 required
               />

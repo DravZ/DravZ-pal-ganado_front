@@ -5,6 +5,7 @@ import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../../../services/hatoDataService';
 import useNotification from '../../../../../hooks/useNotification';
+import { todayLocalDate } from '../../../../../utils/dates';
 
 interface RegisterProductionModalProps {
     isOpen: boolean;
@@ -49,6 +50,10 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
         }
         if (targetType === 'LOT' ? !lotId : !animalId) {
             setSubmitError(targetType === 'LOT' ? 'Selecciona un lote.' : 'Selecciona un animal.');
+            return;
+        }
+        if (productionDate > todayLocalDate()) {
+            setSubmitError('La fecha de producción no puede ser futura.');
             return;
         }
         setIsSaving(true);
@@ -169,6 +174,7 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
                                 type="date"
                                 className={styles.input}
                                 value={productionDate}
+                                max={todayLocalDate()}
                                 onChange={(e) => setProductionDate(e.target.value)}
                                 required
                             />

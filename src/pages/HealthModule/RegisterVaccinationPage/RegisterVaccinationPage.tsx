@@ -6,6 +6,7 @@ import { useFarmScope } from '../../../context/FarmScopeContext';
 import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
 import useNotification from '../../../hooks/useNotification';
+import { todayLocalDate } from '../../../utils/dates';
 
 export const RegisterVaccinationPage: React.FC = () => {
   const navigate = useNavigate();
@@ -47,6 +48,12 @@ export const RegisterVaccinationPage: React.FC = () => {
     }
     if (!Number.isFinite(Number(dose)) || Number(dose) <= 0) {
       newErrors.dose = 'La dosis debe ser mayor que cero.';
+    }
+    if (applicationDate > todayLocalDate()) {
+      newErrors.applicationDate = 'La fecha de aplicación no puede ser futura.';
+    }
+    if (nextDueDate && applicationDate && nextDueDate < applicationDate) {
+      newErrors.nextDueDate = 'La próxima dosis no puede ser anterior a la aplicación.';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -173,9 +180,13 @@ export const RegisterVaccinationPage: React.FC = () => {
               type="date"
               className={styles.input}
               value={applicationDate}
+              max={todayLocalDate()}
               onChange={(e) => setApplicationDate(e.target.value)}
               required
             />
+            {errors.applicationDate && (
+              <span className={styles.errorText}>{errors.applicationDate}</span>
+            )}
           </div>
 
           {/* Próxima dosis */}
@@ -188,6 +199,9 @@ export const RegisterVaccinationPage: React.FC = () => {
               onChange={(e) => setNextDueDate(e.target.value)}
               min={applicationDate}
             />
+            {errors.nextDueDate && (
+              <span className={styles.errorText}>{errors.nextDueDate}</span>
+            )}
           </div>
 
           {/* Dosis y Unidad */}

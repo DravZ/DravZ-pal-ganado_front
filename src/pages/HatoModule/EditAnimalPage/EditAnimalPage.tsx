@@ -14,6 +14,7 @@ import {
   useHatoRecord,
 } from '../../../services/hatoDataService';
 import useNotification from '../../../hooks/useNotification';
+import { todayLocalDate } from '../../../utils/dates';
 
 interface AnimalDraft {
   tagNumber: string;
@@ -125,6 +126,10 @@ export default function EditAnimalPage() {
     event.preventDefault();
     const formElement = event.currentTarget;
     if (!scope) return;
+    if (values.birthDate && values.birthDate > todayLocalDate()) {
+      setSubmitError('La fecha de nacimiento no puede ser futura.');
+      return;
+    }
     setIsSaving(true);
     setSubmitError(null);
     try {
@@ -239,6 +244,7 @@ export default function EditAnimalPage() {
             <div className="col-12 col-md-4">
               <label className={basicStyles.formLabel} htmlFor="animal-birth-date">Fecha de nacimiento</label>
               <input id="animal-birth-date" type="date" className={basicStyles.formControl} value={values.birthDate}
+                max={todayLocalDate()}
                 onChange={(event) => setField('birthDate', event.target.value)} />
             </div>
             <div className="col-12 col-md-6">

@@ -3,6 +3,7 @@ import { X, Check, CloudOff } from 'lucide-react';
 import styles from './RegisterReproductiveEventModal.module.css';
 import { useFormExitGuard } from '../../../../../context/FormExitGuardContext';
 import type { ReproductiveEventFormValues } from '../../../../../types/database.types';
+import { todayLocalDate } from '../../../../../utils/dates';
 
 interface ModalProps {
   isOpen: boolean;
@@ -55,6 +56,11 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
     }
     if (!formData.eventDate) {
       newErrors.eventDate = 'La fecha del evento es obligatoria.';
+    } else if (formData.eventDate > todayLocalDate()) {
+      newErrors.eventDate = 'La fecha del evento no puede ser futura.';
+    }
+    if (formData.expectedDate && formData.eventDate && formData.expectedDate < formData.eventDate) {
+      newErrors.expectedDate = 'La fecha esperada no puede ser anterior al evento.';
     }
 
     setErrors(newErrors);
@@ -194,6 +200,7 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                     errors.eventDate ? styles.formControlError : ''
                   }`}
                   value={formData.eventDate}
+                  max={todayLocalDate()}
                   onChange={(e) => handleChange('eventDate', e.target.value)}
                   required
                 />
@@ -212,6 +219,9 @@ export const RegisterReproductiveEventModal: React.FC<ModalProps> = ({
                   onChange={(e) => handleChange('expectedDate', e.target.value)}
                   min={formData.eventDate}
                 />
+                {errors.expectedDate && (
+                  <div className={styles.errorText}>{errors.expectedDate}</div>
+                )}
               </div>
 
               {/* Resultado */}

@@ -3,6 +3,7 @@ import { Beef } from 'lucide-react';
 import styles from './Step1BasicData.module.css';
 import type { AnimalFormChange, AnimalFormData } from '../../types';
 import { breedsBySpecies } from '../../animalOptions';
+import { todayLocalDate } from '../../../../../utils/dates';
 
 interface Step1Props {
   formData: AnimalFormData;
@@ -11,6 +12,7 @@ interface Step1Props {
 
 export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => {
   const breeds = breedsBySpecies[formData.species.toLocaleLowerCase()] ?? [];
+  const today = todayLocalDate();
 
   return (
     <div className={styles.stepContainer}>
@@ -21,7 +23,7 @@ export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => 
         <div>
           <h2 className={styles.stepTitle}>Información básica</h2>
           <p className={styles.stepSubtitle}>
-            Datos principales para identificar al animal dentro del hato.
+            Datos principales para identificar al animal en Mi Ganado.
           </p>
         </div>
       </div>
@@ -112,6 +114,7 @@ export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => 
             type="date"
             className={styles.formControl}
             value={formData.birthDate}
+            max={today}
             onChange={(e) => onChange('birthDate', e.target.value)}
           />
         </div>
@@ -153,6 +156,8 @@ export const Step1BasicData: React.FC<Step1Props> = ({ formData, onChange }) => 
               type="date"
               className={styles.formControl}
               value={formData.acquisitionDate}
+              min={formData.birthDate || undefined}
+              max={today}
               onChange={(e) => onChange('acquisitionDate', e.target.value)}
             />
           </div>
