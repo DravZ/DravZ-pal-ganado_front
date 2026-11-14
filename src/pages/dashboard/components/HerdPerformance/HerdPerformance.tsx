@@ -18,7 +18,7 @@ export const HerdPerformance: React.FC<HerdPerformanceProps> = ({
     <div className={styles.performanceCard}>
       <div className="d-flex align-items-center justify-content-between">
         <div>
-          <div className={styles.sectionKicker}>RENDIMIENTO DEL HATO</div>
+          <div className={styles.sectionKicker}>RENDIMIENTO DE MI GANADO</div>
           <h3 className={styles.sectionTitle}>Peso promedio</h3>
         </div>
       </div>

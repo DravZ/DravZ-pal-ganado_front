@@ -28,7 +28,6 @@ export const Step1SelectAnimal: React.FC<Step1Props> = ({
   const currentAnimal = animals.find((animal) => animal.id === selectedAnimalId);
 
   const handleOpenScanner = () => {
-    console.log('[Action Log]: Abriendo cámara para escaneo de arete...');
   };
 
   return (

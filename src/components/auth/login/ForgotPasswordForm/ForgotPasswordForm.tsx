@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ForgotPasswordForm.module.css';
 import { KeyRound } from 'lucide-react';
-import type { PasswordRecoveryRequest } from '../../../../types/database.types';
 
 type FormState = 'form' | 'loading' | 'success';
 
 export const ForgotPasswordForm: React.FC = () => {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState<string>('sdfsdf@xdf.c');
+    const [email, setEmail] = useState<string>('');
     const [formState, setFormState] = useState<FormState>('form');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [serverErrorSimulated, setServerErrorSimulated] = useState<boolean>(false);
@@ -31,15 +30,6 @@ export const ForgotPasswordForm: React.FC = () => {
         e.preventDefault();
         if (!validateEmail()) return;
 
-        const request: PasswordRecoveryRequest = { email };
-        const payload = {
-            ...request,
-            timestamp: new Date().toISOString(),
-            action: 'REQUEST_PASSWORD_RESET',
-        };
-
-        console.log('[Action Log]: Formulario de recuperación enviado. JSON Payload preparado para Backend:', payload);
-
         setFormState('loading');
 
         // Simulación de respuesta de Backend
@@ -55,7 +45,6 @@ export const ForgotPasswordForm: React.FC = () => {
     };
 
     const handleSimulateServerError = () => {
-        console.log('[Action Log]: Simular error de servidor activado');
         setServerErrorSimulated(true);
         if (validateEmail()) {
             setFormState('loading');
@@ -68,7 +57,6 @@ export const ForgotPasswordForm: React.FC = () => {
     };
 
     const handleBackToLogin = () => {
-        console.log('[Router Log]: Navegando a inicio de sesión');
         navigate('/');
     };
 
@@ -210,7 +198,6 @@ export const ForgotPasswordForm: React.FC = () => {
                         type="button"
                         className={styles.secondaryButton}
                         onClick={() => {
-                            console.log('[Action Log]: Intentar con otro correo');
                             setFormState('form');
                         }}
                     >
