@@ -12,6 +12,8 @@ import { useFarmScope } from '../../../context/FarmScopeContext';
 import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
 import useNotification from '../../../hooks/useNotification';
+import { todayLocalDate } from '../../../utils/dates';
+import { createIdentifierDraft, resolveCurrentIdentifier } from './identifierDrafts';
 import type { AnimalFormData } from './types';
 
 export const RegisterAnimalPage: React.FC = () => {
@@ -44,16 +46,13 @@ export const RegisterAnimalPage: React.FC = () => {
     birthWeight: '',
     acquisitionDate: '',
     acquisitionCost: '',
-    identifierType: 'SINIGA',
-    identifierCode: '',
-    isOfficial: true,
-    isCurrent: true,
+    identifiers: [createIdentifierDraft(true)],
     loteId: '',
     potreroId: '',
     sireId: '',
     damId: '',
-    currentWeight: '0',
-    currentWeightDate: new Date().toISOString().slice(0, 10),
+    currentWeight: '',
+    currentWeightDate: todayLocalDate(),
     measurementMethod: 'Báscula digital',
     notes: '',
     photoBase64: '',
@@ -71,9 +70,18 @@ export const RegisterAnimalPage: React.FC = () => {
       setSubmitError('No hay una finca autorizada seleccionada.');
       return;
     }
-    if (!formData.identifierCode.trim()) {
+    const currentIdentifier = resolveCurrentIdentifier(formData.identifiers);
+    if (!currentIdentifier) {
       setCurrentStep(2);
       setSubmitError('El identificador del animal es obligatorio.');
+      return;
+    }
+    const identifierCodes = formData.identifiers
+      .map((identifier) => identifier.code.trim().toLowerCase())
+      .filter((code) => code !== '');
+    if (new Set(identifierCodes).size !== identifierCodes.length) {
+      setCurrentStep(2);
+      setSubmitError('No puedes repetir el mismo código en dos identificadores.');
       return;
     }
     if (!formData.photoBase64.trim()) {
@@ -82,11 +90,43 @@ export const RegisterAnimalPage: React.FC = () => {
       return;
     }
 
-    const weight = Number(formData.currentWeight);
-    if (!Number.isFinite(weight) || weight < 0) {
-      setCurrentStep(5);
-      setSubmitError('El peso debe ser un número mayor o igual a cero.');
+    const today = todayLocalDate();
+    if (formData.birthDate && formData.birthDate > today) {
+      setCurrentStep(1);
+      setSubmitError('La fecha de nacimiento no puede ser futura.');
       return;
+    }
+    if (formData.acquisitionDate) {
+      if (formData.acquisitionDate > today) {
+        setCurrentStep(1);
+        setSubmitError('La fecha de adquisición no puede ser futura.');
+        return;
+      }
+      if (formData.birthDate && formData.acquisitionDate < formData.birthDate) {
+        setCurrentStep(1);
+        setSubmitError('La fecha de adquisición no puede ser anterior a la fecha de nacimiento.');
+        return;
+      }
+    }
+
+    const weightText = formData.currentWeight.trim();
+    const weight = weightText === '' ? 0 : Number(weightText);
+    if (weightText !== '' && (!Number.isFinite(weight) || weight <= 0)) {
+      setCurrentStep(5);
+      setSubmitError('Si registras un peso inicial, debe ser mayor que cero.');
+      return;
+    }
+    if (weight > 0) {
+      if (formData.currentWeightDate > today) {
+        setCurrentStep(5);
+        setSubmitError('La fecha de medición no puede ser futura.');
+        return;
+      }
+      if (formData.birthDate && formData.currentWeightDate < formData.birthDate) {
+        setCurrentStep(5);
+        setSubmitError('La fecha de medición no puede ser anterior a la fecha de nacimiento.');
+        return;
+      }
     }
 
     setSubmitError(null);
@@ -99,11 +139,11 @@ export const RegisterAnimalPage: React.FC = () => {
         gender: formData.sex,
         species: formData.species,
         breed: formData.breed || undefined,
-        tag_number: formData.identifierCode.trim(),
-        identifier_type: formData.identifierType,
-        identifier_code: formData.identifierCode.trim(),
-        is_official: formData.isOfficial,
-        is_current: formData.isCurrent,
+        tag_number: currentIdentifier.code.trim(),
+        identifier_type: currentIdentifier.type,
+        identifier_code: currentIdentifier.code.trim(),
+        is_official: currentIdentifier.isOfficial,
+        is_current: true,
         lot_id: formData.loteId || undefined,
         paddock_id: formData.potreroId || undefined,
         sire_id: formData.sireId || undefined,
@@ -131,6 +171,21 @@ export const RegisterAnimalPage: React.FC = () => {
         lastError = weightResult.lastError ?? lastError;
       }
 
+      const additionalIdentifiers = formData.identifiers.filter(
+        (identifier) => identifier.id !== currentIdentifier.id && identifier.code.trim() !== '',
+      );
+      for (const identifier of additionalIdentifiers) {
+        const identifierResult = await queueHatoWrite(scope, 'animal_identifiers', 'CREATE', {
+          animal_id: result.recordId,
+          identifier_type: identifier.type,
+          identifier: identifier.code.trim(),
+          is_current: false,
+          is_official: identifier.isOfficial,
+        });
+        pending ||= identifierResult.pending;
+        lastError = identifierResult.lastError ?? lastError;
+      }
+
       markCurrentFormsSaved();
       showNotification({
         type: pending ? 'alert' : 'success',
@@ -152,7 +207,7 @@ export const RegisterAnimalPage: React.FC = () => {
   const handleNext = () => {
     setSubmitError(null);
     if (currentStep < 5) {
-      if (currentStep === 2 && !formData.identifierCode.trim()) {
+      if (currentStep === 2 && !resolveCurrentIdentifier(formData.identifiers)) {
         setSubmitError('El identificador del animal es obligatorio.');
         return;
       }

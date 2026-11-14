@@ -1,3 +1,11 @@
+export interface AnimalIdentifierDraft {
+  id: string;
+  type: string;
+  code: string;
+  isOfficial: boolean;
+  isCurrent: boolean;
+}
+
 export interface AnimalFormData {
   name: string;
   sex: string;
@@ -7,10 +15,7 @@ export interface AnimalFormData {
   birthWeight: string;
   acquisitionDate: string;
   acquisitionCost: string;
-  identifierType: string;
-  identifierCode: string;
-  isOfficial: boolean;
-  isCurrent: boolean;
+  identifiers: AnimalIdentifierDraft[];
   loteId: string;
   potreroId: string;
   sireId: string;

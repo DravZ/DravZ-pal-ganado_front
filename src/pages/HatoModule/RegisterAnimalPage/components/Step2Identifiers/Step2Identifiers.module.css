@@ -64,6 +64,29 @@
   justify-content: center;
 }
 
+.cardHeaderText {
+  flex: 1;
+}
+
+.removeBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid #e5ebe3;
+  background-color: #ffffff;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.removeBtn:hover {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
 .cardTitle {
   font-size: 0.9rem;
   font-weight: 700;
