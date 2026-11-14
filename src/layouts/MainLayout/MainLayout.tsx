@@ -11,7 +11,7 @@ import { flushPendingHatoOperations, useHatoCollection } from '../../services/ha
 
 const MainLayoutContent: React.FC = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const userId = user?.id;
   const { showNotification } = useNotification();
   const { farms, activeFarm, farmsError, setActiveFarmId, scope } = useFarmScope();
@@ -86,6 +86,7 @@ const MainLayoutContent: React.FC = () => {
         onLogout={handleLogout}
         pendingSyncCount={pendingSyncCount}
         alertCount={alertCount}
+        isAdmin={isAdmin}
       />
 
       {/* 2. Área principal donde se renderiza la pantalla activa */}

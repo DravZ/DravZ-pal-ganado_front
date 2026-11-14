@@ -8,6 +8,7 @@ import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
 import { cacheAdministrationRecord, useHatoCollection } from '../../../services/hatoDataService';
+import { ASSIGNABLE_ROLES, WORKER_ROLE } from '../../../utils/roles';
 
 export const EditUserPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export const EditUserPage: React.FC = () => {
         name: `${field('first_name')} ${field('last_name')}`.trim(),
         email: field('email'),
         phone: field('phone') || undefined,
+        role: field('role'),
         farm_id: field('farm_id') || null,
       });
       await cacheAdministrationRecord(user.id, user.organization_id, 'users', savedUser);
@@ -100,7 +102,16 @@ export const EditUserPage: React.FC = () => {
           <div className="row g-4 mt-1">
             <div className="col-12 col-md-6">
               <label htmlFor="role" className={styles.label}>Rol</label>
-              <input id="role" className={`${styles.input} ${styles.readOnlyInput}`} defaultValue={String(userRecord.role ?? 'Perfil por confirmar')} readOnly disabled />
+              <div className={styles.selectWrapper}>
+                <select
+                  id="role"
+                  name="role"
+                  className={styles.selectInput}
+                  defaultValue={ASSIGNABLE_ROLES.find((role) => role === String(userRecord.role)) ?? WORKER_ROLE}
+                >
+                  {ASSIGNABLE_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                </select>
+              </div>
             </div>
             <div className="col-12 col-md-6">
               <label htmlFor="status" className={styles.label}>Estado</label>
@@ -110,7 +121,7 @@ export const EditUserPage: React.FC = () => {
               <label htmlFor="farm_id" className={styles.label}>Finca asociada</label>
               <div className={styles.selectWrapper}>
                 <select id="farm_id" name="farm_id" className={styles.selectInput} defaultValue={String(userRecord.farm_id ?? '')}>
-                  <option value="" disabled>Sin finca asignada (no editable)</option>
+                  <option value="">Sin finca asignada</option>
                   {farms.map((farm) => <option key={farm.id} value={farm.id}>{farm.name}</option>)}
                 </select>
               </div>

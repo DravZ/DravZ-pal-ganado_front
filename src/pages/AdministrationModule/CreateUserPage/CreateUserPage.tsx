@@ -9,6 +9,7 @@ import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
 import { cacheAdministrationRecord } from '../../../services/hatoDataService';
+import { ASSIGNABLE_ROLES, WORKER_ROLE } from '../../../utils/roles';
 
 export const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export const CreateUserPage: React.FC = () => {
     last_name: '',
     email: '',
     phone: '',
-    role: 'Perfil por confirmar',
+    role: WORKER_ROLE,
     status: 'Invitación pendiente',
     farm_id: activeFarm?.id ?? '',
   });
@@ -108,7 +109,11 @@ export const CreateUserPage: React.FC = () => {
           <div className="row g-4 mt-1">
             <div className="col-12 col-md-6">
               <label htmlFor="role" className={styles.label}>Rol</label>
-              <input id="role" className={`${styles.input} ${styles.readOnlyInput}`} value={formData.role} readOnly disabled />
+              <div className={styles.selectWrapper}>
+                <select id="role" name="role" className={styles.selectInput} value={formData.role} onChange={handleChange} required>
+                  {ASSIGNABLE_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                </select>
+              </div>
             </div>
             <div className="col-12 col-md-6">
               <label htmlFor="status" className={styles.label}>Estado</label>
