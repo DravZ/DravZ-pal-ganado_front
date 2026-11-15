@@ -87,6 +87,7 @@ export const AnimalFilters: React.FC<AnimalFiltersProps> = ({
         <option value="">Estado</option>
         <option value="Activo">Activo</option>
         <option value="Tratamiento">Tratamiento</option>
+        <option value="Inactivo">Inactivo (dados de baja)</option>
       </select>
     </div>
   );

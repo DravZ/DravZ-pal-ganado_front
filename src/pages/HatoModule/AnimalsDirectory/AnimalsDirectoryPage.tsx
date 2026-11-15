@@ -13,6 +13,24 @@ type HatoRecord = Record<string, unknown>;
 const text = (value: unknown, fallback = ''): string =>
   typeof value === 'string' ? value : fallback;
 
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Activo',
+  activo: 'Activo',
+  inactive: 'Inactivo',
+  inactivo: 'Inactivo',
+  baja: 'Inactivo',
+  eliminado: 'Inactivo',
+  sold: 'Vendido',
+  vendido: 'Vendido',
+  deceased: 'Fallecido',
+  muerto: 'Fallecido',
+};
+
+const statusLabel = (value: unknown): string => {
+  const raw = text(value).trim();
+  return STATUS_LABELS[raw.toLowerCase()] ?? (raw || 'Inactivo');
+};
+
 export const AnimalsDirectoryPage: React.FC = () => {
   const navigate = useNavigate();
   const { scope } = useFarmScope();
@@ -35,7 +53,7 @@ export const AnimalsDirectoryPage: React.FC = () => {
     date: text(animal.current_weight_date, 'Sin fecha'),
     lote: text(animal.lot_name, 'Sin lote'),
     potrero: text(animal.paddock_name, 'Sin potrero'),
-    status: text(animal.status) === 'active' ? 'Activo' : text(animal.status, 'Inactivo'),
+    status: statusLabel(animal.status),
     lotId: text(animal.lot_id),
     paddockId: text(animal.paddock_id),
     photoBase64: text(animal.photo_base64, text(animal.photoBase64)),
@@ -58,11 +76,14 @@ export const AnimalsDirectoryPage: React.FC = () => {
 
   const filteredAnimals = animals.filter((animal) => {
     const query = searchTerm.trim().toLocaleLowerCase();
+    const matchesState = selectedEstado
+      ? animal.status === selectedEstado
+      : animal.status !== 'Inactivo';
     return (!query || `${animal.tag} ${animal.name} ${animal.breed}`.toLocaleLowerCase().includes(query))
       && (!selectedLote || animal.lotId === selectedLote)
       && (!selectedPotrero || animal.paddockId === selectedPotrero)
       && (!selectedSexo || animal.sex === selectedSexo)
-      && (!selectedEstado || animal.status === selectedEstado);
+      && matchesState;
   });
 
   return (

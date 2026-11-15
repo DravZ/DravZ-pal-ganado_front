@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Trash2 } from 'lucide-react';
 import styles from '../RegisterAnimalPage/RegisterAnimalPage.module.css';
 import basicStyles from '../RegisterAnimalPage/components/Step1BasicData/Step1BasicData.module.css';
 import locationStyles from '../RegisterAnimalPage/components/Step3LocationGenealogy/Step3LocationGenealogy.module.css';
@@ -76,6 +77,8 @@ export default function EditAnimalPage() {
   const lots = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
   const paddocks = useHatoCollection<Record<string, unknown>>('paddocks', '/paddocks', scope);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [draft, setDraft] = useState<AnimalDraft | null>(null);
 
@@ -166,6 +169,30 @@ export default function EditAnimalPage() {
       showNotification({ type: 'error', title: 'No se pudo actualizar el animal', message });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!scope) return;
+    setIsDeleting(true);
+    setSubmitError(null);
+    try {
+      const result = await queueHatoWrite(scope, 'animals', 'DELETE', {}, id);
+      markCurrentFormsSaved();
+      showNotification({
+        type: result.pending ? 'alert' : 'success',
+        title: result.pending ? 'Baja pendiente de sincronización' : 'Animal dado de baja',
+        message: result.lastError ?? (result.pending
+          ? 'La baja quedó guardada en la cola local y se enviará al recuperar la conexión.'
+          : 'El animal se dio de baja y dejó de contarse como activo.'),
+      });
+      navigate('/hato/animales');
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'No se pudo dar de baja el animal.';
+      setSubmitError(message);
+      showNotification({ type: 'error', title: 'No se pudo dar de baja el animal', message });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -307,13 +334,49 @@ export default function EditAnimalPage() {
           {submitError && <p role="alert" className="text-danger mt-3 mb-0">{submitError}</p>}
         </div>
         <div className={styles.bottomBarFooter}>
-          <button type="button" className={styles.btnSecondary}
-            onClick={() => navigate(`/hato/animales/${encodeURIComponent(id)}`)}>
-            Cancelar
-          </button>
-          <button type="submit" className={styles.btnPrimary} disabled={isSaving}>
-            {isSaving ? 'Guardando…' : 'Guardar cambios'}
-          </button>
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            {confirmDelete ? (
+              <>
+                <span className="text-danger fw-semibold me-1">¿Dar de baja este animal?</span>
+                <button
+                  type="button"
+                  className={styles.btnSecondary}
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={isDeleting}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className={styles.btnDanger}
+                  onClick={handleDelete}
+                  disabled={isDeleting || !scope}
+                >
+                  <Trash2 size={16} />
+                  <span>{isDeleting ? 'Dando de baja…' : 'Sí, dar de baja'}</span>
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className={styles.btnDanger}
+                onClick={() => setConfirmDelete(true)}
+                disabled={isSaving}
+              >
+                <Trash2 size={16} />
+                <span>Dar de baja</span>
+              </button>
+            )}
+          </div>
+          <div className={styles.actionNavButtons}>
+            <button type="button" className={styles.btnSecondary}
+              onClick={() => navigate(`/hato/animales/${encodeURIComponent(id)}`)}>
+              Cancelar
+            </button>
+            <button type="submit" className={styles.btnPrimary} disabled={isSaving || isDeleting}>
+              {isSaving ? 'Guardando…' : 'Guardar cambios'}
+            </button>
+          </div>
         </div>
       </form>
     </section>
