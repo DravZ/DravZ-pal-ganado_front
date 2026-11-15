@@ -18,6 +18,7 @@ import { FormExitGuardProvider } from "../context/FormExitGuardContext";
 const NotFound = lazy(() => import("../pages/NotFound"));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage/LoginPage"));
 const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage/ResetPasswordPage"));
 const RegisterPage = lazy(() => import("../pages/auth/RegisterPage/RegisterPage"));
 const Dashboard = lazy(() => import("../pages/dashboard/DashboardPage"));
 const AnimalsDirectoryPage = lazy(() => import("../pages/HatoModule/AnimalsDirectory/AnimalsDirectoryPage"));
@@ -65,6 +66,7 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route element={<SuperLayout />}>
       <Route path="/" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route element={<AuthGuard />}>
