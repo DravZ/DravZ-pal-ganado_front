@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './TabSelector.module.css';
-import { ArrowLeftRight, Scale } from 'lucide-react';
+import { ArrowLeftRight, Scale, Users } from 'lucide-react';
 import type { ActiveTab } from '../../MovementsAndSalesPage';
 
 interface TabSelectorProps {
@@ -27,6 +27,15 @@ export const TabSelector: React.FC<TabSelectorProps> = ({ activeTab, onChangeTab
       >
         <Scale size={18} />
         <span>Venta de ganado o producto</span>
+      </button>
+
+      <button
+        type="button"
+        className={`${styles.tabBtn} ${activeTab === 'CUSTOMERS' ? styles.active : ''}`}
+        onClick={() => onChangeTab('CUSTOMERS')}
+      >
+        <Users size={18} />
+        <span>Clientes</span>
       </button>
     </div>
   );

@@ -95,7 +95,7 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   treatments: ['CREATE'],
   lots: ['CREATE'],
   paddocks: ['CREATE', 'UPDATE', 'DELETE'],
-  customers: [],
+  customers: ['CREATE', 'UPDATE', 'DELETE'],
   medications: [],
   inventories: [],
   animal_identifiers: ['CREATE'],
