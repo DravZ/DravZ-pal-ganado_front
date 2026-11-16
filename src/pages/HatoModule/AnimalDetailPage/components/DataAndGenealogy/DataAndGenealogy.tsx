@@ -4,6 +4,7 @@ import { Beef, ChevronRight } from 'lucide-react';
 import { animalPhotoSource } from '../../../RegisterAnimalPage/components/AnimalPhotoField/animalPhotoUtils';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../../../services/hatoDataService';
+import { useInvestmentSummary, investmentByAnimalId } from '../../../../../services/investmentService';
 import styles from './DataAndGenealogy.module.css';
 
 interface DataAndGenealogyProps {
@@ -20,6 +21,13 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
     `/animal-identifiers?animal_id=${encodeURIComponent(animalId)}`,
     scope,
   );
+  const { summary: investmentSummary, error: investmentError } = useInvestmentSummary(scope);
+  const investment = investmentByAnimalId(investmentSummary).get(animalId);
+  const money = (value: number) => value.toLocaleString('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 2,
+  });
   const tag = String(animal.identifier_tag ?? animal.tag_number ?? animalId);
   const name = String(animal.name ?? 'Sin nombre');
   const photoBase64 = String(animal.photo_base64 ?? animal.photoBase64 ?? '');
@@ -178,6 +186,59 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
               ))
               : <span className="text-secondary">No hay identificadores disponibles.</span>}
           </div>
+        </div>
+
+        {/* Bloque Inversión */}
+        <div className={`${styles.card} mt-3`}>
+          <div className="d-flex align-items-center justify-content-between mb-2">
+            <div>
+              <div className={styles.kicker}>INVERSIÓN</div>
+              <h2 className={styles.title} style={{ fontSize: '1rem' }}>Dinero invertido</h2>
+            </div>
+            {investment && (
+              <span className={styles.badgePill}>{money(investment.totalInvestment)}</span>
+            )}
+          </div>
+
+          {investment ? (
+            <table className={styles.dataTable}>
+              <tbody>
+                <tr>
+                  <td>
+                    <span className={styles.fieldLabel}>Costo de adquisición</span>
+                    <span className={styles.fieldVal}>{money(investment.acquisitionCost)}</span>
+                  </td>
+                  <td>
+                    <span className={styles.fieldLabel}>Costos asignados</span>
+                    <span className={styles.fieldVal}>{money(investment.assignedCosts)}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span className={styles.fieldLabel}>Alimentación</span>
+                    <span className={styles.fieldVal}>{money(investment.feedingCost)}</span>
+                  </td>
+                  <td>
+                    <span className={styles.fieldLabel}>Gastos de finca</span>
+                    <span className={styles.fieldVal}>{money(investment.farmOverhead)}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={2}>
+                    <span className={styles.fieldLabel}>Punto mínimo de venta</span>
+                    <span className={styles.fieldVal}>{money(investment.breakEvenPrice)}</span>
+                    <span className="text-secondary d-block" style={{ fontSize: '0.75rem' }}>
+                      A partir de este precio no pierdes con la venta.
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <span className="text-secondary">
+              {investmentError ?? 'Sin datos de inversión (se requiere conexión).'}
+            </span>
+          )}
         </div>
       </div>
 

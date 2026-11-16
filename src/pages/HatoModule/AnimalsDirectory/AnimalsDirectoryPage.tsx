@@ -7,6 +7,7 @@ import { AnimalTable, type AnimalItem } from './components/AnimalTable/AnimalTab
 import styles from './AnimalsDirectoryPage.module.css';
 import { useFarmScope } from '../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../services/hatoDataService';
+import { useInvestmentSummary, investmentByAnimalId } from '../../../services/investmentService';
 
 type HatoRecord = Record<string, unknown>;
 
@@ -41,6 +42,8 @@ export const AnimalsDirectoryPage: React.FC = () => {
   );
   const { records: lots } = useHatoCollection<HatoRecord>('lots', '/lots', scope);
   const { records: paddocks } = useHatoCollection<HatoRecord>('paddocks', '/paddocks', scope);
+  const { summary: investmentSummary } = useInvestmentSummary(scope);
+  const investments = investmentByAnimalId(investmentSummary);
   const animals: AnimalItem[] = rawAnimals.map((animal) => ({
     id: text(animal.id),
     tag: text(animal.identifier_tag, text(animal.tag_number, 'Sin identificador')),
@@ -57,6 +60,7 @@ export const AnimalsDirectoryPage: React.FC = () => {
     lotId: text(animal.lot_id),
     paddockId: text(animal.paddock_id),
     photoBase64: text(animal.photo_base64, text(animal.photoBase64)),
+    investment: investments.get(text(animal.id))?.totalInvestment,
   }));
 
   // Estados de Filtros

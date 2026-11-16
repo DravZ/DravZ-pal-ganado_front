@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 import ExpenseTabSelector, { type ExpenseTabType } from './components/ExpenseTabSelector/ExpenseTabSelector';
 import ExpensesTab from './components/ExpensesTab/ExpensesTab';
 import CostAllocationsTab from './components/CostAllocationsTab/CostAllocationsTab';
+import IncomeTab from './components/IncomeTab/IncomeTab';
 import CreateExpenseModal from './components/CreateExpenseModal/CreateExpenseModal';
 import AssignCostModal from './components/AssignCostModal/AssignCostModal';
 import { useFarmScope } from '../../../context/FarmScopeContext';
@@ -58,9 +59,10 @@ export const ExpensesAndCostAllocationsPage: React.FC = () => {
               setIsAssignModalOpen(true);
             }
           }}
+          hidden={activeTab === 'INCOME'}
         >
           <Plus size={18} />
-          <span>{activeTab === 'EXPENSES' ? 'Registrar gasto' : 'Asignar costo'}</span>
+          <span>{activeTab === 'COST_ALLOCATIONS' ? 'Asignar costo' : 'Registrar gasto'}</span>
         </button>
       </div>
 
@@ -72,6 +74,7 @@ export const ExpensesAndCostAllocationsPage: React.FC = () => {
       </div>
 
       {/* TARJETAS KPI RESUMEN */}
+      {activeTab !== 'INCOME' && (
       <div className="row g-3 mb-4">
         <div className="col-12 col-md-4">
           <div className={styles.kpiCard}>
@@ -97,9 +100,12 @@ export const ExpensesAndCostAllocationsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* VISTA DE PESTAÑA ACTIVA */}
-      {activeTab === 'EXPENSES' ? <ExpensesTab /> : <CostAllocationsTab />}
+      {activeTab === 'EXPENSES' && <ExpensesTab />}
+      {activeTab === 'COST_ALLOCATIONS' && <CostAllocationsTab />}
+      {activeTab === 'INCOME' && <IncomeTab />}
 
       {/* MODALES */}
       <CreateExpenseModal

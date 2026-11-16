@@ -30,6 +30,7 @@ export type HatoResource =
   | 'suppliers'
   | 'expenses'
   | 'cost_allocations'
+  | 'financial_records'
   | 'users'
   | 'farms'
   | 'alerts'
@@ -78,6 +79,7 @@ const endpointByResource: Record<HatoResource, string> = {
   suppliers: '/suppliers',
   expenses: '/expenses',
   cost_allocations: '/cost-allocations',
+  financial_records: '/financial-records',
   users: '/users',
   farms: '/farms',
   alerts: '/alerts',
@@ -106,6 +108,7 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   suppliers: ['CREATE', 'UPDATE', 'DELETE'],
   expenses: ['CREATE'],
   cost_allocations: ['CREATE'],
+  financial_records: [],
   users: [],
   farms: [],
   alerts: ['UPDATE'],
@@ -307,6 +310,7 @@ export function useHatoCollection<T extends Record<string, unknown>>(
         'purchase_records',
         'expenses',
         'cost_allocations',
+        'financial_records',
       ].includes(resource)
       && !url.searchParams.has('farm_id')
     ) {
