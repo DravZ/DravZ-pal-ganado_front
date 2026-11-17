@@ -3,24 +3,24 @@ import { apiFetch } from './apiClient';
 import type { HatoScope } from './hatoDataService';
 
 export interface AnimalInvestment {
-  animalId: string;
-  tagNumber: string | null;
+  animal_id: string;
+  tag_number: string | null;
   name: string | null;
-  lotId: string | null;
-  lotName: string | null;
-  acquisitionCost: number;
-  assignedCosts: number;
-  feedingCost: number;
-  farmOverhead: number;
-  totalInvestment: number;
-  breakEvenPrice: number;
+  lot_id: string | null;
+  lot_name: string | null;
+  acquisition_cost: number;
+  assigned_costs: number;
+  feeding_cost: number;
+  farm_overhead: number;
+  total_investment: number;
+  break_even_price: number;
 }
 
 export interface FarmInvestment {
-  farmId: string;
-  activeAnimalCount: number;
-  totalInvestment: number;
-  averageInvestment: number;
+  farm_id: string;
+  active_animal_count: number;
+  total_investment: number;
+  average_investment: number;
   animals: AnimalInvestment[];
 }
 
@@ -79,7 +79,7 @@ export function useInvestmentSummary(scope: HatoScope | null): {
 export function investmentByAnimalId(summary: FarmInvestment | null): Map<string, AnimalInvestment> {
   const map = new Map<string, AnimalInvestment>();
   if (summary) {
-    for (const item of summary.animals) map.set(item.animalId, item);
+    for (const item of summary.animals) map.set(item.animal_id, item);
   }
   return map;
 }

@@ -60,7 +60,7 @@ export const AnimalsDirectoryPage: React.FC = () => {
     lotId: text(animal.lot_id),
     paddockId: text(animal.paddock_id),
     photoBase64: text(animal.photo_base64, text(animal.photoBase64)),
-    investment: investments.get(text(animal.id))?.totalInvestment,
+    investment: investments.get(text(animal.id))?.total_investment,
   }));
 
   // Estados de Filtros

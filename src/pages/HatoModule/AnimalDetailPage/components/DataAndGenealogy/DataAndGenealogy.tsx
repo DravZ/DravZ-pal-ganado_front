@@ -196,7 +196,7 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
               <h2 className={styles.title} style={{ fontSize: '1rem' }}>Dinero invertido</h2>
             </div>
             {investment && (
-              <span className={styles.badgePill}>{money(investment.totalInvestment)}</span>
+              <span className={styles.badgePill}>{money(investment.total_investment)}</span>
             )}
           </div>
 
@@ -206,27 +206,27 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
                 <tr>
                   <td>
                     <span className={styles.fieldLabel}>Costo de adquisición</span>
-                    <span className={styles.fieldVal}>{money(investment.acquisitionCost)}</span>
+                    <span className={styles.fieldVal}>{money(investment.acquisition_cost)}</span>
                   </td>
                   <td>
                     <span className={styles.fieldLabel}>Costos asignados</span>
-                    <span className={styles.fieldVal}>{money(investment.assignedCosts)}</span>
+                    <span className={styles.fieldVal}>{money(investment.assigned_costs)}</span>
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <span className={styles.fieldLabel}>Alimentación</span>
-                    <span className={styles.fieldVal}>{money(investment.feedingCost)}</span>
+                    <span className={styles.fieldVal}>{money(investment.feeding_cost)}</span>
                   </td>
                   <td>
                     <span className={styles.fieldLabel}>Gastos de finca</span>
-                    <span className={styles.fieldVal}>{money(investment.farmOverhead)}</span>
+                    <span className={styles.fieldVal}>{money(investment.farm_overhead)}</span>
                   </td>
                 </tr>
                 <tr>
                   <td colSpan={2}>
                     <span className={styles.fieldLabel}>Punto mínimo de venta</span>
-                    <span className={styles.fieldVal}>{money(investment.breakEvenPrice)}</span>
+                    <span className={styles.fieldVal}>{money(investment.break_even_price)}</span>
                     <span className="text-secondary d-block" style={{ fontSize: '0.75rem' }}>
                       A partir de este precio no pierdes con la venta.
                     </span>
