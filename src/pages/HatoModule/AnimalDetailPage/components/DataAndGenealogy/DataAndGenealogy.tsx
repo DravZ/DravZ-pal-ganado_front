@@ -21,7 +21,7 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
     `/animal-identifiers?animal_id=${encodeURIComponent(animalId)}`,
     scope,
   );
-  const { summary: investmentSummary, error: investmentError } = useInvestmentSummary(scope);
+  const { summary: investmentSummary } = useInvestmentSummary(scope);
   const investment = investmentByAnimalId(investmentSummary).get(animalId);
   const money = (value: number) => value.toLocaleString('es-MX', {
     style: 'currency',
@@ -236,7 +236,7 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
             </table>
           ) : (
             <span className="text-secondary">
-              {investmentError ?? 'Sin datos de inversión (se requiere conexión).'}
+              Sin datos de inversión para este animal.
             </span>
           )}
         </div>

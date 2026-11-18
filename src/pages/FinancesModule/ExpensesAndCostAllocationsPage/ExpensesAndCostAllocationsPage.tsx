@@ -9,6 +9,7 @@ import CreateExpenseModal from './components/CreateExpenseModal/CreateExpenseMod
 import AssignCostModal from './components/AssignCostModal/AssignCostModal';
 import { useFarmScope } from '../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../services/hatoDataService';
+import { useDerivedFinanceMovements } from '../../../services/financeDerivations';
 
 const money = (value: number) => value.toLocaleString('es-MX', {
   style: 'currency',
@@ -25,12 +26,14 @@ export const ExpensesAndCostAllocationsPage: React.FC = () => {
     scope,
   );
   const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
+  const { expenses: derivedExpenses } = useDerivedFinanceMovements(scope);
   const [activeTab, setActiveTab] = useState<ExpenseTabType>('EXPENSES');
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const expensesThisMonth = expenses.filter((expense) => String(expense.expense_date ?? '').startsWith(month));
+  const allExpenses = [...expenses, ...derivedExpenses];
+  const expensesThisMonth = allExpenses.filter((expense) => String(expense.expense_date ?? '').startsWith(month));
   const expensesTotal = expensesThisMonth.reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
   const allocationsThisMonth = allocations.filter((allocation) => String(allocation.allocation_date ?? '').startsWith(month));
   const assignedTotal = allocationsThisMonth.reduce((sum, allocation) => sum + (Number(allocation.amount) || 0), 0);

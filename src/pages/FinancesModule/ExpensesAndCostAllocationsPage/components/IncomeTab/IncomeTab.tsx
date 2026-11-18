@@ -3,6 +3,7 @@ import styles from './IncomeTab.module.css';
 import { Search } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../../../services/hatoDataService';
+import { useDerivedFinanceMovements } from '../../../../../services/financeDerivations';
 
 const money = (value: number) => value.toLocaleString('es-MX', {
   style: 'currency',
@@ -28,7 +29,8 @@ export const IncomeTab: React.FC = () => {
     '/financial-records',
     scope,
   );
-  const filtered = [...financialRecords]
+  const { incomes: derivedIncomes } = useDerivedFinanceMovements(scope);
+  const filtered = [...financialRecords, ...derivedIncomes]
     .filter((record) => String(record.transaction_type ?? '').toUpperCase() === 'INCOME')
     .filter((record) => {
       const query = searchTerm.toLowerCase();
@@ -74,7 +76,12 @@ export const IncomeTab: React.FC = () => {
           <tbody>
             {filtered.map((record) => (
               <tr key={String(record.id)}>
-                <td className="fw-bold">{String(record.description ?? 'Ingreso')}</td>
+                <td className="fw-bold">
+                  {String(record.description ?? 'Ingreso')}
+                  {Boolean(record.derived) && (
+                    <div className={styles.subText}>Pendiente de sincronización</div>
+                  )}
+                </td>
                 <td>{String(record.record_date ?? '').slice(0, 10)}</td>
                 <td><span className={styles.originBadge}>{originLabel(record.reference_type)}</span></td>
                 <td><span className={styles.categoryBadge}>{String(record.category ?? 'Sin categoría')}</span></td>
