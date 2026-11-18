@@ -17,13 +17,12 @@ export const CreateUserPage: React.FC = () => {
   const { farms, activeFarm } = useFarmScope();
   const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
-  const [formData, setFormData] = useState<CreateUserFormValues>({
+  const [formData, setFormData] = useState<Omit<CreateUserFormValues, 'status'>>({
     first_name: '',
     last_name: '',
     email: '',
     phone: '',
     role: WORKER_ROLE,
-    status: 'Invitación pendiente',
     farm_id: activeFarm?.id ?? '',
   });
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -116,8 +115,11 @@ export const CreateUserPage: React.FC = () => {
               </div>
             </div>
             <div className="col-12 col-md-6">
-              <label htmlFor="status" className={styles.label}>Estado</label>
-              <input id="status" className={`${styles.input} ${styles.readOnlyInput}`} value={formData.status} readOnly disabled />
+              <span className={styles.label}>Estado</span>
+              <div className={`${styles.input} ${styles.readOnlyInput}`}>Invitación pendiente</div>
+              <small className={styles.fieldHelpText}>
+                La cuenta se crea como invitación pendiente y se activa al iniciar sesión.
+              </small>
             </div>
             <div className="col-12 col-md-6">
               <label htmlFor="farm_id" className={styles.label}>Finca asociada</label>

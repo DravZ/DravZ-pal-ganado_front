@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './UserInfoProfileCard.module.css';
 import type { UserDetailUI } from '../../UserInfoPage';
+import { isUserActive, userStatusLabel } from '../../../../../utils/userStatus';
 
 interface UserInfoProfileCardProps {
   user: UserDetailUI;
@@ -20,10 +21,10 @@ export const UserInfoProfileCard: React.FC<UserInfoProfileCardProps> = ({ user }
     <div className={styles.badgeWrapper}>
       <span
         className={`${styles.statusBadge} ${
-          user.status === 'active' ? styles.badgeActive : styles.badgePending
+          isUserActive(user.status) ? styles.badgeActive : styles.badgePending
         }`}
       >
-        {user.status === 'active' ? 'Activo' : 'Invitación pendiente'}
+        {userStatusLabel(user.status)}
       </span>
     </div>
   </div>

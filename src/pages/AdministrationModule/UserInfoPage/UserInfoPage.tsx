@@ -1,9 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../shared/InfoPage.module.css';
 import type { User } from '../../../types/database.types';
+import { useAuth } from '../../../context/AuthContext';
 import { useFarmScope } from '../../../context/FarmScopeContext';
-import { useHatoCollection } from '../../../services/hatoDataService';
+import useNotification from '../../../hooks/useNotification';
+import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
+import { cacheAdministrationRecord, useHatoCollection } from '../../../services/hatoDataService';
+import { isUserActive, userStatusLabel } from '../../../utils/userStatus';
 import UserInfoHeader from './components/UserInfoHeader/UserInfoHeader';
 import UserInfoProfileCard from './components/UserInfoProfileCard/UserInfoProfileCard';
 import UserInfoDetailsGrid from './components/UserInfoDetailsGrid/UserInfoDetailsGrid';
@@ -19,6 +23,9 @@ export const UserInfoPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { scope } = useFarmScope();
+  const { user: currentUser, isAdmin, isOffline } = useAuth();
+  const { showNotification } = useNotification();
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>('users', '/users', scope);
   const { records: farms } = useHatoCollection<Record<string, unknown>>('farms', '/farms', scope);
   const userData = useMemo(() => {
@@ -42,6 +49,37 @@ export const UserInfoPage: React.FC = () => {
     } satisfies UserDetailUI;
   }, [farms, id, records, scope?.organizationId]);
 
+  const canManageStatus = Boolean(
+    currentUser && userData && currentUser.id !== userData.id && isAdmin,
+  );
+
+  const handleToggleStatus = async () => {
+    if (!currentUser || !userData || !canManageStatus) return;
+    const nextStatus = isUserActive(userData.status) ? 'inactive' : 'active';
+    setIsUpdatingStatus(true);
+    try {
+      const savedUser = await requestOnlineAdministrationWrite(`/users/${userData.id}`, 'PATCH', {
+        status: nextStatus,
+      });
+      await cacheAdministrationRecord(currentUser.id, currentUser.organization_id, 'users', savedUser);
+      showNotification({
+        type: 'success',
+        title: 'Estado actualizado',
+        message: nextStatus === 'active'
+          ? 'La cuenta quedó activa.'
+          : 'La cuenta quedó desactivada.',
+      });
+    } catch (cause: unknown) {
+      showNotification({
+        type: 'error',
+        title: 'No se pudo cambiar el estado',
+        message: cause instanceof Error ? cause.message : 'Inténtalo de nuevo.',
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   if (isLoading) return <p className="container-fluid">Cargando información local del usuario…</p>;
   if (!userData) return <p className="container-fluid" role={error ? 'alert' : undefined}>
     {error ?? 'El usuario no está disponible en los datos autorizados de este dispositivo.'}
@@ -58,7 +96,14 @@ export const UserInfoPage: React.FC = () => {
       <div className={styles.mainCard}>
         <UserInfoProfileCard user={userData} />
         <UserInfoDetailsGrid user={userData} />
-        <UserStatusWarning />
+        <UserStatusWarning
+          statusLabel={userStatusLabel(userData.status)}
+          isActive={isUserActive(userData.status)}
+          canManage={canManageStatus}
+          isBusy={isUpdatingStatus}
+          isOffline={isOffline}
+          onToggle={() => void handleToggleStatus()}
+        />
       </div>
     </div>
   );
