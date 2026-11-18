@@ -4,6 +4,11 @@ import type { Alert } from '../../../types/database.types';
 import { useFarmScope } from '../../../context/FarmScopeContext';
 import useNotification from '../../../hooks/useNotification';
 import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
+import {
+  isCriticalSeverity,
+  isHighSeverity,
+  isUpcomingSeverity,
+} from '../../../utils/alertSeverity';
 import AlertsHeader from './components/AlertsHeader/AlertsHeader';
 import AlertsFilterTabs from './components/AlertsFilterTabs/AlertsFilterTabs';
 import AlertCard from './components/AlertCard/AlertCard';
@@ -64,15 +69,15 @@ export const AlertsPage: React.FC = () => {
 
   const counts = useMemo(() => ({
     all: alerts.length,
-    critical: alerts.filter((alert) => alert.severity === 'CRÍTICA').length,
-    high: alerts.filter((alert) => alert.severity === 'ALTA').length,
-    upcoming: alerts.filter((alert) => alert.severity === 'MEDIA' || alert.severity === 'BAJA').length,
+    critical: alerts.filter((alert) => isCriticalSeverity(alert.severity)).length,
+    high: alerts.filter((alert) => isHighSeverity(alert.severity)).length,
+    upcoming: alerts.filter((alert) => isUpcomingSeverity(alert.severity)).length,
   }), [alerts]);
 
   const filteredAlerts = useMemo(() => alerts.filter((alert) => {
-    if (activeTab === 'CRITICAL') return alert.severity === 'CRÍTICA';
-    if (activeTab === 'HIGH') return alert.severity === 'ALTA';
-    if (activeTab === 'UPCOMING') return alert.severity === 'MEDIA' || alert.severity === 'BAJA';
+    if (activeTab === 'CRITICAL') return isCriticalSeverity(alert.severity);
+    if (activeTab === 'HIGH') return isHighSeverity(alert.severity);
+    if (activeTab === 'UPCOMING') return isUpcomingSeverity(alert.severity);
     return true;
   }), [activeTab, alerts]);
 

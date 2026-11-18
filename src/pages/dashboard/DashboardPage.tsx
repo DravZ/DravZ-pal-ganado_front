@@ -7,6 +7,7 @@ import { HerdPerformance } from './components/HerdPerformance/HerdPerformance';
 import { useAuth } from '../../context/AuthContext';
 import { useFarmScope } from '../../context/FarmScopeContext';
 import { useHatoCollection } from '../../services/hatoDataService';
+import { isUrgentSeverity } from '../../utils/alertSeverity';
 
 interface DashboardAlert {
   id: string;
@@ -117,9 +118,7 @@ export const Dashboard: React.FC = () => {
       <StatCards
         animalCount={activeAnimals.length}
         alertCount={openAlerts.length}
-        urgentAlertCount={openAlerts.filter((alert) =>
-          ['ALTA', 'CRÍTICA', 'CRITICA'].includes(alert.severity.toUpperCase()),
-        ).length}
+        urgentAlertCount={openAlerts.filter((alert) => isUrgentSeverity(alert.severity)).length}
         lowStockCount={lowStockCount}
         farmName={activeFarm?.name ?? ''}
         isLoading={isLoading}
