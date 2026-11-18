@@ -86,6 +86,23 @@
   text-align: left;
 }
 
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sortBtn:hover {
+  color: #1e4b27;
+}
+
 .customTable tbody td {
   padding: 0.9rem 1rem;
   vertical-align: middle;

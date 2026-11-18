@@ -26,6 +26,7 @@ function toQueueRow(operation: SyncQueueOperation): SyncQueueRow {
     payload: operation.payload,
     status: operation.status === 'CONFLICT' ? 'FAILED' : 'PENDING',
     created_at: displayDate(operation.createdAt),
+    created_at_iso: operation.createdAt,
     error_message: operation.lastError,
   };
 }
