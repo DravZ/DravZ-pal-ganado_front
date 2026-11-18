@@ -1,17 +1,23 @@
 import React from 'react';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import styles from '../../../shared/InfoHeader.module.css';
 
 interface FarmInfoHeaderProps {
   farmName: string;
   onBack: () => void;
   onEdit: () => void;
+  onDelete: () => void;
+  canDelete: boolean;
+  isDeleting: boolean;
 }
 
 export const FarmInfoHeader: React.FC<FarmInfoHeaderProps> = ({
   farmName,
   onBack,
-  onEdit
+  onEdit,
+  onDelete,
+  canDelete,
+  isDeleting,
 }) => (
   <div className={styles.headerWrapper}>
     <button type="button" className={styles.backBtn} onClick={onBack}>
@@ -28,10 +34,23 @@ export const FarmInfoHeader: React.FC<FarmInfoHeaderProps> = ({
         </p>
       </div>
 
-      <button type="button" className={styles.editBtn} onClick={onEdit}>
-        <Pencil size={16} className="d-none d-sm-inline" />
-        <span>Editar finca</span>
-      </button>
+      <div className={styles.headerActions}>
+        {canDelete && (
+          <button
+            type="button"
+            className={styles.deleteBtn}
+            onClick={onDelete}
+            disabled={isDeleting}
+          >
+            <Trash2 size={16} className="d-none d-sm-inline" />
+            <span>{isDeleting ? 'Eliminando…' : 'Eliminar finca'}</span>
+          </button>
+        )}
+        <button type="button" className={styles.editBtn} onClick={onEdit}>
+          <Pencil size={16} className="d-none d-sm-inline" />
+          <span>Editar finca</span>
+        </button>
+      </div>
     </div>
   </div>
 );
