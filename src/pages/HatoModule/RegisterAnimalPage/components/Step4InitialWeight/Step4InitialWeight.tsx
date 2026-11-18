@@ -2,6 +2,7 @@ import React from 'react';
 import { Scale, WifiOff } from 'lucide-react';
 import styles from './Step4InitialWeight.module.css';
 import type { AnimalFormChange, AnimalFormData } from '../../types';
+import { todayLocalDate } from '../../../../../utils/dates';
 
 interface Step4Props {
   formData: AnimalFormData;
@@ -9,6 +10,7 @@ interface Step4Props {
 }
 
 export const Step4InitialWeight: React.FC<Step4Props> = ({ formData, onChange }) => {
+  const today = todayLocalDate();
   return (
     <div className={styles.stepContainer}>
       <div className={styles.stepHeaderGroup}>
@@ -54,6 +56,8 @@ export const Step4InitialWeight: React.FC<Step4Props> = ({ formData, onChange })
               type="date"
               className={styles.formControl}
               value={formData.currentWeightDate}
+              min={formData.birthDate || undefined}
+              max={today}
               onChange={(e) => onChange('currentWeightDate', e.target.value)}
             />
           </div>

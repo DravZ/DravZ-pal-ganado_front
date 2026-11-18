@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 import styles from './MedicationsTab.module.css';
-import { Search, Syringe, MoreHorizontal } from 'lucide-react';
+import { Search, Syringe, Plus, Pencil } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../../../services/hatoDataService';
+import { CreateMedicationModal } from './CreateMedicationModal/CreateMedicationModal';
 
 export const MedicationsTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [routeFilter, setRouteFilter] = useState('ALL');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingMedication, setEditingMedication] = useState<Record<string, unknown> | null>(null);
   const { scope } = useFarmScope();
-  const { records, isLoading, error } = useHatoCollection<Record<string, unknown>>(
+  const { records, isLoading, error, refresh } = useHatoCollection<Record<string, unknown>>(
     'medications',
     '/medications',
     scope,
   );
-  const medications = records.filter((medication) =>
-    String(medication.status ?? 'active').toLowerCase() !== 'inactive',
-  );
 
-  const filtered = medications.filter((m) => {
+  const filtered = records.filter((m) => {
     const matchesSearch =
       String(m.name ?? '').toLowerCase().includes(searchTerm.toLowerCase())
       || String(m.active_ingredient ?? '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -41,7 +41,7 @@ export const MedicationsTab: React.FC = () => {
           />
         </div>
 
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex align-items-center gap-2 flex-wrap">
           <select
             className={styles.routeSelect}
             value={routeFilter}
@@ -56,6 +56,14 @@ export const MedicationsTab: React.FC = () => {
           <span className={styles.countInfo}>
             {isLoading ? 'Cargando…' : `${filtered.length} medicamentos`}
           </span>
+          <button
+            type="button"
+            className={styles.addBtn}
+            onClick={() => setIsCreateOpen(true)}
+          >
+            <Plus size={18} />
+            <span>Agregar medicamento</span>
+          </button>
         </div>
       </div>
 
@@ -64,13 +72,10 @@ export const MedicationsTab: React.FC = () => {
         {filtered.map((med) => (
           <div key={String(med.id)} className="col-12 col-md-6 col-xl-3">
             <div className={styles.medCard}>
-              <div className="d-flex justify-content-between align-items-start mb-2">
+              <div className="mb-2">
                 <div className={styles.medIcon}>
                   <Syringe size={20} color="#1e4b27" />
                 </div>
-                <button type="button" className={styles.moreBtn}>
-                  <MoreHorizontal size={18} />
-                </button>
               </div>
 
               <span className={styles.categoryLabel}>
@@ -100,18 +105,41 @@ export const MedicationsTab: React.FC = () => {
                     <span className={styles.wLabel}>RETIRO LECHE</span>
                     <span className={styles.wDays}>{Number(med.withdrawal_days_milk ?? 0)} días</span>
                   </div>
-                  {error && <p role="alert" className="text-danger">{error}</p>}
-                  {!isLoading && filtered.length === 0 && (
-                    <p className="text-secondary">
-                      {error ?? 'No hay medicamentos disponibles para los filtros seleccionados.'}
-                    </p>
-                  )}
                 </div>
               </div>
+
+              <button
+                type="button"
+                className={styles.editBtn}
+                onClick={() => setEditingMedication(med)}
+              >
+                <Pencil size={16} />
+                <span>Editar</span>
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {error && <p role="alert" className="text-danger mb-0">{error}</p>}
+      {!isLoading && !error && filtered.length === 0 && (
+        <p className="text-secondary mb-0">
+          {records.length === 0
+            ? 'Aún no hay medicamentos en el catálogo. Usa "Agregar medicamento" para registrar el primero.'
+            : 'No hay medicamentos disponibles para los filtros seleccionados.'}
+        </p>
+      )}
+
+      <CreateMedicationModal
+        key={editingMedication ? String(editingMedication.id) : 'new'}
+        isOpen={isCreateOpen || editingMedication !== null}
+        medication={editingMedication}
+        onClose={() => {
+          setIsCreateOpen(false);
+          setEditingMedication(null);
+        }}
+        onSuccess={() => { void refresh(); }}
+      />
     </div>
   );
 };

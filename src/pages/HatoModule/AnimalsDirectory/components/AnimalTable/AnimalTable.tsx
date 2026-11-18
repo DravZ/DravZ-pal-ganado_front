@@ -17,12 +17,19 @@ export interface AnimalItem {
   lotId: string;
   paddockId: string;
   photoBase64?: string;
+  investment?: number;
 }
 
 interface AnimalTableProps {
   animals: AnimalItem[];
   onSelectAnimal: (id: string) => void;
 }
+
+const money = (value: number) => value.toLocaleString('es-MX', {
+  style: 'currency',
+  currency: 'MXN',
+  maximumFractionDigits: 2,
+});
 
 export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, onSelectAnimal }) => {
   return (
@@ -54,6 +61,11 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, onSelectAnima
                 <div className="d-flex align-items-center gap-1">
                   <span>LOTE / POTRERO</span>
                   <ArrowUpDown size={14} />
+                </div>
+              </th>
+              <th>
+                <div className="d-flex align-items-center gap-1">
+                  <span>INVERSIÓN</span>
                 </div>
               </th>
               <th>
@@ -116,6 +128,12 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, onSelectAnima
                   <div className={styles.subDetails}>{item.potrero}</div>
                 </td>
                 <td>
+                  <div className={styles.tagId}>
+                    {item.investment === undefined ? '—' : money(item.investment)}
+                  </div>
+                  <div className={styles.subDetails}>Invertido</div>
+                </td>
+                <td>
                   <span
                     className={`${styles.statusPill} ${
                       item.status === 'Activo'
@@ -167,7 +185,13 @@ export const AnimalTable: React.FC<AnimalTableProps> = ({ animals, onSelectAnima
 
             <div className="d-flex align-items-center gap-2">
               <div className={styles.mobileRightInfo}>
-                <div className={styles.mobileWeightLabel}>WEIGHT</div>
+                <div className={styles.mobileWeightLabel}>INVERSIÓN</div>
+                <div className={styles.weightMain}>
+                  {item.investment === undefined ? '—' : money(item.investment)}
+                </div>
+              </div>
+              <div className={styles.mobileRightInfo}>
+                <div className={styles.mobileWeightLabel}>PESO</div>
                 <div className={styles.weightMain}>{item.weight} kg</div>
                 <div className={styles.subDetails}>{item.date}</div>
               </div>

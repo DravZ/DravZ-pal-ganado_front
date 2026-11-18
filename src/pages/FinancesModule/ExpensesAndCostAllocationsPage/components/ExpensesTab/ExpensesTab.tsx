@@ -3,6 +3,7 @@ import styles from './ExpensesTab.module.css';
 import { Search } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../../../services/hatoDataService';
+import { useDerivedFinanceMovements } from '../../../../../services/financeDerivations';
 
 const money = (value: number) => value.toLocaleString('es-MX', {
   style: 'currency',
@@ -30,7 +31,8 @@ export const ExpensesTab: React.FC = () => {
     '/suppliers',
     scope,
   );
-  const filtered = [...expenses]
+  const { expenses: derivedExpenses } = useDerivedFinanceMovements(scope);
+  const filtered = [...expenses, ...derivedExpenses]
     .filter((expense) => {
       const supplier = suppliers.find((item) => item.id === expense.supplier_id);
       const query = searchTerm.toLowerCase();
@@ -96,7 +98,7 @@ export const ExpensesTab: React.FC = () => {
                     <span className={`${styles.statusBadge} ${assigned ? styles.badgeAssigned : styles.badgePending}`}>
                       {assigned ? 'Asignado' : 'Pendiente'}
                     </span>
-                    {String(expense.id ?? '').startsWith('local:') && (
+                    {(String(expense.id ?? '').startsWith('local:') || Boolean(expense.derived)) && (
                       <div className={styles.subText}>Pendiente de sincronización</div>
                     )}
                   </td>

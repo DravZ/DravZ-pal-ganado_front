@@ -10,6 +10,7 @@ import {
 import SuperLayout from "../layouts/SuperLayout/SuperLayout";
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import AuthGuard from "../components/shared/AuthGuard/AuthGuard";
+import AdminGuard from "../components/shared/AdminGuard/AdminGuard";
 import { AuthProvider } from "../context/AuthContext";
 import { NotificationProvider } from "../context/NotificationContext";
 import { FormExitGuardProvider } from "../context/FormExitGuardContext";
@@ -17,6 +18,7 @@ import { FormExitGuardProvider } from "../context/FormExitGuardContext";
 const NotFound = lazy(() => import("../pages/NotFound"));
 const LoginPage = lazy(() => import("../pages/auth/LoginPage/LoginPage"));
 const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage/ResetPasswordPage"));
 const RegisterPage = lazy(() => import("../pages/auth/RegisterPage/RegisterPage"));
 const Dashboard = lazy(() => import("../pages/dashboard/DashboardPage"));
 const AnimalsDirectoryPage = lazy(() => import("../pages/HatoModule/AnimalsDirectory/AnimalsDirectoryPage"));
@@ -64,6 +66,7 @@ const router = createBrowserRouter(createRoutesFromElements(
     <Route element={<SuperLayout />}>
       <Route path="/" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route element={<AuthGuard />}>
@@ -83,21 +86,24 @@ const router = createBrowserRouter(createRoutesFromElements(
           <Route path="/alimentacion/inventario" element={<InventoryAndPurchasesPage />} />
           <Route path="/finanzas/gastos" element={<ExpensesAndCostAllocationsPage />} />
           <Route path="/admin/estructura" element={<PaddocksPage />} />
-          <Route path="/admin/configuracion" element={<OrganizationConfigPage />} />
-          <Route path="/organizacion/informacion" element={<OrganizationInfoPage />} />
-          <Route path="/organizacion/editar" element={<EditOrganizationInfoPage />} />
-          <Route path="/admin/usuarios" element={<UsersManagementPage />} />
-          <Route path="/usuarios/nuevo" element={<CreateUserPage />} />
-          <Route path="/usuarios/:id" element={<UserInfoPage />} />
-          <Route path="/usuarios/editar/:id" element={<EditUserPage />} />
-          <Route path="/admin/fincas" element={<FarmsManagementPage />} />
-          <Route path="/fincas/:id" element={<FarmInfoPage />} />
-          <Route path="/fincas/nueva" element={<CreateFarmPage />} />
-          <Route path="/fincas/editar/:id" element={<EditFarmPage />} />
           <Route path="/admin/alertas" element={<AlertsPage />} />
-          <Route path="/admin/sincronizacion" element={<SyncQueuePage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/perfil/editar" element={<EditProfilePage />} />
+          {/* Rutas exclusivas de administrador (organización, usuarios, fincas, sincronización) */}
+          <Route element={<AdminGuard />}>
+            <Route path="/admin/configuracion" element={<OrganizationConfigPage />} />
+            <Route path="/organizacion/informacion" element={<OrganizationInfoPage />} />
+            <Route path="/organizacion/editar" element={<EditOrganizationInfoPage />} />
+            <Route path="/admin/usuarios" element={<UsersManagementPage />} />
+            <Route path="/usuarios/nuevo" element={<CreateUserPage />} />
+            <Route path="/usuarios/:id" element={<UserInfoPage />} />
+            <Route path="/usuarios/editar/:id" element={<EditUserPage />} />
+            <Route path="/admin/fincas" element={<FarmsManagementPage />} />
+            <Route path="/fincas/:id" element={<FarmInfoPage />} />
+            <Route path="/fincas/nueva" element={<CreateFarmPage />} />
+            <Route path="/fincas/editar/:id" element={<EditFarmPage />} />
+            <Route path="/admin/sincronizacion" element={<SyncQueuePage />} />
+          </Route>
         </Route>
       </Route>
     </Route>

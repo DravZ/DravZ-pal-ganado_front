@@ -7,6 +7,7 @@ import { useFarmScope } from '../../../context/FarmScopeContext';
 import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import { queueHatoWrite, useHatoCollection } from '../../../services/hatoDataService';
 import useNotification from '../../../hooks/useNotification';
+import { todayLocalDate } from '../../../utils/dates';
 
 function addDays(date: string, days: number): Date | null {
   const [year, month, day] = date.split('-').map(Number);
@@ -38,9 +39,8 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
   const animals = rawAnimals.filter((animal) =>
     String(animal.status ?? '').toLowerCase() === 'active',
   );
-  const medications = rawMedications.filter((medication) =>
-    String(medication.status ?? 'active').toLowerCase() !== 'inactive',
-  );
+  // El catálogo de medicamentos no maneja estado; se listan todos los registros.
+  const medications = rawMedications;
   // Estado Sección 1: Evento de Salud
   const [animalId, setAnimalId] = useState<string>(searchParams.get('animalId') ?? '');
   const [eventType, setEventType] = useState<string>('Enfermedad');
@@ -76,6 +76,17 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
     ? localDate(new Date(Math.max(...withdrawalDates.map((date) => date.getTime()))))
     : undefined;
 
+  // Al elegir un medicamento, precarga los valores por defecto del catálogo.
+  const handleMedicationChange = (value: string) => {
+    setMedicationId(value);
+    const selected = medications.find((medication) => String(medication.id) === value);
+    if (!selected) return;
+    if (selected.route) setRoute(String(selected.route));
+    if (selected.default_unit) setDoseUnit(String(selected.default_unit));
+    const dosage = Number(selected.default_dosage);
+    if (Number.isFinite(dosage) && dosage > 0) setDoseValue(String(selected.default_dosage));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formElement = e.currentTarget;
@@ -89,6 +100,14 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
     }
     if (!Number.isFinite(Number(doseValue)) || Number(doseValue) <= 0) {
       setSubmitError('La dosis debe ser mayor que cero.');
+      return;
+    }
+    if (eventDate > todayLocalDate()) {
+      setSubmitError('La fecha del evento no puede ser futura.');
+      return;
+    }
+    if (endDate && startDate && endDate < startDate) {
+      setSubmitError('La fecha de fin no puede ser anterior a la fecha de inicio.');
       return;
     }
 
@@ -210,6 +229,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
                     type="date"
                     className={styles.input}
                     value={eventDate}
+                    max={todayLocalDate()}
                     onChange={(e) => setEventDate(e.target.value)}
                     required
                   />
@@ -266,7 +286,7 @@ export const HealthEventAndTreatmentPage: React.FC = () => {
                   <select
                     className={styles.select}
                     value={medicationId}
-                    onChange={(e) => setMedicationId(e.target.value)}
+                    onChange={(e) => handleMedicationChange(e.target.value)}
                     required
                   >
                     <option value="">Selecciona un medicamento</option>

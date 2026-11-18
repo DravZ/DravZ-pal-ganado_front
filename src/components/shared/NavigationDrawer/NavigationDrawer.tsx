@@ -18,6 +18,7 @@ import {
     type LucideIcon,
 } from 'lucide-react';
 import styles from './NavigationDrawer.module.css';
+import { useAuth } from '../../../context/AuthContext';
 
 // Estructura de navegación fuertemente tipada
 interface SubMenuItem {
@@ -26,6 +27,7 @@ interface SubMenuItem {
     icon: LucideIcon;
     path: string;
     badge?: number;
+    adminOnly?: boolean;
 }
 
 interface NavigationCategory {
@@ -39,7 +41,7 @@ interface NavigationCategory {
 const NAVIGATION_MENU: NavigationCategory[] = [
     {
         id: 'hato',
-        title: '1. MI HATO',
+        title: '1. MI GANADO',
         icon: Beef,
         subItems: [
             { id: 'animales', label: 'Directorio de animales', icon: Beef, path: '/hato/animales' },
@@ -83,11 +85,11 @@ const NAVIGATION_MENU: NavigationCategory[] = [
         subItems: [
             { id: 'tablero', label: 'Tablero de control', icon: Home, path: '/dashboard' },
             { id: 'estructura', label: 'Estructura del rancho', icon: Package, path: '/admin/estructura' },
-            { id: 'configuracion', label: 'Configuración de organización', icon: Home, path: '/admin/configuracion' },
-            { id: 'usuarios', label: 'Administrar usuarios', icon: Home, path: '/admin/usuarios' },
-            { id: 'fincas', label: 'Administrar fincas', icon: Home, path: '/admin/fincas' },
+            { id: 'configuracion', label: 'Configuración de organización', icon: Home, path: '/admin/configuracion', adminOnly: true },
+            { id: 'usuarios', label: 'Administrar usuarios', icon: Home, path: '/admin/usuarios', adminOnly: true },
+            { id: 'fincas', label: 'Administrar fincas', icon: Home, path: '/admin/fincas', adminOnly: true },
             { id: 'alertas', label: 'Centro de alertas', icon: Bell, path: '/admin/alertas' },
-            { id: 'sincronizacion', label: 'Monitor de sincronizació...', icon: RefreshCw, path: '/admin/sincronizacion', badge: 3 },
+            { id: 'sincronizacion', label: 'Monitor de sincronizació...', icon: RefreshCw, path: '/admin/sincronizacion', adminOnly: true },
         ],
     },
 ];
@@ -106,6 +108,15 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
     // Estado para la categoría actualmente expandida (Acordeón)
     const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>('hato');
     const navigate = useNavigate();
+    const { isAdmin } = useAuth();
+
+    // Oculta las opciones exclusivas de administrador para los trabajadores.
+    const visibleMenu = NAVIGATION_MENU
+        .map((category) => ({
+            ...category,
+            subItems: category.subItems.filter((subItem) => !subItem.adminOnly || isAdmin),
+        }))
+        .filter((category) => category.subItems.length > 0);
 
     if (!isOpen) return null;
 
@@ -113,8 +124,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
         setExpandedCategoryId((prev) => (prev === id ? null : id));
     };
 
-    const handleNavigate = (path: string, label: string) => {
-        console.log(`[Router Log]: Navegando a módulo -> ${path} (${label})`);
+    const handleNavigate = (path: string) => {
         navigate(path);
         onClose();
     };
@@ -142,7 +152,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
 
                 {/* Lista de Módulos */}
                 <div className={styles.drawerBody}>
-                    {NAVIGATION_MENU.map((category) => {
+                    {visibleMenu.map((category) => {
                         const isExpanded = expandedCategoryId === category.id;
                         const CategoryIcon = category.icon;
 
@@ -181,7 +191,7 @@ export const NavigationDrawer: React.FC<NavigationDrawerProps> = ({
                                                     className={`${styles.subItemLink} ${
                                                         isActive ? styles.subItemLinkActive : ''
                                                     }`}
-                                                    onClick={() => handleNavigate(subItem.path, subItem.label)}
+                                                    onClick={() => handleNavigate(subItem.path)}
                                                 >
                                                     <div className={styles.subItemLabelGroup}>
                                                         <SubIcon size={18} strokeWidth={2} />

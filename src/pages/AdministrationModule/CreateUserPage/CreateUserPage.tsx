@@ -9,6 +9,7 @@ import { useFormExitGuard } from '../../../context/FormExitGuardContext';
 import useNotification from '../../../hooks/useNotification';
 import { requestOnlineAdministrationWrite } from '../../../services/administrationService';
 import { cacheAdministrationRecord } from '../../../services/hatoDataService';
+import { ASSIGNABLE_ROLES, WORKER_ROLE } from '../../../utils/roles';
 
 export const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,13 +17,12 @@ export const CreateUserPage: React.FC = () => {
   const { farms, activeFarm } = useFarmScope();
   const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
-  const [formData, setFormData] = useState<CreateUserFormValues>({
+  const [formData, setFormData] = useState<Omit<CreateUserFormValues, 'status'>>({
     first_name: '',
     last_name: '',
     email: '',
     phone: '',
-    role: 'Perfil por confirmar',
-    status: 'Invitación pendiente',
+    role: WORKER_ROLE,
     farm_id: activeFarm?.id ?? '',
   });
   const [submissionError, setSubmissionError] = useState<string | null>(null);
@@ -108,11 +108,18 @@ export const CreateUserPage: React.FC = () => {
           <div className="row g-4 mt-1">
             <div className="col-12 col-md-6">
               <label htmlFor="role" className={styles.label}>Rol</label>
-              <input id="role" className={`${styles.input} ${styles.readOnlyInput}`} value={formData.role} readOnly disabled />
+              <div className={styles.selectWrapper}>
+                <select id="role" name="role" className={styles.selectInput} value={formData.role} onChange={handleChange} required>
+                  {ASSIGNABLE_ROLES.map((role) => <option key={role} value={role}>{role}</option>)}
+                </select>
+              </div>
             </div>
             <div className="col-12 col-md-6">
-              <label htmlFor="status" className={styles.label}>Estado</label>
-              <input id="status" className={`${styles.input} ${styles.readOnlyInput}`} value={formData.status} readOnly disabled />
+              <span className={styles.label}>Estado</span>
+              <div className={`${styles.input} ${styles.readOnlyInput}`}>Invitación pendiente</div>
+              <small className={styles.fieldHelpText}>
+                La cuenta se crea como invitación pendiente y se activa al iniciar sesión.
+              </small>
             </div>
             <div className="col-12 col-md-6">
               <label htmlFor="farm_id" className={styles.label}>Finca asociada</label>

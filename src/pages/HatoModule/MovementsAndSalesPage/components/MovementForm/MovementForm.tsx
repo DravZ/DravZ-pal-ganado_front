@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import styles from './MovementForm.module.css';
 import { ArrowLeftRight, Plus, Trash2, CheckCircle, Beef } from 'lucide-react';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
@@ -26,6 +27,8 @@ export const MovementForm: React.FC = () => {
   const { scope } = useFarmScope();
   const { markCurrentFormsSaved } = useFormExitGuard();
   const { showNotification } = useNotification();
+  const [searchParams] = useSearchParams();
+  const preselectAnimalId = searchParams.get('animalId') ?? '';
   const { records: rawLots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
   const { records: rawAnimals } = useHatoCollection<Record<string, unknown>>(
     'animals',
@@ -60,6 +63,18 @@ export const MovementForm: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasAppliedPreselect, setHasAppliedPreselect] = useState(false);
+
+  // Preselecciona el animal cuando se llega desde su ficha (?animalId=...).
+  // Se ajusta durante el render para no depender de un efecto con setState.
+  if (!hasAppliedPreselect && preselectAnimalId) {
+    const animal = animals.find((item) => item.id === preselectAnimalId);
+    if (animal) {
+      setOriginLotId(animal.lot_id);
+      setSelectedAnimals([{ animal, weight: animal.current_weight }]);
+      setHasAppliedPreselect(true);
+    }
+  }
 
   const handleAddAnimal = () => {
     const unselected = availableAnimals.find(

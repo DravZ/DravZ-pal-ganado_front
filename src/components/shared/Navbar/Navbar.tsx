@@ -34,12 +34,14 @@ interface NavbarProps {
     onLogout?: () => void;
     pendingSyncCount?: number;
     alertCount?: number;
+    isAdmin?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
     currentFarmName,
     activeFarmId,
     activePath = '/dashboard',
+    isAdmin = false,
     user = {
         name: 'Rafael Mendes',
         email: 'rafael@serraverde.com',
@@ -94,19 +96,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     }, []);
 
     const handleBrandClick = () => {
-        console.log('[Router Log]: Navegando a Dashboard');
         navigate('/dashboard');
     };
 
     // Función que cambia efectivamente la finca en pantalla
     const handleSelectFarmItem = (farm: FarmOption) => {
         setIsFarmMenuOpen(false);   // <- Cierra el desplegable
-
-        if (onSelectFarm) {
-            onSelectFarm(farm);
-        } else {
-            console.log(`[Action Log]: Finca seleccionada -> ${farm.name}`);
-        }
+        onSelectFarm?.(farm);
     };
 
     const handleNavigateMenu = (path: string) => {
@@ -119,7 +115,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         if (onLogout) {
             onLogout();
         } else {
-            console.log('[Action Log]: Cerrando sesión...');
             navigate('/');
         }
     };
@@ -192,20 +187,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Grupo Derecho: Notificaciones y Perfil */}
                 <div className={styles.rightGroup}>
-                    <button
-                        type="button"
-                        className={styles.notificationButton}
-                        onClick={() => navigate('/admin/sincronizacion')}
-                        aria-label={`Sincronizaciones pendientes: ${pendingSyncCount}`}
-                        title="Cola de sincronización"
-                    >
-                        <RefreshCw size={17} strokeWidth={2} />
-                        {pendingSyncCount > 0 && (
-                            <span className={`${styles.notificationBadge} ${styles.syncBadge}`}>
-                                {pendingSyncCount > 99 ? '99+' : pendingSyncCount}
-                            </span>
-                        )}
-                    </button>
+                    {isAdmin && (
+                        <button
+                            type="button"
+                            className={styles.notificationButton}
+                            onClick={() => navigate('/admin/sincronizacion')}
+                            aria-label={`Sincronizaciones pendientes: ${pendingSyncCount}`}
+                            title="Cola de sincronización"
+                        >
+                            <RefreshCw size={17} strokeWidth={2} />
+                            {pendingSyncCount > 0 && (
+                                <span className={`${styles.notificationBadge} ${styles.syncBadge}`}>
+                                    {pendingSyncCount > 99 ? '99+' : pendingSyncCount}
+                                </span>
+                            )}
+                        </button>
+                    )}
                     <button
                         type="button"
                         className={styles.notificationButton}
@@ -257,23 +254,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                                     <span>Mi perfil</span>
                                 </button>
 
-                                <button
-                                    type="button"
-                                    className={styles.menuOptionItem}
-                                    onClick={() => handleNavigateMenu('/admin/configuracion')}
-                                >
-                                    <Settings size={16} />
-                                    <span>Configuración de organización</span>
-                                </button>
+                                {isAdmin && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className={styles.menuOptionItem}
+                                            onClick={() => handleNavigateMenu('/admin/configuracion')}
+                                        >
+                                            <Settings size={16} />
+                                            <span>Configuración de organización</span>
+                                        </button>
 
-                                <button
-                                    type="button"
-                                    className={styles.menuOptionItem}
-                                    onClick={() => handleNavigateMenu('/admin/usuarios')}
-                                >
-                                    <Users size={16} />
-                                    <span>Administrar usuarios</span>
-                                </button>
+                                        <button
+                                            type="button"
+                                            className={styles.menuOptionItem}
+                                            onClick={() => handleNavigateMenu('/admin/usuarios')}
+                                        >
+                                            <Users size={16} />
+                                            <span>Administrar usuarios</span>
+                                        </button>
+                                    </>
+                                )}
 
                                 <div className={styles.dropdownDivider} />
 

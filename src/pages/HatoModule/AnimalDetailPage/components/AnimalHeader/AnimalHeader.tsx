@@ -22,17 +22,14 @@ export const AnimalHeader: React.FC<AnimalHeaderProps> = ({ animalId, animal }) 
 
   // Redirecciones hacia los flujos de acción
   const handleRegisterWeight = () => {
-    console.log(`[Router Log]: Redirigiendo a registro de peso para animal ${animalId}`);
-    navigate(`/hato/pesajes/nuevo?animalId=${animalId}`);
+    navigate(`/hato/pesajes?animalId=${encodeURIComponent(animalId)}`);
   };
 
   const handleMoveLot = () => {
-    console.log(`[Router Log]: Redirigiendo a mover lote para animal ${animalId}`);
-    navigate(`/hato/traslados/nuevo?animalId=${animalId}`);
+    navigate(`/hato/traslados?animalId=${encodeURIComponent(animalId)}`);
   };
 
   const handleApplyTreatment = () => {
-    console.log(`[Router Log]: Redirigiendo a tratamiento para animal ${animalId}`);
     navigate(`/salud/tratamientos?animalId=${encodeURIComponent(animalId)}`);
   };
 

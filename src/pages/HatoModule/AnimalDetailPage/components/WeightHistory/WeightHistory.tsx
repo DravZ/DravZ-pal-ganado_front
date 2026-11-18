@@ -43,8 +43,7 @@ export const WeightHistory: React.FC<WeightHistoryProps> = ({ animalId }) => {
   }).join(' ');
 
   const handleRegisterWeight = () => {
-    console.log(`[Router Log]: Redirigiendo a registro de peso para animal ${animalId}`);
-    navigate(`/hato/pesajes/nuevo?animalId=${animalId}`);
+    navigate(`/hato/pesajes?animalId=${encodeURIComponent(animalId)}`);
   };
 
   return (

@@ -129,6 +129,38 @@ export async function closeCurrentSession(): Promise<void> {
   });
 }
 
+export async function requestPasswordReset(email: string): Promise<void> {
+  if (!navigator.onLine) {
+    throw new Error('La recuperación de contraseña requiere conexión a internet.');
+  }
+  const csrfToken = await requestCsrfToken();
+  await requestSession<{ message: string }>('/auth/password-resets', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': csrfToken,
+    },
+    body: JSON.stringify({ email: email.trim() }),
+  });
+}
+
+export async function confirmPasswordReset(token: string, password: string): Promise<void> {
+  const passwordError = passwordPolicyError(password);
+  if (passwordError) throw new Error(passwordError);
+  if (!navigator.onLine) {
+    throw new Error('La recuperación de contraseña requiere conexión a internet.');
+  }
+  const csrfToken = await requestCsrfToken();
+  await requestSession<void>('/auth/password-resets/confirm', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': csrfToken,
+    },
+    body: JSON.stringify({ token, password }),
+  });
+}
+
 export async function registerAccount(
   userAndOrganization: RegistrationFormValues,
   farm: FarmFormValues,

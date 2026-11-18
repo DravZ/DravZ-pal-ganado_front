@@ -30,6 +30,7 @@ export type HatoResource =
   | 'suppliers'
   | 'expenses'
   | 'cost_allocations'
+  | 'financial_records'
   | 'users'
   | 'farms'
   | 'alerts'
@@ -78,6 +79,7 @@ const endpointByResource: Record<HatoResource, string> = {
   suppliers: '/suppliers',
   expenses: '/expenses',
   cost_allocations: '/cost-allocations',
+  financial_records: '/financial-records',
   users: '/users',
   farms: '/farms',
   alerts: '/alerts',
@@ -95,17 +97,18 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   treatments: ['CREATE'],
   lots: ['CREATE'],
   paddocks: ['CREATE', 'UPDATE', 'DELETE'],
-  customers: [],
+  customers: ['CREATE', 'UPDATE', 'DELETE'],
   medications: [],
   inventories: [],
-  animal_identifiers: [],
+  animal_identifiers: ['CREATE'],
   feeding_records: ['CREATE'],
   production_records: ['CREATE'],
   products: ['CREATE', 'UPDATE', 'DELETE'],
   purchase_records: ['CREATE', 'UPDATE', 'DELETE'],
-  suppliers: [],
+  suppliers: ['CREATE', 'UPDATE', 'DELETE'],
   expenses: ['CREATE'],
   cost_allocations: ['CREATE'],
+  financial_records: [],
   users: [],
   farms: [],
   alerts: ['UPDATE'],
@@ -307,6 +310,7 @@ export function useHatoCollection<T extends Record<string, unknown>>(
         'purchase_records',
         'expenses',
         'cost_allocations',
+        'financial_records',
       ].includes(resource)
       && !url.searchParams.has('farm_id')
     ) {
@@ -551,6 +555,47 @@ function mergeLocalPayload(
     : { ...payload, id: recordId };
 }
 
+/**
+ * Nombre de un lote/potrero ya guardado en el caché local.
+ * Devuelve `null` cuando el identificador está vacío (se está limpiando la ubicación),
+ * `undefined` cuando no hay un registro en caché (para no borrar un nombre válido) y
+ * el nombre cuando existe.
+ */
+async function cachedLocationName(
+  userId: string,
+  resource: 'lots' | 'paddocks',
+  recordId: unknown,
+): Promise<string | null | undefined> {
+  if (typeof recordId !== 'string' || !recordId) return null;
+  const record = await offlineDatabase.records.get([userId, resource, recordId]);
+  const name = record?.payload.name;
+  return typeof name === 'string' ? name : undefined;
+}
+
+/**
+ * Mantiene consistentes los campos denormalizados `lot_name`/`paddock_name` de un animal en el
+ * caché local. El backend los devuelve junto con `lot_id`/`paddock_id`, pero las escrituras locales
+ * (edición, movimiento o venta sin conexión) solo envían los identificadores; sin este ajuste la
+ * tabla y el detalle seguirían mostrando el lote/potrero anterior hasta sincronizar.
+ */
+async function withAnimalLocationNames(
+  userId: string,
+  resource: HatoResource,
+  payload: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  if (resource !== 'animals') return payload;
+  const next = { ...payload };
+  if (Object.prototype.hasOwnProperty.call(payload, 'lot_id')) {
+    const name = await cachedLocationName(userId, 'lots', payload.lot_id);
+    if (name !== undefined) next.lot_name = name;
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, 'paddock_id')) {
+    const name = await cachedLocationName(userId, 'paddocks', payload.paddock_id);
+    if (name !== undefined) next.paddock_name = name;
+  }
+  return next;
+}
+
 export async function queueHatoWrite(
   scope: HatoScope,
   resource: HatoResource,
@@ -611,7 +656,11 @@ export async function queueHatoWrite(
         await offlineDatabase.records.delete([scope.userId, resource, localId]);
         return;
       }
-      const localPayload = mergeLocalPayload(localId, operation, payload, previous?.payload);
+      const localPayload = await withAnimalLocationNames(
+        scope.userId,
+        resource,
+        mergeLocalPayload(localId, operation, payload, previous?.payload),
+      );
       await offlineDatabase.records.put({
         userId: scope.userId,
         organizationId: scope.organizationId,
@@ -786,8 +835,21 @@ async function applyConfirmedAnimalChanges(
     }
     if (Array.isArray(response.lines)) {
       for (const line of response.lines) {
-        if (isObject(line) && typeof line.animal_id === 'string') {
+        if (!isObject(line)) continue;
+        if (typeof line.animal_id === 'string') {
           updates.set(line.animal_id, { status: 'sold' });
+        } else if (typeof line.lot_id === 'string') {
+          // La venta de un lote marca como vendidos a todos sus animales activos.
+          const lotAnimals = await offlineDatabase.records
+            .where('[userId+resourceType]')
+            .equals([operation.userId, 'animals'])
+            .toArray();
+          for (const record of lotAnimals) {
+            if (record.farmId !== operation.farmId) continue;
+            if (String(record.payload.lot_id ?? '') !== line.lot_id) continue;
+            if (String(record.payload.status ?? 'active') !== 'active') continue;
+            updates.set(record.recordId, { status: 'sold' });
+          }
         }
       }
     }
@@ -803,7 +865,11 @@ async function applyConfirmedAnimalChanges(
     if (!animal || animal.farmId !== operation.farmId) continue;
     await offlineDatabase.records.put({
       ...animal,
-      payload: { ...animal.payload, ...changes },
+      payload: await withAnimalLocationNames(
+        operation.userId,
+        'animals',
+        { ...animal.payload, ...changes },
+      ),
       updatedAt: new Date().toISOString(),
     });
   }

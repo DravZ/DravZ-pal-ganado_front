@@ -7,11 +7,30 @@ import { AnimalTable, type AnimalItem } from './components/AnimalTable/AnimalTab
 import styles from './AnimalsDirectoryPage.module.css';
 import { useFarmScope } from '../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../services/hatoDataService';
+import { useInvestmentSummary, investmentByAnimalId } from '../../../services/investmentService';
 
 type HatoRecord = Record<string, unknown>;
 
 const text = (value: unknown, fallback = ''): string =>
   typeof value === 'string' ? value : fallback;
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Activo',
+  activo: 'Activo',
+  inactive: 'Inactivo',
+  inactivo: 'Inactivo',
+  baja: 'Inactivo',
+  eliminado: 'Inactivo',
+  sold: 'Vendido',
+  vendido: 'Vendido',
+  deceased: 'Fallecido',
+  muerto: 'Fallecido',
+};
+
+const statusLabel = (value: unknown): string => {
+  const raw = text(value).trim();
+  return STATUS_LABELS[raw.toLowerCase()] ?? (raw || 'Inactivo');
+};
 
 export const AnimalsDirectoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,6 +42,8 @@ export const AnimalsDirectoryPage: React.FC = () => {
   );
   const { records: lots } = useHatoCollection<HatoRecord>('lots', '/lots', scope);
   const { records: paddocks } = useHatoCollection<HatoRecord>('paddocks', '/paddocks', scope);
+  const { summary: investmentSummary } = useInvestmentSummary(scope);
+  const investments = investmentByAnimalId(investmentSummary);
   const animals: AnimalItem[] = rawAnimals.map((animal) => ({
     id: text(animal.id),
     tag: text(animal.identifier_tag, text(animal.tag_number, 'Sin identificador')),
@@ -35,10 +56,11 @@ export const AnimalsDirectoryPage: React.FC = () => {
     date: text(animal.current_weight_date, 'Sin fecha'),
     lote: text(animal.lot_name, 'Sin lote'),
     potrero: text(animal.paddock_name, 'Sin potrero'),
-    status: text(animal.status) === 'active' ? 'Activo' : text(animal.status, 'Inactivo'),
+    status: statusLabel(animal.status),
     lotId: text(animal.lot_id),
     paddockId: text(animal.paddock_id),
     photoBase64: text(animal.photo_base64, text(animal.photoBase64)),
+    investment: investments.get(text(animal.id))?.total_investment,
   }));
 
   // Estados de Filtros
@@ -58,11 +80,14 @@ export const AnimalsDirectoryPage: React.FC = () => {
 
   const filteredAnimals = animals.filter((animal) => {
     const query = searchTerm.trim().toLocaleLowerCase();
+    const matchesState = selectedEstado
+      ? animal.status === selectedEstado
+      : animal.status !== 'Inactivo';
     return (!query || `${animal.tag} ${animal.name} ${animal.breed}`.toLocaleLowerCase().includes(query))
       && (!selectedLote || animal.lotId === selectedLote)
       && (!selectedPotrero || animal.paddockId === selectedPotrero)
       && (!selectedSexo || animal.sex === selectedSexo)
-      && (!selectedEstado || animal.status === selectedEstado);
+      && matchesState;
   });
 
   return (

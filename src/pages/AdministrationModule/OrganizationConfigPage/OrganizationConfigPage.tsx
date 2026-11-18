@@ -66,7 +66,7 @@ export const OrganizationConfigPage: React.FC = () => {
             tag="FINCAS ASOCIADAS"
             title={`${farms.length} fincas disponibles`}
             description="Abre la administración de fincas existente."
-            onClick={() => navigate('/organizacion/fincas')}
+            onClick={() => navigate('/admin/fincas')}
           />
         </div>
       </div>

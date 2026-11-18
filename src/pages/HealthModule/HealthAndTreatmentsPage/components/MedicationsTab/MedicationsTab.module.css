@@ -47,6 +47,41 @@
   white-space: nowrap;
 }
 
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 12px;
+  border: none;
+  background-color: #1e4b27;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editBtn {
+  margin-top: 1rem;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #dce3db;
+  background-color: #ffffff;
+  color: #1e4b27;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.editBtn:hover {
+  background-color: #f2f8f3;
+}
+
 .medCard {
   background-color: #ffffff;
   border-radius: 20px;

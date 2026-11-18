@@ -1,24 +1,7 @@
-import React, { createContext, useState, useCallback, type ReactNode } from 'react';
+import React, { useState, useCallback, type ReactNode } from 'react';
 import GlobalNotificationModal from '../components/shared/GlobalNotificationModal/GlobalNotificationModal';
-
-export type NotificationType = 'success' | 'alert' | 'error';
-
-export interface NotificationOptions {
-  type: NotificationType;
-  title: string;
-  message: string;
-  buttonText?: string;
-  onConfirm?: () => void;
-}
-
-export interface NotificationContextType {
-  showNotification: (options: NotificationOptions) => void;
-  hideNotification: () => void;
-}
-
-export const NotificationContext = createContext<NotificationContextType | undefined>(
-  undefined
-);
+import { NotificationContext } from './notificationContextDefinition';
+import type { NotificationOptions } from './notificationContextDefinition';
 
 interface NotificationProviderProps {
   children: ReactNode;

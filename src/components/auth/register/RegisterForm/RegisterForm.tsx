@@ -112,7 +112,6 @@ export const RegisterForm: React.FC = () => {
   const handleOpenFarmModal = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      console.log('[Action Log]: Validación inicial de registro exitosa. Abriendo modal de finca...');
       setIsModalOpen(true);
     }
   };
@@ -160,7 +159,6 @@ export const RegisterForm: React.FC = () => {
         type="button"
         className={styles.backLinkTop}
         onClick={() => {
-          console.log('[Router Log]: Regresando a login');
           navigate('/');
         }}
       >

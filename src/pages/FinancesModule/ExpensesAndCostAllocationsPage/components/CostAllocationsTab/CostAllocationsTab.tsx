@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from './CostAllocationsTab.module.css';
 import { useFarmScope } from '../../../../../context/FarmScopeContext';
 import { useHatoCollection } from '../../../../../services/hatoDataService';
+import { useDerivedFinanceMovements } from '../../../../../services/financeDerivations';
 
 const colors = ['#1e4b27', '#52796f', '#d97706', '#64748b', '#a855f7', '#0891b2'];
 const money = (value: number) => value.toLocaleString('es-MX', {
@@ -22,6 +23,7 @@ export const CostAllocationsTab: React.FC = () => {
     scope,
   );
   const { records: expenses } = useHatoCollection<Record<string, unknown>>('expenses', '/expenses', scope);
+  const { expenses: derivedExpenses } = useDerivedFinanceMovements(scope);
   const { records: lots } = useHatoCollection<Record<string, unknown>>('lots', '/lots', scope);
   const { records: animals } = useHatoCollection<Record<string, unknown>>('animals', '/animals', scope);
 
@@ -61,7 +63,7 @@ export const CostAllocationsTab: React.FC = () => {
     }))
     .sort((left, right) => right.amount - left.amount);
   const totalAssigned = categoryRows.reduce((sum, item) => sum + item.amount, 0);
-  const totalExpenses = expenses
+  const totalExpenses = [...expenses, ...derivedExpenses]
     .filter((expense) => String(expense.expense_date ?? '').startsWith(selectedMonth))
     .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
   const unassigned = Math.max(totalExpenses - totalAssigned, 0);

@@ -97,22 +97,6 @@
   flex-shrink: 0;
 }
 
-.detailBtn {
-  padding: 0.75rem 1.25rem;
-  background-color: #ffffff;
-  color: #0f172a;
-  border: 1px solid #dce3db;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.detailBtn:hover {
-  background-color: #f8faf7;
-}
-
 .resolveBtn {
   display: inline-flex;
   align-items: center;
@@ -144,7 +128,6 @@
     margin-top: 0.5rem;
   }
 
-  .detailBtn,
   .resolveBtn {
     flex: 1;
     justify-content: center;

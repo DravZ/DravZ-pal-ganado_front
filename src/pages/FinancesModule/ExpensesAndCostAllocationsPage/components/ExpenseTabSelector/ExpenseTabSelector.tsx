@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './ExpenseTabSelector.module.css';
-import { Scale, ArrowLeftRight } from 'lucide-react';
+import { Scale, ArrowLeftRight, TrendingUp } from 'lucide-react';
 
-export type ExpenseTabType = 'EXPENSES' | 'COST_ALLOCATIONS';
+export type ExpenseTabType = 'EXPENSES' | 'COST_ALLOCATIONS' | 'INCOME';
 
 interface ExpenseTabSelectorProps {
   activeTab: ExpenseTabType;
@@ -31,6 +31,15 @@ export const ExpenseTabSelector: React.FC<ExpenseTabSelectorProps> = ({
       >
         <ArrowLeftRight size={18} />
         <span>Asignación de costos</span>
+      </button>
+
+      <button
+        type="button"
+        className={`${styles.tabBtn} ${activeTab === 'INCOME' ? styles.active : ''}`}
+        onClick={() => onChangeTab('INCOME')}
+      >
+        <TrendingUp size={18} />
+        <span>Ingresos</span>
       </button>
     </div>
   );

@@ -26,6 +26,7 @@ function toQueueRow(operation: SyncQueueOperation): SyncQueueRow {
     payload: operation.payload,
     status: operation.status === 'CONFLICT' ? 'FAILED' : 'PENDING',
     created_at: displayDate(operation.createdAt),
+    created_at_iso: operation.createdAt,
     error_message: operation.lastError,
   };
 }
@@ -40,12 +41,13 @@ export const SyncQueuePage: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const isOnline = !isOffline && navigator.onLine;
 
-  const operations = useLiveQuery(
+  const liveOperations = useLiveQuery(
     () => user
       ? offlineDatabase.syncQueue.where('userId').equals(user.id).sortBy('id')
       : Promise.resolve([] as SyncQueueOperation[]),
     [user?.id],
-  ) ?? [];
+  );
+  const operations = useMemo(() => liveOperations ?? [], [liveOperations]);
   const queueItems = useMemo(() => operations.map(toQueueRow), [operations]);
   const metrics = useMemo(() => ({
     total: queueItems.length,

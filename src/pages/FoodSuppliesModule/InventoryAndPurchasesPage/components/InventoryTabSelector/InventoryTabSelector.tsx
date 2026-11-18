@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './InventoryTabSelector.module.css';
-import { Package, ArrowLeftRight } from 'lucide-react';
+import { Package, ArrowLeftRight, Truck } from 'lucide-react';
 import type { InventoryTabType } from '../../InventoryAndPurchasesPage';
 
 interface InventoryTabSelectorProps {
@@ -30,6 +30,15 @@ export const InventoryTabSelector: React.FC<InventoryTabSelectorProps> = ({
       >
         <ArrowLeftRight size={18} />
         <span>Compras y entradas</span>
+      </button>
+
+      <button
+        type="button"
+        className={`${styles.tabBtn} ${activeTab === 'SUPPLIERS' ? styles.active : ''}`}
+        onClick={() => onChangeTab('SUPPLIERS')}
+      >
+        <Truck size={18} />
+        <span>Proveedores</span>
       </button>
     </div>
   );

@@ -24,12 +24,14 @@ import {
   type SyncUser,
 } from '../services/offlineSyncService';
 import useNotification from '../hooks/useNotification';
+import { isAdminRole } from '../utils/roles';
 
 interface AuthContextValue {
   user: SyncUser | null;
   isReady: boolean;
   isOffline: boolean;
   offlineReady: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   renewSession: () => Promise<void>;
@@ -267,6 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isReady,
         isOffline: !isOnline || !hasServerSession,
         offlineReady,
+        isAdmin: isAdminRole(user?.role),
         login,
         logout,
         renewSession,

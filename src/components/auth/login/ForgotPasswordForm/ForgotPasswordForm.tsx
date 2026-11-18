@@ -2,17 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ForgotPasswordForm.module.css';
 import { KeyRound } from 'lucide-react';
-import type { PasswordRecoveryRequest } from '../../../../types/database.types';
+import { requestPasswordReset } from '../../../../services/authService';
 
 type FormState = 'form' | 'loading' | 'success';
 
 export const ForgotPasswordForm: React.FC = () => {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState<string>('sdfsdf@xdf.c');
+    const [email, setEmail] = useState<string>('');
     const [formState, setFormState] = useState<FormState>('form');
     const [errorMessage, setErrorMessage] = useState<string>('');
-    const [serverErrorSimulated, setServerErrorSimulated] = useState<boolean>(false);
 
     const validateEmail = (): boolean => {
         if (!email.trim()) {
@@ -27,48 +26,26 @@ export const ForgotPasswordForm: React.FC = () => {
         return true;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateEmail()) return;
 
-        const request: PasswordRecoveryRequest = { email };
-        const payload = {
-            ...request,
-            timestamp: new Date().toISOString(),
-            action: 'REQUEST_PASSWORD_RESET',
-        };
-
-        console.log('[Action Log]: Formulario de recuperación enviado. JSON Payload preparado para Backend:', payload);
-
         setFormState('loading');
 
-        // Simulación de respuesta de Backend
-        setTimeout(() => {
-            if (serverErrorSimulated) {
-                setErrorMessage('Ocurrió un error en el servidor. Por favor intenta de nuevo.');
-                setFormState('form');
-                setServerErrorSimulated(false);
-            } else {
-                setFormState('success');
-            }
-        }, 2200);
-    };
-
-    const handleSimulateServerError = () => {
-        console.log('[Action Log]: Simular error de servidor activado');
-        setServerErrorSimulated(true);
-        if (validateEmail()) {
-            setFormState('loading');
-            setTimeout(() => {
-                setErrorMessage('Error simulado: No se pudo conectar con el servidor.');
-                setFormState('form');
-                setServerErrorSimulated(false);
-            }, 1500);
+        try {
+            await requestPasswordReset(email);
+            setFormState('success');
+        } catch (cause) {
+            setErrorMessage(
+                cause instanceof Error
+                    ? cause.message
+                    : 'No se pudo enviar la solicitud. Intenta de nuevo.'
+            );
+            setFormState('form');
         }
     };
 
     const handleBackToLogin = () => {
-        console.log('[Router Log]: Navegando a inicio de sesión');
         navigate('/');
     };
 
@@ -140,10 +117,6 @@ export const ForgotPasswordForm: React.FC = () => {
                         <button type="button" className={styles.secondaryButton} onClick={handleBackToLogin}>
                             Volver al inicio de sesión
                         </button>
-
-                        <button type="button" className={styles.simulateErrorBtn} onClick={handleSimulateServerError}>
-                            Simular error del servidor
-                        </button>
                     </form>
                 </div>
             )}
@@ -210,7 +183,6 @@ export const ForgotPasswordForm: React.FC = () => {
                         type="button"
                         className={styles.secondaryButton}
                         onClick={() => {
-                            console.log('[Action Log]: Intentar con otro correo');
                             setFormState('form');
                         }}
                     >

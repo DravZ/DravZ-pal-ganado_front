@@ -2,18 +2,18 @@ import React from 'react';
 import { Bell, Package, Check, Utensils } from 'lucide-react';
 import styles from './AlertCard.module.css';
 import type { AlertUIItem } from '../../AlertsPage';
+import {
+  isCriticalSeverity,
+  isHighSeverity,
+  severityLabel,
+} from '../../../../../utils/alertSeverity';
 
 interface AlertCardProps {
   alert: AlertUIItem;
-  onDetail: () => void;
   onResolve: () => void;
 }
 
-export const AlertCard: React.FC<AlertCardProps> = ({
-  alert,
-  onDetail,
-  onResolve
-}) => {
+export const AlertCard: React.FC<AlertCardProps> = ({ alert, onResolve }) => {
   // Ícono según la categoría de la alerta
   const renderIcon = () => {
     switch (alert.category) {
@@ -28,15 +28,15 @@ export const AlertCard: React.FC<AlertCardProps> = ({
 
   // Clases CSS para el borde de severidad
   const getSeverityBorder = () => {
-    if (alert.severity === 'CRÍTICA') return styles.borderCritical;
-    if (alert.severity === 'ALTA') return styles.borderHigh;
+    if (isCriticalSeverity(alert.severity)) return styles.borderCritical;
+    if (isHighSeverity(alert.severity)) return styles.borderHigh;
     return styles.borderMedium;
   };
 
   // Clases CSS para el badge de severidad
   const getSeverityBadge = () => {
-    if (alert.severity === 'CRÍTICA') return styles.badgeCritical;
-    if (alert.severity === 'ALTA') return styles.badgeHigh;
+    if (isCriticalSeverity(alert.severity)) return styles.badgeCritical;
+    if (isHighSeverity(alert.severity)) return styles.badgeHigh;
     return styles.badgeMedium;
   };
 
@@ -48,7 +48,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         <div className={styles.textContent}>
           <div className={styles.badgesFlex}>
             <span className={`${styles.severityBadge} ${getSeverityBadge()}`}>
-              {alert.severity === 'CRÍTICA' ? 'Crítica' : alert.severity === 'ALTA' ? 'Alta' : 'Media'}
+              {severityLabel(alert.severity)}
             </span>
             <span className={styles.categoryTag}>{alert.category}</span>
           </div>
@@ -64,9 +64,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
       </div>
 
       <div className={styles.actionsFlex}>
-        <button type="button" className={styles.detailBtn} onClick={onDetail}>
-          Ver detalle
-        </button>
         <button type="button" className={styles.resolveBtn} onClick={onResolve}>
           <Check size={18} />
           <span>Resolver</span>

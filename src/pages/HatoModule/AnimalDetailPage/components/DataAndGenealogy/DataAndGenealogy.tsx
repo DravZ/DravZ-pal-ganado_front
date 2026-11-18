@@ -2,6 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Beef, ChevronRight } from 'lucide-react';
 import { animalPhotoSource } from '../../../RegisterAnimalPage/components/AnimalPhotoField/animalPhotoUtils';
+import { useFarmScope } from '../../../../../context/FarmScopeContext';
+import { useHatoCollection } from '../../../../../services/hatoDataService';
+import { useInvestmentSummary, investmentByAnimalId } from '../../../../../services/investmentService';
 import styles from './DataAndGenealogy.module.css';
 
 interface DataAndGenealogyProps {
@@ -12,6 +15,19 @@ interface DataAndGenealogyProps {
 
 export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, animal, animals }) => {
   const navigate = useNavigate();
+  const { scope } = useFarmScope();
+  const { records: identifierRecords } = useHatoCollection<Record<string, unknown>>(
+    'animal_identifiers',
+    `/animal-identifiers?animal_id=${encodeURIComponent(animalId)}`,
+    scope,
+  );
+  const { summary: investmentSummary } = useInvestmentSummary(scope);
+  const investment = investmentByAnimalId(investmentSummary).get(animalId);
+  const money = (value: number) => value.toLocaleString('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 2,
+  });
   const tag = String(animal.identifier_tag ?? animal.tag_number ?? animalId);
   const name = String(animal.name ?? 'Sin nombre');
   const photoBase64 = String(animal.photo_base64 ?? animal.photoBase64 ?? '');
@@ -23,15 +39,30 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
   const display = (value: unknown, fallback = 'No registrado') =>
     value === null || value === undefined || value === '' ? fallback : String(value);
 
+  // Identificadores: se listan los registros dedicados y, si no hay, el arete principal del animal.
+  const identifiers = identifierRecords.length > 0
+    ? identifierRecords.map((identifier) => ({
+      id: String(identifier.id ?? identifier.identifier ?? ''),
+      value: String(identifier.identifier ?? ''),
+      type: String(identifier.identifier_type ?? ''),
+      isCurrent: Boolean(identifier.is_current),
+    }))
+    : (animal.identifier_tag ?? animal.tag_number)
+      ? [{
+        id: 'primary',
+        value: String(animal.identifier_tag ?? animal.tag_number),
+        type: String(animal.identifier_type ?? ''),
+        isCurrent: true,
+      }]
+      : [];
+
   // Navegación para editar el animal
   const handleEditAnimal = () => {
-    console.log(`[Router Log]: Redirigiendo a edición del animal ${animalId}`);
     navigate(`/hato/animales/${animalId}/editar`);
   };
 
   // Navegación hacia la ficha de un pariente o cría
   const handleNavigateToAnimal = (targetId: string) => {
-    console.log(`[Router Log]: Navegando a la ficha del pariente/cría ${targetId}`);
     navigate(`/hato/animales/${targetId}`);
   };
 
@@ -128,17 +159,86 @@ export const DataAndGenealogy: React.FC<DataAndGenealogyProps> = ({ animalId, an
         <div className={styles.card}>
           <div className="d-flex align-items-center justify-content-between mb-3">
             <span className={styles.kicker}>IDENTIFICADORES</span>
-            <span className={styles.badgePill}>{animal.identifier_tag ? '1 activo' : '0 activos'}</span>
+            <span className={styles.badgePill}>
+              {`${identifiers.length} ${identifiers.length === 1 ? 'activo' : 'activos'}`}
+            </span>
           </div>
 
           <div className="d-flex flex-column gap-2">
-            {animal.identifier_tag
-              ? <div className="d-flex align-items-center justify-content-between py-1">
-                <span className={styles.fieldVal}>{String(animal.identifier_tag)}</span>
-                <span className="text-secondary" style={{ fontSize: '0.8rem' }}>Identificador actual</span>
-              </div>
+            {identifiers.length > 0
+              ? identifiers.map((identifier) => (
+                <div
+                  key={identifier.id}
+                  className="d-flex align-items-center justify-content-between py-1"
+                >
+                  <div className="d-flex flex-column">
+                    <span className={styles.fieldVal}>{identifier.value}</span>
+                    {identifier.type && (
+                      <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                        {identifier.type}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-secondary" style={{ fontSize: '0.8rem' }}>
+                    {identifier.isCurrent ? 'Identificador actual' : 'Identificador secundario'}
+                  </span>
+                </div>
+              ))
               : <span className="text-secondary">No hay identificadores disponibles.</span>}
           </div>
+        </div>
+
+        {/* Bloque Inversión */}
+        <div className={`${styles.card} mt-3`}>
+          <div className="d-flex align-items-center justify-content-between mb-2">
+            <div>
+              <div className={styles.kicker}>INVERSIÓN</div>
+              <h2 className={styles.title} style={{ fontSize: '1rem' }}>Dinero invertido</h2>
+            </div>
+            {investment && (
+              <span className={styles.badgePill}>{money(investment.total_investment)}</span>
+            )}
+          </div>
+
+          {investment ? (
+            <table className={styles.dataTable}>
+              <tbody>
+                <tr>
+                  <td>
+                    <span className={styles.fieldLabel}>Costo de adquisición</span>
+                    <span className={styles.fieldVal}>{money(investment.acquisition_cost)}</span>
+                  </td>
+                  <td>
+                    <span className={styles.fieldLabel}>Costos asignados</span>
+                    <span className={styles.fieldVal}>{money(investment.assigned_costs)}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span className={styles.fieldLabel}>Alimentación</span>
+                    <span className={styles.fieldVal}>{money(investment.feeding_cost)}</span>
+                  </td>
+                  <td>
+                    <span className={styles.fieldLabel}>Gastos de finca</span>
+                    <span className={styles.fieldVal}>{money(investment.farm_overhead)}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={2}>
+                    <span className={styles.fieldLabel}>Punto mínimo de venta</span>
+                    <span className={styles.fieldVal}>{money(investment.break_even_price)}</span>
+                    <span className="text-secondary d-block" style={{ fontSize: '0.75rem' }}>
+                      A partir de este precio no pierdes con la venta.
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <span className="text-secondary">
+              Sin datos de inversión para este animal.
+            </span>
+          )}
         </div>
       </div>
 

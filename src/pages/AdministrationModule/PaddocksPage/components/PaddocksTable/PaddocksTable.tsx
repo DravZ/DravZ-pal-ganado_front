@@ -5,9 +5,10 @@ import { ChevronRight } from 'lucide-react';
 
 interface PaddocksTableProps {
   paddocks: PaddockUI[];
+  onEdit: (paddock: PaddockUI) => void;
 }
 
-export const PaddocksTable: React.FC<PaddocksTableProps> = ({ paddocks }) => {
+export const PaddocksTable: React.FC<PaddocksTableProps> = ({ paddocks, onEdit }) => {
   return (
     <div className={styles.cardBox}>
       <div className={styles.tableResponsiveContainer}>
@@ -56,8 +57,8 @@ export const PaddocksTable: React.FC<PaddocksTableProps> = ({ paddocks }) => {
                   </span>
                 </td>
                 <td>
-                  <button type="button" className={styles.detailBtn}>
-                    <span>Ver detalle</span>
+                  <button type="button" className={styles.detailBtn} onClick={() => onEdit(p)}>
+                    <span>Editar</span>
                     <ChevronRight size={16} />
                   </button>
                 </td>

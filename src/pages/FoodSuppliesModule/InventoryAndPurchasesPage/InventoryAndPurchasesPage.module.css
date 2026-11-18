@@ -60,6 +60,33 @@
   background-color: #15381d;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #ffffff;
+  color: #1e4b27;
+  border: 1px solid #1e4b27;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.secondaryBtn:hover {
+  background-color: #eaf3ed;
+}
+
 @media (max-width: 576px) {
   .pageContainer {
     padding: 1rem;

@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import styles from './UsersTable.module.css';
 import type { UserUIItem } from '../../UsersManagementPage';
+import { isUserActive, userStatusLabel } from '../../../../../utils/userStatus';
 
 interface UsersTableProps {
   users: UserUIItem[];
@@ -23,7 +24,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ users, onUserClick }) =>
     {/* Filas */}
     <div className={styles.tableBody}>
       {users.map((u) => {
-        const isPending = u.status === 'pending_invitation';
+        const isActive = isUserActive(u.status);
         return (
           <div
             key={u.id}
@@ -52,10 +53,10 @@ export const UsersTable: React.FC<UsersTableProps> = ({ users, onUserClick }) =>
             <div className={styles.colStatusBadge}>
               <span
                 className={`${styles.badge} ${
-                  isPending ? styles.badgePending : styles.badgeActive
+                  isActive ? styles.badgeActive : styles.badgePending
                 }`}
               >
-                {isPending ? 'Invitación pendiente' : 'Activo'}
+                {userStatusLabel(u.status)}
               </span>
             </div>
 

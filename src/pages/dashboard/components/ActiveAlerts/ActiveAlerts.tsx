@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ActiveAlerts.module.css';
+import { isUrgentSeverity } from '../../../../utils/alertSeverity';
 
 export interface DashboardAlert {
   id: string;
@@ -33,7 +34,7 @@ function timeLabel(alert: DashboardAlert): string {
 }
 
 function isUrgent(severity: string): boolean {
-  return ['ALTA', 'CRÍTICA', 'CRITICA'].includes(severity.toUpperCase());
+  return isUrgentSeverity(severity);
 }
 
 export const ActiveAlerts: React.FC<ActiveAlertsProps> = ({ alerts, isLoading }) => {

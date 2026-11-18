@@ -129,7 +129,7 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
             <span className={styles.dbLabel}>PURCHASES + PURCHASE_LINES</span>
             <h2 className={styles.title}>Registrar compra</h2>
             <p className={styles.subtitle}>
-              La compra generará entradas de inventario automáticamente.
+              La compra sumará la cantidad al stock de cada producto.
             </p>
           </div>
           <button type="button" className={styles.closeBtn} onClick={onClose}>
@@ -272,10 +272,10 @@ export const RegisterPurchaseModal: React.FC<RegisterPurchaseModalProps> = ({
                 <RefreshCw size={20} className={styles.autoEntryIcon} />
                 <div>
                   <div className={styles.autoEntryTitle}>
-                    Entrada automática de inventario
+                    Actualización automática de stock
                   </div>
                   <div className={styles.autoEntrySubtitle}>
-                    Se crearán {lines.length} registros en inventory_movements.
+                    Se sumará la cantidad comprada al stock de {lines.length} {lines.length === 1 ? 'producto' : 'productos'}.
                   </div>
                 </div>
               </div>

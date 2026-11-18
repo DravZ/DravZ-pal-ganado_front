@@ -32,3 +32,25 @@
   margin: 0;
   line-height: 1.45;
 }
+
+.actionBtn {
+  margin-top: 0.85rem;
+  padding: 0.6rem 1.25rem;
+  background-color: #b45309;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.actionBtn:hover {
+  background-color: #92400e;
+}
+
+.actionBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
