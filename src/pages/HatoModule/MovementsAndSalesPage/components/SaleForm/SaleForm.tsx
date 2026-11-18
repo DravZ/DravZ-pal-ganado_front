@@ -296,7 +296,7 @@ export const SaleForm: React.FC = () => {
                     value={line.weight}
                     onChange={(e) => handleUpdateLine(line.id, 'weight', parseFloat(e.target.value) || 0)}
                     min="0.001"
-                    step="0.01"
+                    step="any"
                     required
                   />
                   <span className={styles.unitText}>kg</span>

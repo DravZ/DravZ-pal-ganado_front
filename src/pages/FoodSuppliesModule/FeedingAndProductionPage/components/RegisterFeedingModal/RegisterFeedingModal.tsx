@@ -186,7 +186,7 @@ export const RegisterFeedingModal: React.FC<RegisterFeedingModalProps> = ({
               <label className={styles.label}>Cantidad</label>
               <input
                 type="number"
-                step="0.1"
+                step="any"
                 className={styles.input}
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}

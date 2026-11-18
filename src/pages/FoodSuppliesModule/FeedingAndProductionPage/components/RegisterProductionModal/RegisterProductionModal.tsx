@@ -184,7 +184,7 @@ export const RegisterProductionModal: React.FC<RegisterProductionModalProps> = (
                             <label className={styles.label}>Cantidad</label>
                             <input
                                 type="number"
-                                step="0.1"
+                                step="any"
                                 className={styles.input}
                                 value={quantity}
                                 onChange={(e) => setQuantity(e.target.value)}
