@@ -2,12 +2,12 @@ import React from 'react';
 import { Home, Beef } from 'lucide-react';
 import styles from './Step3LocationGenealogy.module.css';
 import type { AnimalFormChange, AnimalFormData } from '../../types';
-import FarmLocationFields from '../FarmLocationFields/FarmLocationFields';
+import FarmLocationFields, { type LotOption } from '../FarmLocationFields/FarmLocationFields';
 
 interface Step3Props {
   formData: AnimalFormData;
   onChange: AnimalFormChange;
-  lots: { id: string; name: string }[];
+  lots: LotOption[];
   lotsLoading: boolean;
   lotsError: string | null;
   paddocks: { id: string; name: string }[];

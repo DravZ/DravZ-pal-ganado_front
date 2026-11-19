@@ -55,10 +55,15 @@ export interface Paddock {
   farm_id: string; // uuid [ref: > farms.id]
   name: string; // varchar(150) [not null]
   code?: string; // varchar(50)
-  hectares?: number; // decimal(12,2)
-  capacity?: number; // decimal(12,2)
+  area_hectares?: number; // decimal(12,2)
+  hectares?: number; // decimal(12,2) [alias de area_hectares]
+  capacity?: number; // int [número máximo de animales]
   forage_type?: string; // varchar(100)
   status: 'active' | 'inactive' | string; // varchar(30) [default: 'active']
+  // Derivados que calcula el backend a partir de los lotes ubicados en el potrero.
+  current_animals?: number;
+  available_capacity?: number | null;
+  occupancy_percentage?: number | null;
 }
 
 // ==========================================
@@ -72,13 +77,32 @@ export interface Lot {
   code?: string; // varchar(50)
   lot_type?: string; // varchar(50)
   purpose?: string; // varchar(100)
-  current_paddock_id?: string; // uuid [ref: > paddocks.id]
+  current_paddock_id: string; // uuid [ref: > paddocks.id] [not null]
+  current_paddock_name?: string; // derivado del potrero actual
+  animal_count?: number; // derivado: animales activos del lote
   start_date?: string; // date
   end_date?: string; // date
   status: 'active' | 'archived' | string; // varchar(30) [default: 'active']
   notes?: string; // text
   created_at: string; // timestamp
   updated_at?: string; // timestamp
+}
+
+export interface LotMovement {
+  id: string; // uuid [pk]
+  farm_id: string; // uuid [ref: > farms.id]
+  lot_id: string; // uuid [ref: > lots.id]
+  lot_name?: string;
+  origin_paddock_id?: string; // uuid [ref: > paddocks.id] (null en la asignación inicial)
+  origin_paddock_name?: string;
+  destination_paddock_id: string; // uuid [ref: > paddocks.id]
+  destination_paddock_name?: string;
+  movement_date: string; // timestamp [not null]
+  animal_count?: number;
+  moved_by_id?: string; // uuid [ref: > users.id]
+  moved_by_name?: string;
+  notes?: string; // text
+  created_at: string; // timestamp
 }
 
 // ==========================================
@@ -98,8 +122,10 @@ export interface Animal {
   birth_weight?: number; // decimal(10,2)
   sire_id?: string; // uuid [ref: > animals.id]
   dam_id?: string; // uuid [ref: > animals.id]
-  current_lot_id?: string; // uuid [ref: > lots.id]
-  current_paddock_id?: string; // uuid [ref: > paddocks.id]
+  lot_id?: string; // uuid [ref: > lots.id] (la ubicación se deriva del potrero del lote)
+  lot_name?: string; // derivado
+  paddock_id?: string; // uuid [ref: > paddocks.id] (derivado del lote, solo lectura)
+  paddock_name?: string; // derivado
   status: 'active' | 'sold' | 'deceased' | string; // varchar(50) [default: 'active']
   current_weight?: number; // decimal(10,2)
   current_weight_date?: string; // date

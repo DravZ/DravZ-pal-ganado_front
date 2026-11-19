@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { AnimalStats } from './components/AnimalStats/AnimalStats';
 import { AnimalFilters } from './components/AnimalFilters/AnimalFilters';
@@ -63,12 +63,23 @@ export const AnimalsDirectoryPage: React.FC = () => {
     investment: investments.get(text(animal.id))?.total_investment,
   }));
 
-  // Estados de Filtros
+  // Estados de Filtros. El lote y el potrero viven en la URL para poder llegar al directorio
+  // con un filtro preseleccionado desde Gestión de lotes (por ejemplo /hato/animales?lote=<id>).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedLote = searchParams.get('lote') ?? '';
+  const selectedPotrero = searchParams.get('potrero') ?? '';
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLote, setSelectedLote] = useState('');
-  const [selectedPotrero, setSelectedPotrero] = useState('');
   const [selectedSexo, setSelectedSexo] = useState('');
   const [selectedEstado, setSelectedEstado] = useState('');
+
+  const setLocationFilter = (key: 'lote' | 'potrero', value: string) => {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      if (value) next.set(key, value);
+      else next.delete(key);
+      return next;
+    }, { replace: true });
+  };
 
   const handleRegisterAnimal = () => {
     navigate('/hato/nuevo');
@@ -130,9 +141,9 @@ export const AnimalsDirectoryPage: React.FC = () => {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         selectedLote={selectedLote}
-        onLoteChange={setSelectedLote}
+        onLoteChange={(value) => setLocationFilter('lote', value)}
         selectedPotrero={selectedPotrero}
-        onPotreroChange={setSelectedPotrero}
+        onPotreroChange={(value) => setLocationFilter('potrero', value)}
         selectedSexo={selectedSexo}
         onSexoChange={setSelectedSexo}
         selectedEstado={selectedEstado}

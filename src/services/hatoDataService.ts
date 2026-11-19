@@ -19,6 +19,7 @@ export type HatoResource =
   | 'treatments'
   | 'lots'
   | 'paddocks'
+  | 'lot_movements'
   | 'customers'
   | 'medications'
   | 'inventories'
@@ -68,6 +69,7 @@ const endpointByResource: Record<HatoResource, string> = {
   treatments: '/treatments',
   lots: '/lots',
   paddocks: '/paddocks',
+  lot_movements: '/lot-movements',
   customers: '/customers',
   medications: '/medications',
   inventories: '/inventories',
@@ -95,8 +97,9 @@ const supportedOperations: Record<HatoResource, WriteOperation[]> = {
   movements: ['CREATE'],
   sales_records: ['CREATE', 'UPDATE', 'DELETE'],
   treatments: ['CREATE'],
-  lots: ['CREATE'],
+  lots: ['CREATE', 'UPDATE'],
   paddocks: ['CREATE', 'UPDATE', 'DELETE'],
+  lot_movements: [],
   customers: ['CREATE', 'UPDATE', 'DELETE'],
   medications: [],
   inventories: [],
@@ -218,7 +221,6 @@ function normalizeAdministrationPayload(payload: Record<string, unknown>): Recor
     totalAreaHectares: 'total_area_hectares',
     areaHectares: 'area_hectares',
     forageType: 'forage_type',
-    capacityAnimalUnits: 'capacity_animal_units',
     resolvedAt: 'resolved_at',
     resolvedBy: 'resolved_by',
     alertType: 'alert_type',
@@ -302,6 +304,7 @@ export function useHatoCollection<T extends Record<string, unknown>>(
       [
         'lots',
         'paddocks',
+        'lot_movements',
         'movements',
         'sales_records',
         'feeding_records',
@@ -596,10 +599,10 @@ async function cachedLocationName(
 }
 
 /**
- * Mantiene consistentes los campos denormalizados `lot_name`/`paddock_name` de un animal en el
- * caché local. El backend los devuelve junto con `lot_id`/`paddock_id`, pero las escrituras locales
- * (edición, movimiento o venta sin conexión) solo envían los identificadores; sin este ajuste la
- * tabla y el detalle seguirían mostrando el lote/potrero anterior hasta sincronizar.
+ * Mantiene consistentes los campos denormalizados `lot_name`/`paddock_id`/`paddock_name` de un
+ * animal en el caché local. El backend deriva el potrero del lote del animal, así que una escritura
+ * local (edición, movimiento o venta sin conexión) que solo envía `lot_id` debe recalcular el
+ * potrero a partir del lote cacheado para que la tabla y el detalle no muestren la ubicación anterior.
  */
 async function withAnimalLocationNames(
   userId: string,
@@ -609,12 +612,23 @@ async function withAnimalLocationNames(
   if (resource !== 'animals') return payload;
   const next = { ...payload };
   if (Object.prototype.hasOwnProperty.call(payload, 'lot_id')) {
-    const name = await cachedLocationName(userId, 'lots', payload.lot_id);
-    if (name !== undefined) next.lot_name = name;
-  }
-  if (Object.prototype.hasOwnProperty.call(payload, 'paddock_id')) {
-    const name = await cachedLocationName(userId, 'paddocks', payload.paddock_id);
-    if (name !== undefined) next.paddock_name = name;
+    const lotName = await cachedLocationName(userId, 'lots', payload.lot_id);
+    if (lotName !== undefined) next.lot_name = lotName;
+    if (typeof payload.lot_id === 'string' && payload.lot_id) {
+      const lot = await offlineDatabase.records.get([userId, 'lots', payload.lot_id]);
+      if (lot) {
+        next.paddock_id = typeof lot.payload.current_paddock_id === 'string'
+          ? lot.payload.current_paddock_id
+          : null;
+        next.paddock_name = typeof lot.payload.current_paddock_name === 'string'
+          ? lot.payload.current_paddock_name
+          : null;
+      }
+    } else {
+      // Sin lote no hay ubicación derivable.
+      next.paddock_id = null;
+      next.paddock_name = null;
+    }
   }
   return next;
 }
@@ -850,6 +864,25 @@ async function applyConfirmedAnimalChanges(
         if (isObject(entry) && typeof entry.animal_id === 'string') {
           updates.set(entry.animal_id, { lot_id: destinationLotId });
         }
+      }
+    }
+  } else if (operation.resourceType === 'lots') {
+    // Un traslado de lote cambia el potrero de todos sus animales. Reflejamos el nuevo potrero en
+    // los animales cacheados del lote para no mostrar la ubicación anterior.
+    const lotId = typeof response.id === 'string' ? response.id : null;
+    if (lotId) {
+      const paddockId = typeof response.current_paddock_id === 'string'
+        ? response.current_paddock_id : null;
+      const paddockName = typeof response.current_paddock_name === 'string'
+        ? response.current_paddock_name : null;
+      const lotAnimals = await offlineDatabase.records
+        .where('[userId+resourceType]')
+        .equals([operation.userId, 'animals'])
+        .toArray();
+      for (const record of lotAnimals) {
+        if (record.farmId !== operation.farmId) continue;
+        if (String(record.payload.lot_id ?? '') !== lotId) continue;
+        updates.set(record.recordId, { paddock_id: paddockId, paddock_name: paddockName });
       }
     }
   } else if (operation.resourceType === 'sales_records') {

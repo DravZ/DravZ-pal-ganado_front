@@ -6,9 +6,10 @@ import type { PaddockUI } from '../../PaddocksPage';
 interface PaddockCardProps {
   paddock: PaddockUI;
   onEdit: (paddock: PaddockUI) => void;
+  onOpen: (paddock: PaddockUI) => void;
 }
 
-export const PaddockCard: React.FC<PaddockCardProps> = ({ paddock, onEdit }) => {
+export const PaddockCard: React.FC<PaddockCardProps> = ({ paddock, onEdit, onOpen }) => {
   const isResting = paddock.badge_status === 'Descanso';
 
   return (
@@ -52,10 +53,15 @@ export const PaddockCard: React.FC<PaddockCardProps> = ({ paddock, onEdit }) => 
           <span className={styles.occupancySubtext}>
             {paddock.occupancy_percentage}% ocupado
           </span>
-          <button type="button" className={styles.detailBtn} onClick={() => onEdit(paddock)}>
-            <span>Editar</span>
-            <ChevronRight size={15} />
-          </button>
+          <div className="d-flex align-items-center gap-2">
+            <button type="button" className={styles.detailBtn} onClick={() => onOpen(paddock)}>
+              <span>Ver detalle</span>
+            </button>
+            <button type="button" className={styles.detailBtn} onClick={() => onEdit(paddock)}>
+              <span>Editar</span>
+              <ChevronRight size={15} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
