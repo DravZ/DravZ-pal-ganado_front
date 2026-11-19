@@ -346,6 +346,7 @@ export function useHatoCollection<T extends Record<string, unknown>>(
       resource,
       body,
       urls.length > 1 || !url.searchParams.has('animal_id'),
+      resource === 'animals' && url.searchParams.get('include_photo') !== 'true',
     );
   }, [endpoint, resource, scope, scopedAnimalIdsKey]);
 
@@ -416,11 +417,25 @@ export function useHatoRecord<T extends Record<string, unknown>>(
   };
 }
 
+function hasPhoto(payload: Record<string, unknown>): boolean {
+  const photo = payload.photo_base64 ?? payload.photoBase64;
+  return typeof photo === 'string' && photo.length > 0;
+}
+
+/**
+ * Fusiona en el caché los registros devueltos por el servidor.
+ *
+ * Cuando la petición no pidió las fotografías (`include_photo` ausente o `false`), el backend
+ * responde `photo_base64: null` aunque el animal sí tenga foto. Con `preservePhoto` se conserva la
+ * fotografía ya cacheada en lugar de borrarla, porque esa respuesta no significa que el animal se
+ * haya quedado sin foto.
+ */
 async function mergeRemoteRecords(
   scope: HatoScope,
   resource: HatoResource,
   payloads: Record<string, unknown>[],
   completeCollection: boolean,
+  preservePhoto = false,
 ): Promise<void> {
   const now = new Date().toISOString();
   const remoteRecords: CachedRecord[] = [];
@@ -465,6 +480,7 @@ async function mergeRemoteRecords(
         .where('[userId+resourceType]')
         .equals([scope.userId, resource])
         .toArray();
+      const cachedById = new Map(current.map((record) => [record.recordId, record.payload]));
       const protectedIds = new Set(
         (await offlineDatabase.syncQueue.where('userId').equals(scope.userId).toArray())
           .filter((operation) => operation.resourceType === resource)
@@ -473,7 +489,14 @@ async function mergeRemoteRecords(
 
       for (const remote of remoteRecords) {
         if (protectedIds.has(remote.recordId)) continue;
-        await offlineDatabase.records.put(remote);
+        let payload = remote.payload;
+        if (preservePhoto && !hasPhoto(payload)) {
+          const cachedPhoto = cachedById.get(remote.recordId)?.photo_base64;
+          if (typeof cachedPhoto === 'string' && cachedPhoto) {
+            payload = { ...payload, photo_base64: cachedPhoto };
+          }
+        }
+        await offlineDatabase.records.put({ ...remote, payload });
       }
 
       const receivedIds = new Set(remoteRecords.map((record) => record.recordId));
