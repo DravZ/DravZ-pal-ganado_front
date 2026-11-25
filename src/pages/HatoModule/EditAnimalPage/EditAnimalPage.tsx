@@ -145,7 +145,6 @@ export default function EditAnimalPage() {
         breed: values.breed || undefined,
         birth_date: values.birthDate || undefined,
         lot_id: values.lotId || undefined,
-        paddock_id: values.paddockId || undefined,
         sire_id: values.sireId || undefined,
         dam_id: values.damId || undefined,
         notes: values.notes,
@@ -308,6 +307,7 @@ export default function EditAnimalPage() {
               lots={lots.records.map((lot) => ({
                 id: String(lot.id ?? ''),
                 name: String(lot.name ?? ''),
+                currentPaddockId: String(lot.current_paddock_id ?? ''),
               }))}
               lotsLoading={lots.isLoading}
               lotsError={lots.error}

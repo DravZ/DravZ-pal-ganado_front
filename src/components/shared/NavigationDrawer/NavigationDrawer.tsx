@@ -85,6 +85,7 @@ const NAVIGATION_MENU: NavigationCategory[] = [
         subItems: [
             { id: 'tablero', label: 'Tablero de control', icon: Home, path: '/dashboard' },
             { id: 'estructura', label: 'Estructura del rancho', icon: Package, path: '/admin/estructura' },
+            { id: 'lotes', label: 'Gestión de lotes', icon: Beef, path: '/admin/lotes' },
             { id: 'configuracion', label: 'Configuración de organización', icon: Home, path: '/admin/configuracion', adminOnly: true },
             { id: 'usuarios', label: 'Administrar usuarios', icon: Home, path: '/admin/usuarios', adminOnly: true },
             { id: 'fincas', label: 'Administrar fincas', icon: Home, path: '/admin/fincas', adminOnly: true },

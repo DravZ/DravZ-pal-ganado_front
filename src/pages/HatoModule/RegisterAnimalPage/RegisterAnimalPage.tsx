@@ -145,7 +145,6 @@ export const RegisterAnimalPage: React.FC = () => {
         is_official: currentIdentifier.isOfficial,
         is_current: true,
         lot_id: formData.loteId || undefined,
-        paddock_id: formData.potreroId || undefined,
         sire_id: formData.sireId || undefined,
         dam_id: formData.damId || undefined,
         birth_date: formData.birthDate || undefined,
@@ -279,7 +278,11 @@ export const RegisterAnimalPage: React.FC = () => {
               <Step3LocationGenealogy
                 formData={formData}
                 onChange={handleFieldChange}
-                lots={lots.records.map((lot) => ({ id: text(lot.id), name: text(lot.name) }))}
+                lots={lots.records.map((lot) => ({
+                  id: text(lot.id),
+                  name: text(lot.name),
+                  currentPaddockId: text(lot.current_paddock_id),
+                }))}
                 lotsLoading={lots.isLoading}
                 lotsError={lots.error}
                 paddocks={paddocks.records.map((paddock) => ({

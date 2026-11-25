@@ -35,6 +35,7 @@ const FeedingAndProductionPage = lazy(() => import("../pages/FoodSuppliesModule/
 const InventoryAndPurchasesPage = lazy(() => import("../pages/FoodSuppliesModule/InventoryAndPurchasesPage/InventoryAndPurchasesPage"));
 const ExpensesAndCostAllocationsPage = lazy(() => import("../pages/FinancesModule/ExpensesAndCostAllocationsPage/ExpensesAndCostAllocationsPage"));
 const PaddocksPage = lazy(() => import("../pages/AdministrationModule/PaddocksPage/PaddocksPage"));
+const LotsManagementPage = lazy(() => import("../pages/AdministrationModule/LotsManagementPage/LotsManagementPage"));
 const OrganizationConfigPage = lazy(() => import("../pages/AdministrationModule/OrganizationConfigPage/OrganizationConfigPage"));
 const OrganizationInfoPage = lazy(() => import("../pages/AdministrationModule/OrganizationInfoPage/OrganizationInfoPage"));
 const EditOrganizationInfoPage = lazy(() => import("../pages/AdministrationModule/EditOrganizationInfoPage/EditOrganizationInfoPage"));
@@ -86,6 +87,7 @@ const router = createBrowserRouter(createRoutesFromElements(
           <Route path="/alimentacion/inventario" element={<InventoryAndPurchasesPage />} />
           <Route path="/finanzas/gastos" element={<ExpensesAndCostAllocationsPage />} />
           <Route path="/admin/estructura" element={<PaddocksPage />} />
+          <Route path="/admin/lotes" element={<LotsManagementPage />} />
           <Route path="/admin/alertas" element={<AlertsPage />} />
           <Route path="/perfil" element={<ProfilePage />} />
           <Route path="/perfil/editar" element={<EditProfilePage />} />

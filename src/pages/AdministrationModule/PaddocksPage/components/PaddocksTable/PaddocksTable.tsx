@@ -6,9 +6,10 @@ import { ChevronRight } from 'lucide-react';
 interface PaddocksTableProps {
   paddocks: PaddockUI[];
   onEdit: (paddock: PaddockUI) => void;
+  onOpen: (paddock: PaddockUI) => void;
 }
 
-export const PaddocksTable: React.FC<PaddocksTableProps> = ({ paddocks, onEdit }) => {
+export const PaddocksTable: React.FC<PaddocksTableProps> = ({ paddocks, onEdit, onOpen }) => {
   return (
     <div className={styles.cardBox}>
       <div className={styles.tableResponsiveContainer}>
@@ -57,10 +58,15 @@ export const PaddocksTable: React.FC<PaddocksTableProps> = ({ paddocks, onEdit }
                   </span>
                 </td>
                 <td>
-                  <button type="button" className={styles.detailBtn} onClick={() => onEdit(p)}>
-                    <span>Editar</span>
-                    <ChevronRight size={16} />
-                  </button>
+                  <div className="d-flex align-items-center gap-3">
+                    <button type="button" className={styles.detailBtn} onClick={() => onOpen(p)}>
+                      <span>Ver detalle</span>
+                    </button>
+                    <button type="button" className={styles.detailBtn} onClick={() => onEdit(p)}>
+                      <span>Editar</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
